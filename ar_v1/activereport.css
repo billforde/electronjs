@@ -1,0 +1,439 @@
+/*Copyright 1996-2011 Information Builders, Inc. All rights reserved.*/
+.activeReport {
+	font-family:Arial,tahoma,verdana;
+	font-size:11px;
+}
+.arDashboard {
+}
+.arDashboardObject {
+	border:1px solid #a0abbb;
+}
+.arDashboardMergeDropdown {
+}
+.arDashboardBar {
+	font-family:Arial,tahoma,verdana;
+	font-size:12px;
+	font-weight: bold;
+	background: -webkit-gradient(linear, left top, left bottom, from(#c5cfdd), color-stop(45%, #2d66b6));
+	background: -webkit-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -moz-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6', GradientType=0);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6')";
+	background: -ms-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -o-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background-color:#2d66b6;
+	color:white;
+}
+.arDashboardBarButton {
+	padding-left:4px;
+	padding-right:4px;
+	padding-top:4px;
+	padding-bottom:4px;
+	text-align:center;
+	font-weight: bold;
+	color:white;
+}
+.arDashboardBarButtonSelected {
+	padding-left:4px;
+	padding-right:4px;
+	padding-top:4px;
+	padding-bottom:4px;
+	text-align:center;
+	font-weight: bold;
+	background: -webkit-gradient(linear, left top, left bottom, from(#61e0f7), color-stop(45%, #0297c4));
+	background: -webkit-linear-gradient(top, #61e0f7, #0297c4 45%);
+	background: -moz-linear-gradient(top, #61e0f7, #0297c4 45%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#61e0f7', endColorstr='#0297c4', GradientType=0);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#61e0f7', endColorstr='#0297c4')";
+	background: -ms-linear-gradient(top, #61e0f7, #0297c4 45%);
+	background: -o-linear-gradient(top, #61e0f7, #0297c4 45%);
+	background: linear-gradient(top, #61e0f7, #0297c4 45%);
+	background-color:#51d7eb;
+	color:white;
+}
+.arDashboardBarGlobalMobile {
+	font-family:Arial,tahoma,verdana;
+	font-size:12px;
+	font-weight: bold;
+	background-color:#2d66b6;
+	color:white;
+}
+.arDashboardBarGlobalButton {
+}
+.arGrid {
+}
+.arGridBar {
+	font-family:Arial,tahoma,verdana;
+	font-size:11px;
+	background-color:#d7e1ed;
+	color:#354e6d;
+}
+.arGridBarCalc {
+	font-family:Arial,tahoma,verdana;
+	font-size:11px;
+	color:#354e6d;
+}
+.arGridColumnHeading {
+	background-color:#2d66b6;
+	color:white;
+	font-weight: bold;
+}
+.arGridAgg {
+	font-family:Arial,tahoma,verdana;
+	font-size:11px;
+	color:#354e6d;
+}
+.arChart {
+}
+.arChartMenuBar {
+	font-family:Arial,tahoma,verdana;
+	font-size:11px;
+	background-color:#d7e1ed;
+	color:#374e6d;
+}
+.arChartMenuBarContainer {
+	border-right:1px solid white;
+}
+.arPivot {
+}
+.arPivotMenuBar {
+	font-family:Arial,tahoma,verdana;
+	font-size:11px;
+	background-color:#d7e1ed;
+	color:#374e6d;
+}
+.arPivotMenuBarContainer {
+	border-right:1px solid white;
+}
+.arPivotColumnHeading {
+	background-color:#2d66b6;
+	color:white;
+	font-weight: bold;
+}
+.arPivotColumnHeadingContainer {
+	vertical-align:top;
+}
+.arFilter {
+	border:1px solid #a0abbb;
+	background-color:white;
+}
+.arFilterItem {
+}
+.arFilterItemDrowpDown {
+	border:1px solid black;
+}
+.arFilterSelectionValues {
+	font-family:Arial,tahoma,verdana;
+	background-color:#e4ebf3;
+	text-align:center;
+	font-size:10pt;
+}
+.arFilterButton {
+	padding-top:4px;
+	padding-bottom:4px;
+	text-align:center;
+	font-weight: bold;
+	background: -webkit-gradient(linear, left top, left bottom, from(#c5cfdd), color-stop(45%, #2d66b6));
+	background: -webkit-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -moz-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6', GradientType=0);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6')";
+	background: -ms-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -o-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background-color:#2d66b6;
+	color:white;
+}
+.arPromptButton {
+	padding-top:4px;
+	padding-bottom:4px;
+	text-align:center;
+	font-weight: bold;
+	background: -webkit-gradient(linear, left top, left bottom, from(#c5cfdd), color-stop(45%, #2d66b6));
+	background: -webkit-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -moz-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6', GradientType=0);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6')";
+	background: -ms-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -o-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background-color:#2d66b6;
+	color:white;
+}
+.arWindow {
+	border:1px solid #a0abbb;
+}
+.arWindowBar {
+	background: -webkit-gradient(linear, left top, left bottom, from(#c5cfdd), color-stop(45%, #2d66b6));
+	background: -webkit-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -moz-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6', GradientType=0);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6')";
+	background: -ms-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -o-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background-color:#2d66b6;
+	font-weight: bold;
+	color:white;
+}
+.arWindowBarTitle {
+	font-family:Arial,tahoma,verdana;
+	padding-left:4px;
+	font-weight:bold;
+	font-size:11px;
+}
+.arWindowMinBox {
+	color:white;
+	background-color:#2d66b6;
+	border: 1px solid #a0abbb
+}
+.arWindowMinBoxTab {
+	color:white;
+	background-color:#2d66b6;
+	cursor:pointer;
+	border:1px solid #a0abbb;
+}
+.arMenu {
+	font-family:Arial,tahoma,verdana;
+	font-size:11px;
+	background-Color: #f1f5f9;
+	border-Color: #d7e1ed;
+	color: #354e6d;
+	text-Align: left;
+}
+.arMenuHover {
+	background-Color: #51d7eb;
+	color: #354e6d;
+}
+.arTool {
+	font-family:Arial,tahoma,verdana;
+	font-size:11px;
+	border:1px solid #a0abbb;
+	background-color:white;
+}
+.arToolDragBox {
+	font-family:Arial,tahoma,verdana;
+	border:1px solid #a0abbb;
+	background-color:white;
+	font-family:Arial,tahoma,verdana;
+	font-size:11px;
+}
+.arToolColumnBorder {
+	border:none;
+}
+.arToolColumn {
+	background-color:white;
+	border:1px solid #a0abbb;
+}
+.arToolColumnHeading {
+	padding-left:4px;
+	padding-right:4px;
+	padding-top:2px;
+	padding-bottom:2px;
+	font-weight: bold;
+	background-color:#d7e1ed;
+	color:#354e6d;
+}
+.arToolColumnSelect {
+	background-color:white;
+	cursor:pointer;
+}
+.arToolItem {
+	padding-left:4px;
+	padding-right:4px;
+	color:#354e6d;
+}
+.arToolItemSeperator {
+	background-color:#2d66b6;
+}
+.arToolMenuBar {
+	background-color:#d7e1ed;
+	color:#354e6d;
+}
+.arToolButton {
+	padding-top:4px;
+	padding-bottom:4px;
+	text-align:center;
+	font-weight: bold;
+	background: -webkit-gradient(linear, left top, left bottom, from(#c5cfdd), color-stop(45%, #2d66b6));
+	background: -webkit-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -moz-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6', GradientType=0);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6')";
+	background: -ms-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -o-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background-color:#2d66b6;
+	color:white;
+}
+.arToolTab {
+	padding-left:4px;
+	padding-right:4px;
+	padding-top:4px;
+	padding-bottom:4px;
+	text-align:center;
+	font-weight: bold;
+	background: -webkit-gradient(linear, left top, left bottom, from(#c5cfdd), color-stop(45%, #2d66b6));
+	background: -webkit-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -moz-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6', GradientType=0);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#A3C0E9', endColorstr='#2d66b6')";
+	background: -ms-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: -o-linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background: linear-gradient(top, #c5cfdd, #2d66b6 45%);
+	background-color:#2d66b6;
+	cursor:pointer;
+	color:white;
+}
+.arToolTabSelected {
+	padding-left:4px;
+	padding-right:4px;
+	padding-top:4px;
+	padding-bottom:4px;
+	text-align:center;
+	font-weight: bold;
+	background: -webkit-gradient(linear, left top, left bottom, from(#61e0f7), color-stop(45%, #0297c4));
+	background: -webkit-linear-gradient(top, #61e0f7, #0297c4 45%);
+	background: -moz-linear-gradient(top, #61e0f7, #0297c4 45%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#61e0f7', endColorstr='#0297c4', GradientType=0);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#61e0f7', endColorstr='#0297c4')";
+	background: -ms-linear-gradient(top, #61e0f7, #0297c4 45%);
+	background: -o-linear-gradient(top, #61e0f7, #0297c4 45%);
+	background: linear-gradient(top, #61e0f7, #0297c4 45%);
+	background-color:#51d7eb;
+	color:white;
+}
+.arToolChartIcon {
+	padding: 10px;
+	border: 1px solid #d7e1ed;
+	border-radius:5px;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	background-color:#FFFFFF;
+}
+.arToolChartIconSelected {
+	padding: 10px;
+	border: 1px solid #0297c4;
+	border-radius:5px;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	background-color:#FFFFFF;
+}
+.arCommentCell {
+	border: 1px solid #a0abbb;
+	background-color:white;
+}
+.arCommentText {
+	font-family:Arial,tahoma,verdana;
+	color:#354e6d;
+	font-size:11px;
+	background-color:#e4ebf3;
+}
+.arCommentDate {
+	font-family:Arial,tahoma,verdana;
+	color:#354e6d;
+	font-size:11px;
+	background-color:white;
+}
+.arAuthorizedMessage {
+	font-family:Arial,tahoma,verdana;
+	color:#8d8d8d;
+	font-size:10pt;
+	font-weight:bold;
+	text-align:center;
+}
+.arByToc {
+	font-family:Arial,tahoma,verdana;
+	font-size:8pt;
+	color:Black;
+	background-color:#F0F0F0;
+}
+.arByTocTitle {
+	font-family:Arial,tahoma,verdana;
+	font-size:8pt;
+	color:Black;
+	background-color:#D6E7EF;
+}
+.arByTocItemSelected {
+	font-family:Arial,tahoma,verdana;
+	font-size:7pt;
+	color:Black;
+	cursor:pointer;
+	background-color:yellow;
+}
+.arByTocItem {
+	font-family:Arial,tahoma,verdana;
+	font-size:7pt;
+	color:Black;
+	cursor:pointer;
+	background-color:white;
+}
+.activeMobile {
+	font-family:arial,tahoma,verdana;
+	font-size:11px;
+	background-color:white;
+}
+.amMenuItem {
+	font-family: Helvetica;
+	display: block;
+	padding: 8px 2px 8px 2px;
+	font-size: 18px;
+	font-weight: bold;
+	text-decoration: none;
+	text-align:left;
+	color: inherit;
+}
+.amMenuItemRight {
+	font-family: Helvetica;
+	padding: 8px 2px 8px 2px;
+	font-size: 14px;
+	font-weight:normal;
+	text-decoration: none;
+	text-align:right;
+	color: inherit;
+}
+.amButton {
+	vertical-align:middle;
+	font-family: Helvetica;
+	background-color:#91969D;
+	color:white;
+	border-radius:5px;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	height: 32px;
+	min-width:54px;
+	border-width: 0px 8px 0px 8px;
+	padding: 3px;
+}
+.arMobileTabSelected {
+	vertical-align:middle;
+	font-size:10pt;
+	background-color:#c8c8c8;
+	border-radius:5px 5px 0px 0px;
+	-moz-border-radius:5px 5px 0px 0px ;
+	-webkit-border-radius:5px 5px 0 0 ;
+	height: 28px;
+	border-width: 4px 4px 4px 0px;
+}
+.arMobileTab {
+	vertical-align:middle;
+	font-size:10pt;
+	background-color:#DDDDDD;
+	border-radius:5px 5px 0px 0px;
+	-moz-border-radius:5px 5px 0px 0px ;
+	-webkit-border-radius:5px 5px 0 0 ;
+	height: 28px;
+	border-width: 4px 4px 4px 0px;
+}
+
+.arMobileTabBar {
+	font-family: Helvetica;
+	background-color: #FFFFFF;
+}
+
+.arLoadingMessage {
+	font-family: Helvetica;
+	color: #354e6d;
+	font-size: 14pt;
+}

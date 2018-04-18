@@ -1,0 +1,189 @@
+<fx:Script>
+    <![CDATA[
+        public var fcCategory:Array;
+        public var APDFCategory:Array;
+        public var defaultParams:Array;
+        public var pieParams:Array;
+        private function getFCGlobal(): void {          
+        
+            this.fcCategory = [                 
+                {category:this.ibiMsgStr['crtcol'], //Column Category
+                chartList:[{swfName:'FlexColumn', label:this.ibiMsgStr['DfltColumn']},
+                    {swfName:'Column2D', label:this.ibiMsgStr['Column2D'], chartParams:'defaultParams'},
+                    {swfName:'Column3D', label:this.ibiMsgStr['Column3D'], chartParams: 'defaultParams'},
+                    {swfName:'MSColumn2D', label:this.ibiMsgStr['MSColumn2D'], chartParams: 'defaultParams'},
+                    {swfName:'MSColumn3D', label:this.ibiMsgStr['MSColumn3D'], chartParams: 'defaultParams'},
+                    {swfName:'StackedColumn2D', label:this.ibiMsgStr['StackedColumn2D'], chartParams: 'defaultParams'},
+                    {swfName:'StackedColumn3D', label:this.ibiMsgStr['StackedColumn3D'], chartParams: 'defaultParams'},
+                    {swfName:'ScrollColumn2D', label:this.ibiMsgStr['ScrollColumn2D'], chartParams: 'defaultParams'},
+                    {swfName:'ScrollStackedColumn2D', label:this.ibiMsgStr['ScrollStackedColumn2D'], chartParams: 'defaultParams'},
+                    {swfName:'LogMSColumn2D', label:this.ibiMsgStr['LogMSColumn2D'], chartParams: 'defaultParams'},
+                    //{swfName:'MSColumnLine3D', label:'Multi-series Column 3D Line Single Y'},
+                    //{swfName:'MSColumn3DLineDY', label:'Multi-series Column 3D Line Dual Y'},                  
+                    {swfName:'InverseMSColumn2D', label:this.ibiMsgStr['InverseMSColumn2D'], chartParams: 'defaultParams'}],
+                isCreated:false},  
+
+                {category:this.ibiMsgStr['crtbar'], //Bar Category
+                chartList:[{swfName:'Bar2D', label:this.ibiMsgStr['Bar2D'], chartParams: 'defaultParams'},
+                    {swfName:'MSBar2D', label:this.ibiMsgStr['MSBar2D'], chartParams: 'defaultParams'},
+                    {swfName:'MSBar3D', label:this.ibiMsgStr['MSBar3D'], chartParams: 'defaultParams'},
+                    {swfName:'StackedBar2D', label:this.ibiMsgStr['StackedBar2D'], chartParams: 'defaultParams'},
+                    {swfName:'StackedBar3D', label:this.ibiMsgStr['StackedBar3D'], chartParams: 'defaultParams'}],
+                isCreated:false},  
+                        
+                {category:this.ibiMsgStr['crtpie'],  //Pie Category
+                chartList:[{swfName:'FlexPie', label:this.ibiMsgStr['DfltPie']},
+                    {swfName:'Pie2D', label:this.ibiMsgStr['Pie2D'], chartParams: 'pieParams'},
+                    {swfName:'Pie3D', label:this.ibiMsgStr['Pie3D'], chartParams: 'pieParams'},
+                    {swfName:'Doughnut2D', label:this.ibiMsgStr['Doughnut2D'], chartParams: 'pieParams'},
+                    {swfName:'Doughnut3D', label:this.ibiMsgStr['Doughnut3D'], chartParams: 'pieParams'}],
+                isCreated:false},
+                        
+                {category:this.ibiMsgStr['crtline'], //Line Category
+                chartList:[{swfName:'FlexLine', label:this.ibiMsgStr['DfltLine']},
+                    {swfName:'Line', label:this.ibiMsgStr['Line'], chartParams: 'defaultParams'},
+                    {swfName:'MSLine', label:this.ibiMsgStr['MSLine'], chartParams: 'defaultParams'},
+                    {swfName:'LogMSLine', label:this.ibiMsgStr['LogMSLine'], chartParams: 'defaultParams'},
+                    {swfName:'ScrollLine2D', label:this.ibiMsgStr['ScrollLine2D'], chartParams: 'defaultParams'},
+                    {swfName:'InverseMSLine', label:this.ibiMsgStr['InverseMSLine'], chartParams: 'defaultParams'},
+                    {swfName:'Spline', label:this.ibiMsgStr['Spline'], chartParams: 'defaultParams'},
+                    {swfName:'MSSpline', label:this.ibiMsgStr['MSSpline'], chartParams: 'defaultParams'}],
+                isCreated:false},                       
+
+                {category:this.ibiMsgStr['crtarea'], //Area Category
+                chartList:[{swfName:'Area2D', label:this.ibiMsgStr['Area2D'], chartParams: 'defaultParams'},
+                    {swfName:'MSArea', label:this.ibiMsgStr['MSArea'], chartParams: 'defaultParams'},
+                    {swfName:'StackedArea2D', label:this.ibiMsgStr['StackedArea2D'], chartParams: 'defaultParams'},
+                    {swfName:'ScrollArea2D', label:this.ibiMsgStr['ScrollArea2D'], chartParams: 'defaultParams'},
+                    {swfName:'InverseMSArea', label:this.ibiMsgStr['InverseMSArea'], chartParams: 'defaultParams'},
+                    {swfName:'SplineArea', label:this.ibiMsgStr['SplineArea'], chartParams: 'defaultParams'},  
+                    {swfName:'MSSplineArea', label:this.ibiMsgStr['MSSplineArea'], chartParams: 'defaultParams'}],
+                isCreated:false},                       
+                    
+                {category:this.ibiMsgStr['crtscat'], //Scatter/Bubble category
+                chartList:[{swfName:'FlexScatter', label:this.ibiMsgStr['DfltScatter']},
+                    {swfName:'Scatter', label:this.ibiMsgStr['Scatter'], chartParams: 'defaultParams'},                 
+                    {swfName:'Bubble', label:this.ibiMsgStr['Bubble'], chartParams: 'defaultParams'}], 
+                    isCreated:false}, 
+                        
+                {category:this.ibiMsgStr['crtother'], //Other category
+                    chartList:[{swfName:'Funnel', label:this.ibiMsgStr['Funnel'], chartParams: 'defaultParams'}, 
+                    {swfName:'Pyramid', label:this.ibiMsgStr['Pyramid'], chartParams: 'defaultParams'},
+                    {swfName:'Radar', label:this.ibiMsgStr['Radar'], chartParams: 'defaultParams'}],
+                    isCreated:false} 
+                ];
+                
+                this.APDFCategory = [                   
+                    {category:this.ibiMsgStr['crt'], //APDF Chart Category
+                    chartList:[{swfName:'FlexPie', label:this.ibiMsgStr['DfltPie']},
+                        {swfName:'FlexColumn', label:this.ibiMsgStr['DfltColumn']},
+                        {swfName:'FlexLine', label:this.ibiMsgStr['DfltLine']},
+                        {swfName:'FlexScatter', label:this.ibiMsgStr['DfltScatter']}],
+                    isCreated:false}        
+                ];
+                //This parameters are used by the icons in the chart tool 
+                //and by the real fusion charts.
+                this.defaultParams = [          
+                    {alternateHGridAlpha:"100"},
+                    {alternateHGridColor:"f9f9fa"},
+                    {anchorRadius:"3"}, 
+                    {anchorBorderThickness:"3"}, 
+                    {baseFont:"Arial"},                  
+                    {baseFontColor:"000000"}, 
+                    {baseFontSize:"10"},                    
+                    {bgColor:"f3f3f3,ffffff"},
+                    {canvasBaseColor:"BBCCDD"}, //3D
+                    {canvasBgColor:"f9f9fa"}, //3D 
+                    {canvasBorderColor:"808080"},
+                    {chartLeftMargin:"0"},
+                    {chartRightMargin:"0"},
+                    {chartTopMargin:"0"},
+                    {chartBottomMargin:"0"},
+                    //{bgSWFApha:.5},
+                    //{labelPadding:"0"},
+                    //For the tool, labelDisplay can't be stagger, otherwise, 
+                    //the chart will be shown very short and small in the icon.
+                    //{labelDisplay:"STAGGER"},                     
+                    {divLineColor:"BDC6D0"},
+                    {lineThickness:"2"}, //Line
+                    {numVisiblePlot:"4"},
+                    {outCnvBaseFont:"Arial"}, 
+                    {outCnvBaseFontSize:"12"},                                      
+                    //default chart paletter color
+                    {paletteColors:"0079c1,ee2e23,b60cb0,a3c366,a1a1d9,ffeb95,7faddc,2e2eab,8803a4,09b8ce,107a16,6c95c8,3c3124,bfdaaa,a96dcd,1317a2,4e2b25,ffef79,f0abc4,424649,9ed5f3,c3da7d,d28fff,e67958,1317a2,ffef00,009852,ce0036,f09f61,773920"},
+                    {plotBorderColor:"808080"},//Area or Spline Area
+                    {plotFillColor:"0079c1"},
+                    {plotGradientColor:"ffffff"},
+                    {showAboutMenuItem:"0"}, 
+                    {showAlternateHGridColor:"1"},              
+                    {showBorder:"1"},
+                    //{showDataTips:true},  //Has been added internally for the live charts only         
+                    {showLabels:"0"},
+                    {showLegend:"0"},                                       
+                    {showShadow:"1"},                    
+                    {showToolTipShadow:"1"},  
+                    {showValues:"0"},
+                    {showYAxisValues:"0"},
+                    {streamlinedData:"0"},//for funnel                  
+                    {toolTipBgColor:"FFFFE1"}, 
+                    {toolTipBorderColor:"000000"},
+                    {toolTipSepChar:" = "},
+                    {zeroPlaneColor:"717171"},
+                    {zeroPlaneThickness:"3"},                   
+                    {zeroPlaneShowBorder:"0"}
+                ];  //end defaultChartParams
+                
+            this.pieParams = [
+                    {alternateHGridColor:"f9f9fa"}, 
+                    {alternateHGridAlpha:"100"},
+                    {anchorRadius:"3"}, 
+                    {anchorBorderThickness:"3"},
+                    {baseFont:"Arial"}, 
+                    {baseFontSize:"10"}, 
+                    {baseFontColor:"000000"},  
+                    {bgColor:"f3f3f3,ffffff"}, 
+                    //{bgSWFApha:.5}, 
+                    {canvasBaseColor:"BBCCDD"}, 
+                    {canvasBgColor:"f9f9fa"}, 
+                    {chartBottomMargin:"0"},
+                    {chartLeftMargin:"0"},
+                    {chartRightMargin:"0"},
+                    {chartTopMargin:"0"},  
+                    {canvasBorderColor:"808080"},
+                    {divLineColor:"BDC6D0"},                    
+                    {lineThickness:"2"},//Line
+                    //{labelPadding:"0"},
+                    //For the tool, labelDisplay can't be stagger otherwise, 
+                    //the chart will be shown very short and small in the icon.
+                    //{labelDisplay:"STAGGER"}, 
+                    {numVisiblePlot:"4"}, 
+                    {outCnvBaseFont:"Arial"}, 
+                    {outCnvBaseFontSize:"12"},                  
+                    //palette color used by Pie and doughnut 
+                    {paletteColors:"b60cb0, a3c366, 0079c1, a1a1d9, ffeb95, 7faddc, ee2e23, 2e2eab, 8803a4, 09b8ce, 107a16, 6c95c8, 3c3124, bfdaaa, a96dcd, 1317a2, 4e2b25, ffef79, f0abc4, 424649, 9ed5f3, c3da7d, d28fff, e67958, 1317a2, ffef00, 009852, ce0036, f09f61, 773920"},
+                    //Area or Spline Area
+                    {plotBorderColor:"808080"},
+                    {plotFillColor:"0079c1"},
+                    {plotGradientColor:"ffffff"},
+                    {showAboutMenuItem:"0"},                
+                    {showBorder:"1"},
+                    {showLabels:"0"},
+                    //{showDataTips:true},  ==> Has been added internally for the live charts only           
+                    {showLegend:"0"},
+                    {showValues:"0"},
+                    {showYAxisValues:"0"},
+                    {showShadow:"1"}, 
+                    {showAlternateHGridColor:"1"}, 
+                    {showToolTipShadow:"1"}, 
+                    //{showDataTips:true}, //Added internally for the charts only                
+                    {toolTipBgColor:"FFFFE1"}, 
+                    {toolTipBorderColor:"000000"},
+                    {toolTipSepChar:"="},
+                    {zeroPlaneThickness:"3"},
+                    {zeroPlaneShowBorder:"0"},
+                    {zeroPlaneColor:"717171"}
+                ];  //end pieChartParams
+                
+        } // end getFCGlobal()
+    ]]>
+</fx:Script>

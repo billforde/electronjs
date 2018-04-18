@@ -1,0 +1,12 @@
+<h3>F&#x00fc;r In-Document-Analytics ist JavaScript erforderlich.</h3>
+
+<p>
+Um Inhalt mit In-Document-Analytics &#x00f6;ffnen zu k&#x00f6;nnen, muss JavaScript auf Ihrem Webbrowser aktiviert werden.
+</p>
+
+<p>
+Auf Mobil-Ger&#x00e4;ten verwenden Sie bitte die App Mobile Faves. Falls Sie sie noch nicht installiert haben, k&#x00f6;nnen Sie sie im  
+<a href="https://itunes.apple.com/us/app/mobile-faves/id406033421?mt=8">App Store</a> f&#x00fc;r iOS-Ger&#x00e4;te oder im
+<a href="https://play.google.com/store/apps/details?id=com.ibi.android.mobilefaves&hl=en">Google Play Store</a>
+f&#x00fc;r Android-Ger&#x00e4;te herunterladen.
+</p>

@@ -1,0 +1,12 @@
+<h3>Analyses dans document n&#x00e9;cessite JavaScript</h3>
+
+<p>
+Pour ouvrir le contenu Analyses dans document, vous devez activer JavaScript dans votre navigateur Web.
+</p>
+
+<p>
+Sur les dispositifs mobiles, veuillez utiliser l'application Favoris de mobile. S'il n'est pas install&#x00e9;, t&#x00e9;l&#x00e9;chargez-le sur l'
+<a href="https://itunes.apple.com/us/app/mobile-faves/id406033421?mt=8">App Store</a> pour les dispositifs iOS ou sur le
+<a href="https://play.google.com/store/apps/details?id=com.ibi.android.mobilefaves&hl=en">Google Play Store</a>
+pour les dispositifs Android.
+</p>

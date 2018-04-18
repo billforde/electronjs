@@ -1,0 +1,273 @@
+<s:controlBarLayout>
+     <s:VerticalLayout paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" />
+</s:controlBarLayout>
+<fx:Declarations>
+     <mx:SeriesInterpolate id="pieShowEffect" duration="2000" elementOffset="10"/>
+     <mx:SeriesSlide id="barShowEffect" duration="2000" direction="up"/>
+     <mx:SeriesSlide id="barHideEffect" duration="2000" direction="down"/>
+     <mx:SeriesSlide id="lineShowEffect" duration="2000" direction="right"/>
+     <mx:SeriesSlide id="lineHideEffect" duration="2000" direction="left"/>
+     <mx:SeriesSlide id="scatterShowEffect" duration="2000" direction="right"/>
+     <mx:SeriesSlide id="scatterHideEffect" duration="2000" direction="left"/>
+</fx:Declarations>
+
+<fx:Style>
+
+.arPieChartStyle {
+   chartSeriesStyles: arPieSeries1,arPieSeries2,arPieSeries3;
+}
+.arPieSeries1 {
+	fillsGradient: pcolor1,pcolor2,pcolor3,pcolor4,pcolor5,pcolor6,pcolor7,pcolor8,pcolor9,pcolor10;
+} 	 
+	.pcolor1 {
+		fillColors: #8D0988,#C53EC0,#b60cb0,#DB86D8,#b60cb0;
+		fillRatios: 0,.25,.5,.75,1;
+		fillAlphas: 1,1,1,1,1,1;
+		fillType: Radial;
+	}
+	.pcolor2 {
+		fillColors: #819A50,#B6CF86,#a3c366,#D1E1B3,#a3c366;
+		fillRatios: 0,.25,.5,.75,1;
+		fillAlphas: 1,1,1,1,1,1;
+		fillType: Radial;
+	}
+	.pcolor3 { 	 
+		fillColors: #006AA9,#3394CD,#0079c1,#7EBCE0,#0079c1;
+		fillRatios: 0,.25,.5,.75,1;
+		fillAlphas: 1,1,1,1,1,1;
+		fillType: Radial;
+	}
+	.pcolor4 {
+		fillColors: #7C7CA8,#B6B6E1,#a1a1d9,#D0D0EC,#a1a1d9;
+		fillRatios: 0,.25,.5,.75,1;
+		fillAlphas: 1,1,1,1,1,1;
+		fillType: Radial;
+	}
+	.pcolor5 {
+		fillColors: #C6B774,#FFEFAB,#ffeb95,#FFF5CA,#ffeb95;
+		fillRatios: 0,.25,.5,.75,1;
+		fillAlphas: 1,1,1,1,1;
+		fillType: Radial;
+	}
+	.pcolor6 {
+		fillColors: #5B84B2,#91BAE8,#7faddc,#B7D3F2,#7faddc;
+		fillRatios: 0,.25,.5,.75,1;
+		fillAlphas: 1,1,1,1,1;
+		fillType: Radial;
+	}
+	.pcolor7 {
+		fillColors: #B9241B,#F15950,#ee2e23,#F79791,#ee2e23;
+		fillRatios: 0,.25,.5,.75,1;
+		fillAlphas: 1,1,1,1,1;
+		fillType: Radial;
+	}
+	.pcolor8 {
+		fillColors: #151687,#4C4EBF,#2e2eab,#8A8BD7,#2e2eab;
+		fillRatios: 0,.25,.5,.75,1;
+		fillAlphas: 1,1,1,1,1;
+		fillType: Radial;
+	}
+	.pcolor9 {
+		fillColors: #70007E,#A836B7,#8803a4,#C97ED1,#8803a4;
+		fillRatios: 0,.25,.5,.75,1;
+		fillAlphas: 1,1,1,1,1;
+		fillType: Radial;
+	}
+	.pcolor10 {
+		fillColors: #009FA6,#35D5DC,#09b8ce,#7CE7E9,#09b8ce;
+		fillRatios: 0,.25,.5,.75,1;
+		fillAlphas: 1,1,1,1,1;
+		fillType: Radial;
+	}
+.arPieSeries2 {
+	fills: #b60cb0, #a3c366, #0079c1, #a1a1d9, #ffeb95, #7faddc, #ee2e23, #2e2eab, #8803a4, #09b8ce, #107a16, #6c95c8, #3c3124, #bfdaaa, #a96dcd, #1317a2, #4e2b25, #ffef79, #f0abc4, #424649, #9ed5f3, #c3da7d, #d28fff, #e67958, #1317a2, #ffef00, #009852, #ce0036, #f09f61, #773920;
+	color: black;
+	callOutStroke: pieStroke;
+	showDataEffect: pieShowEffect; 
+	hideDataEffect: pieHideEffect;
+}
+.arPieSeries3 {
+	fills: #305ed5, #edc31b, #889097, #8ccd28, #e38800, #28becd, #ff6666, #47ba8f, #bb5a47, #be6bd3, #107a16, #6c95c8, #3c3124, #bfdaaa, #a96dcd, #1317a2, #4e2b25, #ffef79, #f0abc4, #424649, #9ed5f3, #c3da7d, #d28fff, #e67958, #1317a2, #ffef00, #009852, #ce0036, #f09f61, #773920;
+	color: black;
+	fontWeight: bold;
+	callOutStroke: pieStroke;
+	showDataEffect: pieShowEffect; 
+	hideDataEffect: pieHideEffect;
+	labelPosition: inside;
+}
+.arBarChartStyle{
+	chartSeriesStyles: arBarSeries1, arBarSeries2, arBarSeries3, arBarSeries4, arBarSeries5, arBarSeries6, arBarSeries7, arBarSeries8, arBarSeries9, arBarSeries10;
+}
+.arBarSeries1 {
+	fillAlphas: 1, 1, 1, 1, 1;
+	fillRatios: 0, .2, .4, .75, 1;
+	fillColors: #0079c1, #7EBCE0, #3394CD, #0079c1, #006AA9;
+}
+.arBarSeries2 {
+	fillAlphas: 1, 1, 1, 1, 1;
+	fillRatios: 0, .2, .4, .75, 1;
+	fillColors: #ee2e23, #F79791, #F15950, #ee2e23, #B9241B;
+}
+.arBarSeries3 {
+	fillAlphas: 1, 1, 1, 1, 1;
+	fillRatios: 0, .2, .4, .75, 1;
+	fillColors: #b60cb0, #DB86D8, #C53EC0, #b60cb0, #8D0988;
+}
+.arBarSeries4 {
+	fillAlphas: 1, 1, 1, 1, 1;
+	fillRatios: 0, .2, .4, .75, 1;
+	fillColors: #a3c366, #D1E1B3, #B6CF86, #a3c366, #819A50;
+}
+.arBarSeries5 {
+	fillAlphas: 1, 1, 1, 1, 1;
+ 	fillRatios: 0, .2, .4, .75, 1;
+ 	fillColors: #a1a1d9, #D0D0EC, #B6B6E1, #a1a1d9, #7C7CA8;
+}
+.arBarSeries6 {
+	fillAlphas: 1, 1, 1, 1, 1;
+	fillRatios: 0, .2, .4, .75, 1;
+	fillColors: #ffeb95, #FFF5CA, #FFEFAB, #ffeb95, #C6B774;
+}
+.arBarSeries7 {
+	fillAlphas: 1, 1, 1, 1, 1;
+	fillRatios: 0, .2, .4, .75, 1;
+	fillColors: #7faddc, #B7D3F2, #91BAE8, #7faddc, #5B84B2;
+}
+.arBarSeries8 {
+	fillAlphas: 1, 1, 1, 1, 1;
+	fillRatios: 0, .2, .4, .75, 1;
+	fillColors: #2e2eab, #8A8BD7, #4C4EBF, #2e2eab, #151687;
+}
+.arBarSeries9 {
+	fillAlphas: 1, 1, 1, 1, 1;
+	fillRatios: 0, .2, .4, .75, 1;
+	fillColors: #8803a4, #C97ED1, #A836B7, #8803a4, #70007E;
+}
+.arBarSeries10 {
+	fillAlphas: 1, 1, 1, 1, 1;
+	fillRatios: 0, .2, .4, .75, 1;
+	fillColors: #09b8ce, #7CE7E9, #35D5DC, #09b8ce, #009FA6;
+}
+/*
+.arBarSeries1 {
+	fill: #0079c1;
+}
+.arBarSeries2 {
+	fill: #ee2e23;
+}
+.arBarSeries3 {
+	fill: #b60cb0;
+}
+.arBarSeries4 {
+	fill: #a3c366;
+}
+.arBarSeries5 {
+	fill: #a1a1d9;
+}
+.arBarSeries6 {
+	fill: #ffeb95;
+}
+.arBarSeries7 {
+	fill: #7faddc;
+}
+.arBarSeries8 {
+	fill: #2e2eab;
+}
+.arBarSeries9 {
+	fill: #8803a4;
+}
+.arBarSeries10 {
+	fill: #09b8ce;
+}
+*/
+.arLineChartStyle{
+	chartSeriesStyles: arLineSeries1, arLineSeries2, arLineSeries3, arLineSeries4, arLineSeries5, arLineSeries6, arLineSeries7, arLineSeries8, arLineSeries9, arLineSeries10;
+}
+.arLineSeries1 {
+	color: #0079c1;
+	weight: 2;
+}
+.arLineSeries2{
+	color: #ee2e23;
+	weight: 2;
+}
+.arLineSeries3 {
+	color: #b60cb0;
+	weight: 2;
+}
+.arLineSeries4 {
+	color: #a3c366;
+	weight: 2;
+}
+.arLineSeries5 {
+	color: #a1a1d9;
+	weight: 2;
+}
+.arLineSeries6 {
+	color: #ffeb95;
+	weight: 2;
+}
+.arLineSeries7 {
+	color: #7faddc;
+	weight: 2;
+}
+.arLineSeries8 {
+	color: #2e2eab;
+	weight: 2;
+}
+.arLineSeries9 {
+	color: #8803a4;
+	weight: 2;
+}
+.arLineSeries10 {
+	color: #09b8ce;
+	weight: 2;
+}
+.arScatterChartStyle{
+	chartSeriesStyles: arScatterSeries1, arScatterSeries2, arScatterSeries3, arScatterSeries4, arScatterSeries5, arScatterSeries6, arScatterSeries7, arScatterSeries8, arScatterSeries9, arScatterSeries10;
+}
+.arScatterSeries1 {
+	fill: #0079c1;
+}
+.arScatterSeries2 {
+	fill: #ee2e23;
+}
+.arScatterSeries3 {
+	fill: #b60cb0;
+}
+.arScatterSeries4 {
+	fill: #a3c366;
+}		
+.arScatterSeries5 {
+	fill: #a1a1d9;
+}		
+.arScatterSeries6 {
+	fill: #ffeb95;
+}		
+.arScatterSeries7 {
+	fill: #7faddc;
+}		
+.arScatterSeries8 {
+	fill: #2e2eab;
+}		
+.arScatterSeries9 {
+	fill: #8803a4;
+}		
+.arScatterSeries10 {
+	fill: #09b8ce;
+}		
+.arTrialMsgReport{
+   backgroundColor: #ffffff;
+   color: #8d8d8d;
+   textAlign: center;
+   fontSize: 13;
+   fontWeight: bold;
+}
+.arTrialMsgChart{
+   backgroundColor: #ffffff;
+   color: #8d8d8d;
+   textAlign: center;
+   fontSize: 13;
+   fontWeight: bold;
+}           
+</fx:Style>

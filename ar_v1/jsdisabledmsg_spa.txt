@@ -1,0 +1,12 @@
+<h3>In-Document Analytics requiere JavaScript</h3>
+
+<p>
+Para abrir el contenido de In-Document Analytics tiene que habilitar JavaScript en su navegador web.
+</p>
+
+<p>
+En dispositivos m&#x00f3;viles, use la aplicaci&#x00f3;n Favoritos de m&#x00f3;vil. Si no est&#x00e1; instalada, desc&#x00e1;rguela de la 
+<a href="https://itunes.apple.com/us/app/mobile-faves/id406033421?mt=8">Tienda de aplicaciones</a> de dispositivos de iOS o de la
+<a href="https://play.google.com/store/apps/details?id=com.ibi.android.mobilefaves&hl=en">Tienda de Google Play</a>
+para dispositivos Android.
+</p>

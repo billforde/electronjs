@@ -1,0 +1,23 @@
+{
+  "name": "idfViewer",
+  "version": "1.0.0",
+  "description": "try electron",
+  "main": "main.js",
+  "dependencies": {
+    "electron": "^1.8.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "idfViewer"
+  },
+  "keywords": [
+    "adf",
+    "idf"
+  ],
+  "author": "Patricia L",
+  "license": "ISC"
+}

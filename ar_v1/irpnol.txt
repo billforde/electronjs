@@ -1,0 +1,1 @@
+<%^No valid license key found for Active Reports (AHTML).  Please contact your WebFOCUS administrator.%>

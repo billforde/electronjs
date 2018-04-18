@@ -1,0 +1,111 @@
+import mx.collections.ArrayCollection;
+import spark.components.SkinnableContainer;
+import arObjects.activeReport;
+//including file irpstr.js--file opened
+public var TTablePRO:Array = [], IMGARRAY:Array = [];
+public var IBISTR:String='IBISTR', IBIDATE:String='IBIDATE',IBINUM:String='IBINUM';
+public var DASTR:int=0,DARAW:int=1,DACLS:int=2,DAACD:int=3,DATYP:int=4,DAHIR:int=5,DACNT:int=6,DANOTE:int=7;
+public var missingVal:Object={'missing':true};
+public var MyTable:Array = [],RMyTable:Array = [];
+public var T_look:Array =[], T_capt:Array =[], T_cntl:Array =[];
+public var T_cont:Array =[], a_T_cont:Array =[];
+public var b_T_cont:Array =[], T_saveARs:Array =[], MDitems:Array =[];
+public var t_T_capt:Array =[];
+public var NumOfTable:int =0;
+public var LayoutSection:Array =[];
+public var LayoutObjects:Array =[];
+public var ibiMsgStr:Object=new Object(); 
+public var paglinetext:String = "";
+public var cv:SkinnableContainer;   
+public var ActiveReportObject:activeReport = null;
+public var tdginfoCategory:Array;	
+System.useCodePage=true;
+
+public function initApp():void
+{		 		
+    //Create a SkinnableContainer
+    cv = new SkinnableContainer();
+    cv.x = 0;
+    cv.y = 0;
+
+    init();
+    init2();
+    initTDG();
+    tdginfoCategory = tdginfo.category;
+
+    if(T_cntl[0].isAPDF) {
+        //will generate scrollbar
+        cv.width = this.explicitWidth;
+        cv.height = this.explicitHeight;
+    } else {
+        cv.percentWidth = 100;
+        cv.percentHeight = 100;
+    }
+    addElement(cv);
+
+    getFCGlobal();
+    ActiveReportObject = new activeReport(LayoutSection, LayoutObjects, NumOfTable, 
+         T_cont, T_capt, t_T_capt, T_look, ARstrings, T_cntl, ibiMsgStr, cv); 
+
+    /* If user codes their own init function in irpuflex.js then call it */
+    /* Have to call user function this way, because this.user_init() will cause an error */
+    /* if user_init isnt defined.*/
+    if(this.hasOwnProperty('user_init')) this['user_init']();
+} 
+
+private function init2():void
+{
+	var o:int;
+	var i:int;
+	var j:int;
+	var a:Array;
+	var len:int;
+	i=0;
+	o=0;
+
+	if(this.hasOwnProperty("totalLayouts"))
+        	for(i=0;i<=this["totalLayouts"];i++) 
+			if(this.hasOwnProperty("LayoutSection"+i)) {
+				LayoutSection[i] = this["LayoutSection"+i];
+			}
+	if(this.hasOwnProperty("totalObjects"))
+        	for(i=0;i<this["totalObjects"];i++) 
+			if(this.hasOwnProperty("LayoutObjects"+i)) {
+				LayoutObjects[i] = this["LayoutObjects"+i];
+			}
+	if(this.hasOwnProperty("totalImages"))
+        	for(i=0;i<this["totalImages"];i++) 
+			if(this.hasOwnProperty("IMGARRAY"+i)) {
+				IMGARRAY[i] = this["IMGARRAY"+i];
+			}
+	i=1;        
+	while(this.hasOwnProperty("ARstrings_"+i.toString())) {
+		a = this["ARstrings_"+i.toString()];
+		len = ARstrings.length;
+		for(j=0;j<a.length;j++)
+			ARstrings[j+len] = a[j];
+		i++;
+	}
+	while(this.hasOwnProperty("T_capt"+o.toString())) {
+		T_cont[o]=[];
+		i=0;        
+		while(this.hasOwnProperty("T_cont"+o.toString()+"_"+i.toString())) {
+			a = this["T_cont"+o.toString()+"_"+i.toString()];
+			len = T_cont[o].length;
+			for(j=0;j<a.length;j++)
+				T_cont[o][j+len] = a[j];
+			i++;
+		}
+		T_capt[o]=this["T_capt"+o.toString()];
+		T_look[o]=this["T_look"+o.toString()];
+		T_cntl[o]=this["T_cntl"+o.toString()];
+		t_T_capt[o]=this["t_T_capt"+o.toString()];
+	        if(this.hasOwnProperty("MDitems"+o.toString())) {
+			T_cntl[o].MDitems = this["MDitems"+o.toString()];
+		}
+		o++;
+		NumOfTable=o;
+	}
+}
+
+

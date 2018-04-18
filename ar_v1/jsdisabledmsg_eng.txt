@@ -1,0 +1,12 @@
+<h3>In-Document Analytics Requires JavaScript</h3>
+
+<p>
+To open In-Document Analytics content, JavaScript needs to be enabled in your web browser.
+</p>
+
+<p>
+On mobile devices, please use the Mobile Faves App. If not installed download it from the 
+<a href="https://itunes.apple.com/us/app/mobile-faves/id406033421?mt=8">App Store</a> for iOS devices or from the
+<a href="https://play.google.com/store/apps/details?id=com.ibi.android.mobilefaves&hl=en">Google Play Store</a>
+for Android devices.
+</p>
