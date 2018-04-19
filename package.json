@@ -1,5 +1,6 @@
 {
   "name": "idfViewer",
+  "productName": "idfViewer",
   "version": "1.0.0",
   "description": "try electron",
   "main": "main.js",
@@ -7,7 +8,10 @@
     "electron": "^1.8.4",
     "googleapis": "^28.1.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "electron": "^1.8.4",
+    "electron-packager": "^12.0.1"
+  },
   "scripts": {
     "start": "electron ."
   },

@@ -322,7 +322,7 @@ var TOKEN_PATH;
             isHtmlPage = true;
         } else { //if Json object(hold.txt) ==> put it into the report One div
             //htmltxt = "iFrameContent.html";
-            var iFrameContent = fs.readFileSync('iFrameContent.html').toString();
+            //var iFrameContent = fs.readFileSync('iFrameContent.html').toString();
             //htmltxt must be a fully formed html doc for webview
             //htmltxt = iFrameContent.replace(/abcdefghij/i, holdfileString);
             //var newArray = iFrameContent.split("abcdefghij");
@@ -368,15 +368,23 @@ var TOKEN_PATH;
             //load the html content into the reportFrame ==>  already encoded to base64
             if (isHtmlPage) {
                 reportFrame.addEventListener("did-finish-load", function(){
-                    reportFrame.openDevTools();
+                    //reportFrame.openDevTools();
                 });
                 reportFrame.src = htmltxt;
             } else {
-                reportFrame.addEventListener("did-finish-load", function(){ //after loading the iframe content page
-                    reportFrame.openDevTools();
-                    reportFrame.executeJavaScript(htmltxt);
+                reportFrame.addEventListener("did-finish-load", function(){
+                    //after loading the iframe content page
+                    //reportFrame.openDevTools();
+                   reportFrame.executeJavaScript(htmltxt);
                 });
-                reportFrame.src = "iFrameContent.html";
+                //reportFrame.src = "iFrameContent.html";
+                var path = require('path');
+                var url = require('url');
+                reportFrame.src = url.format({
+                    pathname: path.join(__dirname, 'iFrameContent.html'),
+                    protocol: 'file:',
+                    slashes: true
+                });
             }
         },10);
 
@@ -408,7 +416,7 @@ var TOKEN_PATH;
         //Need to email the change of the report so ==> must do save first
         var executetxt = "$AR.saveJsonReport()";
 
-        mywebview.executeScript({code:executetxt, mainWorld:true},
+        mywebview.executeJavaScript(executetxt,false,
                 function(jsonObject){
                     var fs =  require('fs'); //load the node js file system library
 
@@ -661,7 +669,7 @@ var TOKEN_PATH;
 
             if (token) {
                 //alert(token.value);
-                e.sender.close();
+                e.sender.destroy();
                 oauth2Client.getToken(token, function (err, token) {
                     if (err) {
                         console.log('Error while trying to retrieve access token', err);
@@ -676,48 +684,6 @@ var TOKEN_PATH;
 
         // Load a remote URL
         new_win.loadURL(authUrl);
-
-        //console.log('Authorize this app by visiting this url: ', authUrl);
-        //nw.Window.open(authUrl);
-        /*****************
-        // Create a new window and get it
-        window.open(authUrl, {}, function(new_win) {
-            // Add event listener to new window's load event
-            new_win.on('loaded', function() {
-                var token = this.window.document.getElementById('code');
-                if (token) {
-                    alert(token.value);
-                    oauth2Client.getToken(token.value, function (err, token) {
-                        if (err) {
-                            console.log('Error while trying to retrieve access token', err);
-                            return;
-                        }
-                        oauth2Client.credentials = token;
-                        storeToken(token);
-                        callback(oauth2Client);
-                    });
-                };
-            });
-
-        });
-
-        var rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-        rl.question('Enter the code from that page here: ', function(code) {
-            rl.close();
-            oauth2Client.getToken(code, function(err, token) {
-                if (err) {
-                    console.log('Error while trying to retrieve access token', err);
-                    return;
-                }
-                oauth2Client.credentials = token;
-                storeToken(token);
-                callback(oauth2Client);
-            });
-        });
-         *********************/
     }
 
     /**
@@ -843,7 +809,7 @@ var TOKEN_PATH;
 
         var executetxt = "$AR.saveJsonReport()"; //return jsonObject
 
-        mywebview.executeScript({code:executetxt, mainWorld:true},
+        mywebview.executeJavaScript(executetxt, false,
             function(jsonObject){
                 var drive = google.drive({ version: 'v3', auth: auth });
                 var fileMetadata = {
@@ -853,7 +819,7 @@ var TOKEN_PATH;
                 // var holdfileString = fs.readFileSync('./hold.adf').toString();
                 var media = {
                     mimeType: 'text/plain',
-                    body: JSON.stringify(jsonObject[0])
+                    body: JSON.stringify(jsonObject)
                 };
                 drive.files.create({
                     //resource: fileMetadata,
