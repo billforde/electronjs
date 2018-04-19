@@ -4,7 +4,8 @@
   "description": "try electron",
   "main": "main.js",
   "dependencies": {
-    "electron": "^1.8.4"
+    "electron": "^1.8.4",
+    "googleapis": "^28.1.0"
   },
   "devDependencies": {},
   "scripts": {

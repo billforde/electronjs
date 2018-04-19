@@ -101,10 +101,11 @@
     }
     function saveFile(name) {
       var dialog = require('electron').remote.dialog;
-      dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']});
-        /*var chooser = document.querySelector(name);
-        chooser.value = "";
-        chooser.click();*/
+      //dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'promptToCreate']});
+        dialog.showOpenDialog({properties: ['promptToCreate','createDirectory','openFile'],buttonLabel:"Save"},function(filename){
+            var empty=1;
+            saveCurrentTab(filename[0]);
+        });
     }
 
     //chooseFile('#fileDialog');
@@ -227,6 +228,17 @@
     //var firstTime = true;
     var currentTabActive = null;
     var app;
+    //For Google Authentication code
+    var readline;
+    var google;
+    var googleAuth;
+var SCOPES;
+// 'https://www.googleapis.com/auth/drive.appdata',
+//'https://www.googleapis.com/auth/drive.file'];
+// If modifying these scopes, delete your previously saved credentials
+// at ~/.credentials/drive-nodejs-quickstart.json
+var TOKEN_DIR;
+var TOKEN_PATH;
     function main()
     {
         //console.log(nw.App.argv);
@@ -235,8 +247,21 @@
         //open event will trigger this funtion to loadDocIntoTab
         //with the last parameter passed from the file system.
 
-       // nw.App.on('open', function(filename){
+        fs = require('fs');
+        readline = require('readline');
+        google = require('googleapis').google;
+        googleAuth = require('google-auth-library');
+        SCOPES = ['https://www.googleapis.com/auth/drive'];
+        // 'https://www.googleapis.com/auth/drive.appdata',
+        //'https://www.googleapis.com/auth/drive.file'];
+// If modifying these scopes, delete your previously saved credentials
+// at ~/.credentials/drive-nodejs-quickstart.json
+       // var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
+           // process.env.USERPROFILE) + '/.credentials/';
+        TOKEN_DIR = './credentials/'
+        TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
         app = require('electron').remote.app;
+
         app.on('open', function(filename){
             var parm = filename.split(' ');
             var lastparm = parm[parm.length-1];  //filename
@@ -471,7 +496,7 @@
         //get the webwiew window
         //var webviewWin = nw.Window.get(mywebview.contentWindow);
         var executetxt = "$AR.saveJsonReport()";
-        mywebview.executeJavaScript(executetxt,true,
+        mywebview.executeJavaScript(executetxt,false,
                  function(jsonObject){
                      var fs =  require('fs'); //load the node js file system library
 
@@ -482,7 +507,7 @@
                          newfilename += '.adf';
 
                      //write the content of the json object to a file
-                     fs.writeFileSync(newfilename, JSON.stringify(jsonObject[0]));
+                     fs.writeFileSync(newfilename, JSON.stringify(jsonObject));
 
                  });
     }
@@ -565,19 +590,6 @@
     /* then we prompt the user for a filename for storing it into the Google Drive.*/
     /* Download from Google Drive ==> users can read files from their Google Drive */
     /********************************************************************/
-var fs = require('fs');
-var readline = require('readline');
-var google = require('googleapis').google;
-var googleAuth = require('google-auth-library');
-var SCOPES = ['https://www.googleapis.com/auth/drive'];
-   // 'https://www.googleapis.com/auth/drive.appdata',
-    //'https://www.googleapis.com/auth/drive.file'];
-// If modifying these scopes, delete your previously saved credentials
-// at ~/.credentials/drive-nodejs-quickstart.json
-var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
-    process.env.USERPROFILE) + '/.credentials/';
-TOKEN_DIR = './credentials/'
-var TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
 
     function signinToGoogle(dowhat, fileId, filename) {
 
@@ -635,10 +647,41 @@ var TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
             access_type: 'offline',
             scope: SCOPES
         });
+        //let us access to the BrowserWindow object
+        var BrowserWindow = require('electron').remote.BrowserWindow;
+
+        // Or use `remote` from the renderer process.
+        // const {BrowserWindow} = require('electron').remote
+
+        var new_win = new BrowserWindow({width: 800, height: 600});
+        new_win.webContents.on('dom-ready', function(e) {
+            var token = e.sender.webContents.getTitle().split('=');
+            if (token[0] == 'Success code') token = token[1];
+            else token = null;
+
+            if (token) {
+                //alert(token.value);
+                e.sender.close();
+                oauth2Client.getToken(token, function (err, token) {
+                    if (err) {
+                        console.log('Error while trying to retrieve access token', err);
+                        return;
+                    }
+                    oauth2Client.credentials = token;
+                    storeToken(token);
+                    callback(oauth2Client);
+                });
+            };
+        })
+
+        // Load a remote URL
+        new_win.loadURL(authUrl);
+
         //console.log('Authorize this app by visiting this url: ', authUrl);
         //nw.Window.open(authUrl);
+        /*****************
         // Create a new window and get it
-        nw.Window.open(authUrl, {}, function(new_win) {
+        window.open(authUrl, {}, function(new_win) {
             // Add event listener to new window's load event
             new_win.on('loaded', function() {
                 var token = this.window.document.getElementById('code');
@@ -657,6 +700,7 @@ var TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
             });
 
         });
+
         var rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout
@@ -673,6 +717,7 @@ var TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
                 callback(oauth2Client);
             });
         });
+         *********************/
     }
 
     /**
