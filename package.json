@@ -10,10 +10,13 @@
   },
   "devDependencies": {
     "electron": "^1.8.4",
+    "electron-installer-windows": "^1.1.0",
     "electron-packager": "^12.0.1"
   },
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-packager .  --overwrite --icon=assets/favicon.ico  --out=release-builds",
+    "setup": "electron-installer-windows --src release-builds/idfViewer-win32-x64/ --dest dist/installers/"
   },
   "repository": {
     "type": "git",
