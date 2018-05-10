@@ -232,13 +232,15 @@
     var readline;
     var google;
     var googleAuth;
-var SCOPES;
+    var SCOPES;
 // 'https://www.googleapis.com/auth/drive.appdata',
 //'https://www.googleapis.com/auth/drive.file'];
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/drive-nodejs-quickstart.json
-var TOKEN_DIR;
-var TOKEN_PATH;
+    var TOKEN_DIR;
+    var TOKEN_PATH;
+    var arguments;
+
     function main()
     {
         //console.log(nw.App.argv);
@@ -273,11 +275,23 @@ var TOKEN_PATH;
             console.log("main 1: before loadDocIntoTab tabItemCount is:" + tabItemCount);
             loadDocIntoTab(lastparm, myNextTabId);
         });
-        /*******
-        if (app.argv.length > 0) { //if argument exist on command line
+
+        var remote = require('electron').remote;
+        var origArgs = remote.getGlobal('sharedObject').prop1;
+        //remove all the options
+        args = [];
+        for (var i=0; i<origArgs.length; i++)
+            if (origArgs[i].substr(0,2)!= "--") //not a option
+                args[args.length] = origArgs[i];
+
+        console.log(args);
+
+        //if argument exist on command line && ...
+        if (args.length > 1 && args[1] != '.') {
             $(document).ready(function () {
                 console.log("main 2: before loadDocIntoTab tabItemCount is:" + tabItemCount);
-                var filename = nw.App.argv[0];
+               // var filename = process.argv[0];
+                var filename = args[1];
                 var lp = filename.split('"');
                 if (lp.length > 1)
                     filename = lp[1];
@@ -285,8 +299,8 @@ var TOKEN_PATH;
                 loadDocIntoTab(filename, myNextTabId);
             });
         }
-         ********/
-        createHomeMenu();
+
+        //createHomeMenu();
     }
     /**********************************************************************************/
     /* Load the active report using html page or json object passed from the cmd line */
@@ -604,7 +618,12 @@ var TOKEN_PATH;
     function signinToGoogle(dowhat, fileId, filename) {
 
         // Load client secrets from a local file.
-        fs.readFile('client_secret.json', function processClientSecrets(err, content) {
+        var fullFilename = app.getAppPath()+'\\'+'client_secret.json';
+
+        if (fs.existsSync(fullFilename))
+            console.log('Checking for: '+ fullFilename);
+
+        fs.readFile(fullFilename, function processClientSecrets(err, content) {
             if (err) {
                 console.log('Error loading client secret file: ' + err);
                 return;
