@@ -9,6 +9,7 @@
     <link href="Office-Ribbon/soft_button.css" rel="stylesheet" type="text/css" />
     <script src="jquery/jquery_min.js"></script>
     <script src="jquery/jquery_ui_ar_min.js"></script>
+    <script type="text/javascript" src="Office-Ribbon/ribbon/jquery.tooltip.min.js"></script>
     <!--script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script-->
     <script type="text/javascript" src="Office-Ribbon/ribbon/ribbon.js"></script>
     <script type="text/javascript"></script>
@@ -119,28 +120,30 @@
             <div class="ribbon-section">
                 <span class="section-title">Files</span>
                 <div class="ribbon-button ribbon-button-large" id="open-file-button">
-                    <span class="button-title">Open<br/>File</span>
-                    <!--span class="button-help">This button will add a table to your document.</span-->
-                    <img class="ribbon-icon ribbon-normal" src="Office-Ribbon/icons/normal/open-page.png" />
+                    <!--span class="button-title">Open<br/>File</span-->
+                    <span class="button-help">Open a file from the file system</span>
+                    <img class="ribbon-icon ribbon-normal" src="assets/005-open-file.png" />
                 </div>
                 <div class="ribbon-button ribbon-button-large" id="save-button">
-                    <span class="button-title">Save<br/>File</span>
-                    <img class="ribbon-icon ribbon-normal" src="Office-Ribbon/icons/hot/save.png" width="32"/>
+                    <span class="button-help">Save your document to the file system</span>
+                    <span class="button-help">This button will add a page to your document.</span>
+                    <img class="ribbon-icon ribbon-normal" src="assets/001-floppy-disk-1.png" width="32"/>
                 </div>
                 <div class="ribbon-button ribbon-button-large" id="print-button">
-                    <span class="button-title">Print</span>
-                    <img class="ribbon-icon ribbon-normal" src="Office-Ribbon/icons/normal/run.png" width="32"/>
+                    <span class="button-help">Print</span>
+                    <img class="ribbon-icon ribbon-normal" src="assets/015-print.png" width="32"/>
                 </div>
                 <div class="ribbon-button ribbon-button-large" id="email-button">
                     <span class="button-title">Email</span>
-                    <img class="ribbon-icon ribbon-normal" src="Office-Ribbon/icons/hot/web_sheet.png" width="32"/>
+                    <span class="button-help">Email</span>
+                    <img class="ribbon-icon ribbon-normal" src="assets/004-envelope.png" width="32"/>
                 </div>
                 <div class="ribbon-button ribbon-button-large" id="saveToGoogle-button">
-                    <span class="button-title">Save To<br/>Google Drive</span>
-                    <img class="ribbon-icon ribbon-normal" src="Office-Ribbon/icons/normal/save-page.png" width="32"/>
+                    <span class="button-help">Upload To Google Drive<br/>Or<br/>Download From Google Drive</span>
+                    <img class="ribbon-icon ribbon-normal" src="assets/011-drive.png" width="32"/>
                 </div>
                 <div class="ribbon-button ribbon-button-large" id="loadFromGoogle-button">
-                    <span class="button-title">Load From<br/>Google Drive</span>
+                    <span class="button-help">Load From<br/>Google Drive</span>
                     <img class="ribbon-icon ribbon-normal" src="Office-Ribbon/icons/normal/open-page.png" width="32"/>
                 </div>
             </div>
@@ -166,7 +169,7 @@
             </div>
 
 
-            <div class="ribbon-section">
+            <div-- class="ribbon-section">
                 <span class="section-title">Actions</span>
                 <div class="ribbon-button ribbon-button-small" id="run-btn">
                     <span class="button-title">Run</span>
