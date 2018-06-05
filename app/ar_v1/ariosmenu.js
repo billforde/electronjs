@@ -7,6 +7,7 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180312 1326 iys 200991 Mobile:Adaptive Dashboard:Doc with textbox and image click i
 * 170717 1531 iys 185617 Mobile:AHTML report using FREEZE displays tiny panel in upp
 * 170620 1550 iys 185617 Mobile:AHTML report using FREEZE displays tiny panel in upp
 * 161208 1345 iys 186079 Chart Type not displayed correctly in MobleFaves on iPad
@@ -28,7 +29,7 @@
 *-------------------------------------------------------------------*/
 /*Copyright 1996-2011 Information Builders, Inc. All rights reserved.*/
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["ariosmenu"]="$Revision: 20170717.1531 $";
+ActiveJSRevision["ariosmenu"]="$Revision: 20180312.1326 $";
 //$Revision: 1.13 $
 //$Log: ariosmenu.js,v $
 //Revision 1.13  2013/11/13 03:31:02  William_Forde
@@ -660,6 +661,10 @@ ActiveJSRevision["ariosmenu"]="$Revision: 20170717.1531 $";
         else
             ctype = obj.ctype.value*1;
         ibiChart.makeChartItem(tn,ctype,x,y,btype,null,myibiChart);
+        if(ibiCompound.ibiLayout.length && b_ios && arDisplayMode === DISPLAY_MODE_ADAPTIVE && (typeof ARMobileDashboards != 'undefined')) {
+            var currentLayoutSlide = ARMobileDashboards[0].getCurrentLayoutSlide();
+            currentLayoutSlide.slides[currentLayoutSlide.slideIndex][0].scrollLeft = 0;
+        }
     } 
     
     var myibiChart = "bar";
@@ -1502,10 +1507,12 @@ ActiveJSRevision["ariosmenu"]="$Revision: 20170717.1531 $";
         if(mytable.isRollUp) {
             pmytable = getMyTable(mytable.parent_table);
         }
-        if(pmytable.fullScreenOn)
-            menuStr += ibi_ios_menuitem(ibiMsgStr['ogv'],'ibi_iPadMenu.hideMain();ibi_iPadMenu.fullScreen('+pmytable.id+',true,false);',0,0,mytable.a_cntl.menubackcolor,mytable.a_cntl.menucolor);
-        else
-            menuStr += ibi_ios_menuitem(ibiMsgStr['fsr'],'ibi_iPadMenu.hideMain();ibi_iPadMenu.fullScreen('+pmytable.id+',true,true);',0,0,mytable.a_cntl.menubackcolor,mytable.a_cntl.menucolor);
+        if(arDisplayMode !== DISPLAY_MODE_ADAPTIVE) {
+            if(pmytable.fullScreenOn)
+                menuStr += ibi_ios_menuitem(ibiMsgStr['ogv'],'ibi_iPadMenu.hideMain();ibi_iPadMenu.fullScreen('+pmytable.id+',true,false);',0,0,mytable.a_cntl.menubackcolor,mytable.a_cntl.menucolor);
+            else
+                menuStr += ibi_ios_menuitem(ibiMsgStr['fsr'],'ibi_iPadMenu.hideMain();ibi_iPadMenu.fullScreen('+pmytable.id+',true,true);',0,0,mytable.a_cntl.menubackcolor,mytable.a_cntl.menucolor);
+        }
         if((do_sort)&&(!norecords)) {
             menuStr += ibi_ios_menuitem(ibiMsgStr['sas'],'doSort('+tn+',' + i + ',false);ibi_iPadMenu.hideMain()',0,0,mytable.a_cntl.menubackcolor,mytable.a_cntl.menucolor);
             menuStr += ibi_ios_menuitem(ibiMsgStr['sds'],'doSort('+tn+',' + i + ',true);ibi_iPadMenu.hideMain()',0,0,mytable.a_cntl.menubackcolor,mytable.a_cntl.menucolor);

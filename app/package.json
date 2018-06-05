@@ -1,0 +1,20 @@
+{
+  "name": "idfViewer",
+  "productName": "idfViewer",
+  "version": "1.0.0",
+  "description": "Application built with electron-builder",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "idfViewer"
+  },
+  "keywords": [
+    "adf",
+    "idf"
+  ],
+  "author": "Patricia Lam",
+  "license": "ISC",
+  "dependencies": {
+    "googleapis": "^31.0.2"
+  }
+}

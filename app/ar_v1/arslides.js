@@ -7,6 +7,7 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180312 1326 iys 200991 Mobile:Adaptive Dashboard:Doc with textbox and image click i
 * 170531 1006 iys 162870 AHTML/MOB:New dashboard layout option / mobile small screens
 * 170530 1601 iys 162870 AHTML/MOB:New dashboard layout option / mobile small screens
 * 151030 1250 iys 173296 Optimize chart updating for mobile responsive dashboard
@@ -17,7 +18,7 @@
 *-------------------------------------------------------------------*/
 
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arslides"]="$Revision: 20170531.1006 $";
+ActiveJSRevision["arslides"]="$Revision: 20180312.1326 $";
 
 function ARSlides(settings) {
     var _this = this;
@@ -87,6 +88,7 @@ function ARSlides(settings) {
 
             // apply css common to both left and right controls
             $([this.navigatorLeftControl, this.navigatorRightControl]).css({
+                'display': (this.slideElements.length > 1) ? 'block' : 'none',
                 'width': '25px',
                 'height': '25px',
                 'position': 'absolute',
@@ -432,6 +434,7 @@ function ARSlides(settings) {
     this.resize = function(width, height) {
         var containerStyle = this.container[0].style;
         var slideStyle;
+        var slideHeight;
 
         // update the width and height variables which affect animations
         this.width = width;
@@ -441,11 +444,16 @@ function ARSlides(settings) {
         containerStyle.height = height + 'px';
 
         for(var i=0, l=this.slides.length; i<l; i++) {
+            slideHeight = height;
             slideStyle = this.slides[i][0].style;
+
+            if(this.navigator && !this.navigatorOverlaysContent) {
+                slideHeight -= this.navigatorHeight;
+            }
 
             // resize each slide
             slideStyle.width = width + 'px';
-            slideStyle.height = height + 'px';
+            slideStyle.height = slideHeight + 'px';
 
             // adjust the 'left' style as well as remove transitions for slides that are not
             // currently in view so that they're a proper distance from the slide currently

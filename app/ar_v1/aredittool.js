@@ -7,6 +7,9 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180403 1011 wjf 201843 AHTML:Incorrect chart title displaying after selecting chart
+* 180330 1240 wjf 199943 Conversion from Any chart type to Tagcloud with two BY fiel
+* 180321 1033 wjf 199943 Conversion from Any chart type to Tagcloud with two BY fiel
 * 171117 1155 wjf 196097 AHTL:Pivot Tool:Unable to drag a field name with quotes
 * 170925 1223 wjf 189627 Advanced Chart option not passing correct variable back to
 * 170522 1314 wjf 168489 NFR:Filtering in Active Reports doesn't update totals
@@ -35,7 +38,7 @@
 *-------------------------------------------------------------------*/
 /*Copyright 1996-2011 Information Builders, Inc. All rights reserved.*/
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["aredittool"]="$Revision: 20171117.1155 $";
+ActiveJSRevision["aredittool"]="$Revision: 20180403.1011 $";
 //$Revision: 1.11 $
 //$Log: aredittool.js,v $
 //Revision 1.11  2014/05/06 15:24:15  Brian_DCruz
@@ -1922,13 +1925,67 @@ function ct_toogleTab(win,t_num,spanel,hpanel)
 
 function ct_setmyibiChart(win,t_num,chart)
 {
+	var inBuckets = function(col,buckets,returnName) {
+		for(var i in buckets) {
+			if(i == 'TOOLTIP')
+				continue;
+			for(var j = 0; j < buckets[i].length; j++)
+				if(buckets[i][j]==col)
+					if(returnName)
+						return i;
+					else
+					if(i == "EMPTY")
+						return false;
+					else
+						return true;
+		}
+		if(returnName)
+			return null;
+		else
+			return false;
+	};
 	var mytable = getMyTable(t_num);
+    var glist = grouplist[win];
+    var mlist = measurelist[win];
+    var newlist;
+    var i,c;
     var dobjs = document.getElementById('chticon_'+win+'_'+t_num+'_'+chart);
     var dobjh = document.getElementById('chticon_'+win+'_'+t_num+'_'+myibiChart[win]);
     myibiChart[win] = chart;
     typelist[win] = chartIsTDG;
-	if(mytable.tdgOrgChartType)
+	if(mytable.tdgOrgChartType && (typeof mytable.a_cntl.buckets != "undefined")) {
+		if(typeof mytable.editTool != "undefined") {
+            glist = mytable.editTool.grouplist;
+            mlist = mytable.editTool.measureList;
+		} else {
+            mytable.editTool = {};
+            mytable.editTool.measureList = ibiStd.copyObject(measurelist[win]);
+            mytable.editTool.grouplist = ibiStd.copyObject(grouplist[win]);
+        }
 		bucketlist[win] = ibiChart.swapBuckets(mytable,mytable.tdgOrgChartType,chart);
+        // remove unused fields
+        newlist = [];
+        for (i = 0; i < glist.length; i++)
+            if (inBuckets(glist[i], bucketlist[win]))
+                newlist[newlist.length] = glist[i];
+            else
+                newlist[newlist.length] = glist[i - 1];
+        grouplist[win] = newlist;
+        newlist = [];
+        for (i = 0; i < mlist.length; i++)
+            if (inBuckets(mlist[i], bucketlist[win]))
+                newlist[newlist.length] = mlist[i];
+            else
+                newlist[newlist.length] = mlist[i - 1];
+        measurelist[win] = newlist;
+        // cleanup tooltip;
+        newlist = [];
+        for (i = 0; i < bucketlist[win]['TOOLTIP'].length; i++)
+            if (inBuckets(bucketlist[win]['TOOLTIP'][i], bucketlist[win]))
+        		newlist[newlist.length] =  bucketlist[win]['TOOLTIP'][i];
+        bucketlist[win]['TOOLTIP'] = newlist;
+    }
+
     if(dobjs) dobjs.setAttribute(ibiclassName,"arToolChartIconSelected");
     if(dobjh) dobjh.setAttribute(ibiclassName,"arToolChartIcon");
 }

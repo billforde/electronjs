@@ -7,6 +7,9 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180510 1228 wjf 203095 AHTML-Mobile: Chart Default should be Bar instead of VBar
+* 180326 1242 wjf 199946 Conversion from "Treemap to Tagcloud" with two BY fields di
+* 180321 1055 wjf 199943 Conversion from Any chart type to Tagcloud with two BY fiel
 * 180306 1442 wjf 200246 AHML: Unify JSON output
 * 180226 1240 wjf 200246 AHML: Unify JSON output
 * 180220 0915 wjf 200246 AHML: Unify JSON output
@@ -72,7 +75,7 @@
 //[p134795] fix log/revision message
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["artdgclist"]="$Revision: 20180306.1442 $";
+ActiveJSRevision["artdgclist"]="$Revision: 20180510.1228 $";
 
 
 var TDGDefaultLabelColor = "#333333";
@@ -210,7 +213,7 @@ tdginfo.category = [
      chartList:[
             {base:'bar',internalType:'bla',name:'vbar', label:ibiMsgStr['VBar'],chartProps: 'barProps',showInTool:false},
             {base:'bar',internalType:'bla',name:'errorbar', label:ibiMsgStr['Errorbar'],chartProps: 'barProps',showInTool:false},
-            {base:'bar',internalType:'bla',name:'bar', label:ibiMsgStr['VBar'],chartProps: 'barProps',showInTool:false},
+            {base:'bar',internalType:'bla',name:'bar', label:ibiMsgStr['Bar'],chartProps: 'barProps',showInTool:false},
             {base:'bar',internalType:'bla',name:'bar1', label:ibiMsgStr['Bar'],chartProps: 'barProps',chartPropsExtra:'hbarSidebySideProps',sampleData:dpdef,showInTool:true,sampleImg:null},
             {base:'bar',internalType:'bla',name:'bar2', label:ibiMsgStr['Stacked_Bar'],chartProps: 'barProps',chartPropsExtra:'hbarStackedProps',sampleData:dpdef,showInTool:true,sampleImg:null},
             {base:'bar',internalType:'bla',name:'bar3', label:ibiMsgStr['Percent_Bar'],chartProps: 'barProps',chartPropsExtra:'hbarPercentProps',sampleData:dpdef,showInTool:true,sampleImg:null},
@@ -335,7 +338,7 @@ tdginfo.category = [
             {base:'heatmap',internalType:'heatmap',name:'heatmap', label:ibiMsgStr['Heatmap'], chartProps: 'otherProps',chartPropsExtra:'heatmapProps',sampleData:dpheatmap,showInTool:true,sampleImg:null},
             {base:'waterfall',internalType:'waterfall',name:'hwaterfl', label:ibiMsgStr['Waterfall'], chartProps: 'otherProps',chartPropsExtra:'waterfallProps',sampleData:dpwaterfall,showInTool:false,sampleImg:null,notForBucket:true},
             {base:'waterfall',internalType:'waterfall',name:'vwaterfl', label:ibiMsgStr['Waterfall'], chartProps: 'otherProps',chartPropsExtra:'waterfallProps',sampleData:dpwaterfall,showInTool:false,sampleImg:null,notForBucket:true},
-            {base:'waterfall',internalType:'waterfall',name:'waterfall', label:ibiMsgStr['Waterfall'], chartProps: 'otherProps',chartPropsExtra:'waterfallProps',sampleData:dpwaterfall,showInTool:true,sampleImg:null},
+            {base:'waterfall',internalType:'waterfall',name:'waterfall', label:ibiMsgStr['Waterfall'], chartProps: 'otherProps',chartPropsExtra:'waterfallProps',sampleData:dpwaterfall,showInTool:true,sampleImg:null,notForBucket:true},
             {base:'histogram',internalType:'histogram',name:'histogram', label:ibiMsgStr['Histogram'], chartProps: 'barProps',chartPropsExtra:'histogramProps',sampleData:dphistogram,showInTool:true,sampleImg:null,notForBucket:true},
             {base:'polar',name:'polar', label:ibiMsgStr['Polar'], chartProps: 'otherProps',sampleData:dpscat,showInTool:false,sampleImg:null,notForBucket:true},
             {base:'radar',name:'radar', label:ibiMsgStr['Radar_Line'], chartProps: 'otherProps',sampleData:dpdef,showInTool:true,sampleImg:null,notForBucket:true},
@@ -379,7 +382,7 @@ tdginfo.chartIconsSize = {
 
 tdginfo.knownBuckets = ['LONGITUDE','LATITUDE','SLIDER','LOCATION','GEOMETRY','COLOR','SIZE',
     'COLUMN','DETAIL','LOWER','MAX','MEDIAN','MIN','NULL','PAGE','ROW','SHAPE','SLIDER',
-    'TOOLTIP','UPPER','X-AXIS','Y-AXIS','MEASURE'];
+        'TOOLTIP', 'UPPER', 'X-AXIS', 'Y-AXIS', 'MEASURE','EMPTY','ACTIVE_NOTUSED'];
 
 tdginfo.blainfo = {
     "to": {

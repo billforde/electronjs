@@ -7,6 +7,7 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180312 1326 iys 200991 Mobile:Adaptive Dashboard:Doc with textbox and image click i
 * 180220 0915 wjf 200246 AHML: Unify JSON output
 * 180207 0849 bjd 200086 AHTML: PopUp Menu Title Bar disappears when switching to Tab
 * 180125 1507 iys 168850 NFR:AHTML FREEZING HEADINGS IN ACTIVE REPORT OUTPUT
@@ -229,7 +230,7 @@
 //[p136963]  If ARDEFAULTHEAD=ORIGINAL then use the heading from the original report.
 // 
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["argenfunctions"]="$Revision: 20180220.0915 $";
+ActiveJSRevision["argenfunctions"]="$Revision: 20180312.1326 $";
 
 // capture keystrokes
 
@@ -425,7 +426,7 @@ function setUpNewWindow(i)
     pwn[i].dobj_e=d.getElementById('wbot'+i);
     pwn[i].dobj_a=d.getElementById('wall'+i);
 
-    if(b_mobile && pwn[i].dobj_b) {
+    if(arDisplayMode !== DISPLAY_MODE_ADAPTIVE && b_mobile && pwn[i].dobj_b) {
         ibiUtil.enableMobileNativeScrolling(pwn[i].dobj_b);
     }
 }

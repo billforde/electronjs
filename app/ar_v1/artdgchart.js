@@ -7,6 +7,8 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180320 1505 bjd 200596 The operation of [Automatically Shade Frame Edge] does not b
+* 180320 1421 bjd 200403 Axis labels now appear for certain active charts
 * 171204 0930 wjf 193487 Inconsistent  Graph Rendering in Active Dashboard
 * 170919 1154 wjf 195272 NATURAL_DISASTERFOC.MAS: ESRI Bubble map Size legend title
 * 170919 1132 wjf 194774 WQ: Visualization: both X and Y axis labels are not display
@@ -404,7 +406,7 @@
 //[p143860] Set overflow to hidden so that we dont cause unwanted scroll bars.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["artdgchart"]="$Revision: 20171204.0930 $";
+ActiveJSRevision["artdgchart"]="$Revision: 20180320.1505 $";
 
 (function() {
 
@@ -538,7 +540,8 @@ ActiveJSRevision["artdgchart"]="$Revision: 20171204.0930 $";
 
         if(dataProvider.type == "buckets")
             hasBuckets = true;
-        
+        parms.hasBuckets = hasBuckets;
+
         if(typeof focexurl != "undefined")
             ibiTDGCharts.chartAlias = focexurl;
         tdgchart.getScriptPath = ibiTDGCharts.getScriptPath;
@@ -1475,6 +1478,10 @@ ActiveJSRevision["artdgchart"]="$Revision: 20171204.0930 $";
                                     chart.parsePFJString("setGraphType(" + parms.mytable.a_cntl.graphType + ");\n");
                             }
 
+                            if (chart.pfjString && !parms.hasBuckets) {
+                                chart.parsePFJString(pfjParse(chart.pfjString, parms.isOriginal, props.series, (parms.mytable.isRollUp || parms.dataProvider.hasMulti), parms.mytable));
+                            }
+
                             if (oProps) {
                                 for (j = 0; j < oProps.length; j++) {
                                     if (oProps[j].pfj) {
@@ -1508,7 +1515,7 @@ ActiveJSRevision["artdgchart"]="$Revision: 20171204.0930 $";
                                     }
                                 }
                             }
-                            if (chart.pfjString) {
+                            if (chart.pfjString && parms.hasBuckets) {
                                 chart.parsePFJString(pfjParse(chart.pfjString, parms.isOriginal, props.series,(parms.mytable.isRollUp || parms.dataProvider.hasMulti), parms.mytable));
                                 //if(isOriginalChart)
                                 //    chart.parsePFJString("setGraphType(" + parms.mytable.a_cntl.graphType + ");\n");
@@ -1858,7 +1865,8 @@ ActiveJSRevision["artdgchart"]="$Revision: 20171204.0930 $";
                             (ps[i].indexOf("setDepth") != -1) ||
                             (ps[i].indexOf("setShadowDisplay") != -1) ||
                             (ps[i].indexOf("setGridStep") != -1) ||
-                            (ps[i].indexOf("setFont")!=-1)) {
+                            (ps[i].indexOf("setFrameAuto") != -1) ||
+                            (ps[i].indexOf("setFont") != -1)) {
                             if(ps[i].indexOf('$')!=-1) {
                                 t = ps[i].split('$');
                                 tt = parseInt(t[1],10);

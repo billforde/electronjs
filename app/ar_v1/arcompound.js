@@ -7,6 +7,9 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180416 1050 wjf 202085 Hiding the filter prompt title, hides the prompt drop-down i
+* 180329 1145 wjf 201527 Document Canvas: Type any text inside "Edit box" throws "Web
+* 180326 1420 wjf 200478 Filter prompt showing additional unselected values, which wa
 * 180222 1046 wjf 200246 AHML: Unify JSON output
 * 180220 0915 wjf 200246 AHML: Unify JSON output
 * 180116 1536 iys 162870 AHTML/MOB:New dashboard layout option / mobile small screens
@@ -410,7 +413,7 @@
 //[p135287] FIx issue with border around pivot not being sized correctly why toggling between layouts.
 // 
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arcompound"]="$Revision: 20180222.1046 $";
+ActiveJSRevision["arcompound"]="$Revision: 20180416.1050 $";
 
 (function() {
 
@@ -513,6 +516,12 @@ ActiveJSRevision["arcompound"]="$Revision: 20180222.1046 $";
         var fc = a_filt_name[ibiStd.mapFilterObjectCondition(this.filterCondition)];
         var i;
         var columnName;
+        if(typeof this.mytable == "undefined")
+            this.mytable = this.getTable(this.dataReport);
+
+        if(!this.mytable)
+            return;
+
         if(this.dataColumnType == "multi") {
             columnName = this.mytable.getColumnTitleByName(this.dataColumn[0]);
             for(i=1; i < this.dataColumn.length; i++) {
@@ -1050,9 +1059,9 @@ ActiveJSRevision["arcompound"]="$Revision: 20180222.1046 $";
                     }
                 this.rowCount = this.dataProvider[0].length;
                 this.clen = null;
-                if (this.filter_datatype == IBIDATE) {
-                    this.clen = 8;
-                }
+                //if (this.filter_datatype == IBIDATE) {
+                //    this.clen = 8;
+                //}
                 var stopLoop;
                 var doOnload = false;
                 var filterIndex = (this.filterSortDesc === true) ? this.rowCount - 1 : 0;
@@ -1902,6 +1911,7 @@ ActiveJSRevision["arcompound"]="$Revision: 20180222.1046 $";
                     filter.iconBox.style.setAttribute('cssText', 'position:absolute;top:0px;right:0px;margin:0px;padding:0px;width:'+this.width+';height:'+this.height+';', 0);
                 else 
                     filter.iconBox.setAttribute('style','position:absolute;top:0px;right:0px;margin:0px;padding:0px;width:'+this.width+';height:'+this.height+';');
+                filter.iconBox.className = "arFilterButton";
                 filter.iconBox.appendChild(filter.iconHolder.buildComponent());
                 obj.appendChild(filter.iconBox);
                 

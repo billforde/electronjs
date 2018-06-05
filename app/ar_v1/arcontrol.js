@@ -7,6 +7,18 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180508 1044 iys 168850 NFR:AHTML FREEZING HEADINGS IN ACTIVE REPORT OUTPUT
+* 180503 1540 bjd 202855 AHTML: COLUMN=field(*) formatting does not format computed f
+* 180419 1022 wjf 199221 Vis Esri Postal Code to City drill down and vise versa at r
+* 180419 0950 bjd 196891 AHTML:Clicking or Dragging slider control displays Zero rec
+* 180417 1058 wjf 202212 VIS: Leafletmap :Apply lasso filter on Latitude/Longitude th
+* 180413 1600 wjf 200536 VIS: ESRI Map throws error in preview, when GEO_ALIASING is
+* 180413 1010 wjf 200536 VIS: ESRI Map throws error in preview, when GEO_ALIASING is
+* 180412 1605 wjf 200536 VIS: ESRI Map throws error in preview, when GEO_ALIASING is
+* 180405 0958 wjf 201841 Vis Run time menu: Displays invisible Undo filter icon
+* 180329 1106 wjf 199069 Vis : Run time menu : Gap displays between Reset and Funnel
+* 180327 1102 wjf 196843 Visualization: Exclude column results in Error; page hangs
+* 180326 1118 wjf 199235 AHTML:Tooltip info shows all measure values for line charts
 * 180302 1345 wjf 200246 AHML: Unify JSON output
 * 180226 1254 wjf 200246 AHML: Unify JSON output
 * 180220 0915 wjf 200246 AHML: Unify JSON output
@@ -722,7 +734,7 @@
 //[p139177] dont set default font and size if not Report style node.
 // 
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arcontrol"]="$Revision: 20180302.1345 $";
+ActiveJSRevision["arcontrol"]="$Revision: 20180508.1044 $";
 
 
 
@@ -3042,46 +3054,57 @@ function IinitBody(iMytable)
     }
 }
 
-function IGetColumnByName(name,mytable)
+function IGetColumnByName(name,mytable,nameOnly,startAt)
 {
     var i;
-    for(i=0; i < this.a_cntl.a_cols.length; i++) {
+	var checkNameOnly = false;
+	if(typeof nameOnly != "undefined")
+		checkNameOnly = nameOnly;
+	var start = 0;
+	if(typeof startAt != "undefined")
+		start = startAt;
+	for(i=start; i < this.a_cntl.a_cols.length; i++) {
 		if(this.a_capt[i].deleted)
 			continue;
 		if(typeof this.a_cntl.a_cols[i].field == "undefined")
 			continue;
-        if((this.a_cntl.a_cols[i].field.toUpperCase() == name.toUpperCase())||
-        (this.a_cntl.a_cols[i].name.toUpperCase() == name.toUpperCase())||
-        (this.a_cntl.a_cols[i].alias.toUpperCase() == name.toUpperCase()))
-             return i;
-		if(this.a_cntl.a_cols[i].qualname) {
-            if(this.a_cntl.a_cols[i].qualname.toUpperCase() == name.toUpperCase())
+		if(checkNameOnly) {
+            if  (this.a_cntl.a_cols[i].name.toUpperCase() == name.toUpperCase())
                 return i;
-            var pos = this.a_cntl.a_cols[i].qualname.indexOf(".");
-            if(pos>-1) {
-            	if(this.a_cntl.a_cols[i].qualname.substr(pos+1).toUpperCase() == name.toUpperCase())
+		} else {
+            if((this.a_cntl.a_cols[i].field.toUpperCase() == name.toUpperCase())||
+            (this.a_cntl.a_cols[i].name.toUpperCase() == name.toUpperCase())||
+            (this.a_cntl.a_cols[i].alias.toUpperCase() == name.toUpperCase()))
+                 return i;
+            if(this.a_cntl.a_cols[i].qualname) {
+                if(this.a_cntl.a_cols[i].qualname.toUpperCase() == name.toUpperCase())
                     return i;
-			}
-        }
-        if(name.indexOf(" ")!=-1) {
-            var fixSpaceName = name.split(" ");
-            var j = 0;
-            while (j < fixSpaceName.length) {
-                if (fixSpaceName[j] == "") {
-                    fixSpaceName.splice(j, 1);
-                } else
-                    j++;
+                var pos = this.a_cntl.a_cols[i].qualname.indexOf(".");
+                if(pos>-1) {
+                    if(this.a_cntl.a_cols[i].qualname.substr(pos+1).toUpperCase() == name.toUpperCase())
+                        return i;
+                }
             }
-            fixSpaceName = fixSpaceName.join(" ");
-            if ((this.a_cntl.a_cols[i].field.toUpperCase() == fixSpaceName.toUpperCase()) ||
-                (this.a_cntl.a_cols[i].name.toUpperCase() == fixSpaceName.toUpperCase()) ||
-                (this.a_cntl.a_cols[i].alias.toUpperCase() == fixSpaceName.toUpperCase()))
-                return i;
-            if (this.a_cntl.a_cols[i].qualname)
-                if (this.a_cntl.a_cols[i].qualname.toUpperCase() == fixSpaceName.toUpperCase())
+            if(name.indexOf(" ")!=-1) {
+                var fixSpaceName = name.split(" ");
+                var j = 0;
+                while (j < fixSpaceName.length) {
+                    if (fixSpaceName[j] == "") {
+                        fixSpaceName.splice(j, 1);
+                    } else
+                        j++;
+                }
+                fixSpaceName = fixSpaceName.join(" ");
+                if ((this.a_cntl.a_cols[i].field.toUpperCase() == fixSpaceName.toUpperCase()) ||
+                    (this.a_cntl.a_cols[i].name.toUpperCase() == fixSpaceName.toUpperCase()) ||
+                    (this.a_cntl.a_cols[i].alias.toUpperCase() == fixSpaceName.toUpperCase()))
                     return i;
+                if (this.a_cntl.a_cols[i].qualname)
+                    if (this.a_cntl.a_cols[i].qualname.toUpperCase() == fixSpaceName.toUpperCase())
+                        return i;
+            }
         }
-    }
+	}
     return -1;
 }
 
@@ -3156,8 +3179,7 @@ function TTable(a_capt, a_cont, o_look, a_cntl, a_styles, subtab,tstrings,acdLin
     this.a_filter_body = null;
     this.a_all_cont = null;
     this.a_filter_cont = null;
-    // hardcoded false until server sends down setting
-    this.isHFreezeEnabled = false && !b_ios;
+    this.isHFreezeEnabled = o_look.freezeTop && !b_ios;
     this.getColumnByName = IGetColumnByName;
 	this.getColumnTitleByName = function (name,mytable)
 		{
@@ -3610,7 +3632,13 @@ function TTable(a_capt, a_cont, o_look, a_cntl, a_styles, subtab,tstrings,acdLin
     for (i = 0; i < 33; i++) { this.bycount[i] = 0; }
     var non_noprint_col = -1;
     this.n_cols_print=0;
-    for (i = 0; i < this.n_cols; i++) { 
+    if(this.a_cntl.fullfex) {
+        var ff = this.a_cntl.fullfex;
+        if(typeof ff == "object")
+            ff = ff.join('');
+        this.fexParts = splitUpOriginalFex(ff);
+    }
+    for (i = 0; i < this.n_cols; i++) {
         if((this.FirstNoprintColumn==-1)&&(!a_capt[i].noprint)) this.FirstNoprintColumn=i;
     }
     for (i = 0; i < this.n_cols; i++) {
@@ -3669,6 +3697,77 @@ function TTable(a_capt, a_cont, o_look, a_cntl, a_styles, subtab,tstrings,acdLin
             'aggType':a_capt[i].aggType?a_capt[i].aggType:null,
             'exp_hide' : a_capt[i].exphide
         };
+		if(this.fexParts) {
+			var found = false;
+			var aggfields, bys;
+			if(i == 0) {
+                aggfields = ibiStd.copyObject(this.fexParts.focus.aggfields);
+                bys = ibiStd.copyObject(this.fexParts.focus.bys);
+            }
+			var varName,varNameShort,varNameVeryShort;
+			if(aggfields && !this.a_capt[i].isby) {
+				for(j=0; j < aggfields.length; j++) {
+                    varName = aggfields[j];
+                    varNameShort = varName.split(".");
+                    varNameVeryShort = varNameShort[varNameShort.length-1];
+                    if(varNameShort.length>1) {
+                        varNameShort.splice(0,1);
+                        varNameShort = varNameShort.join(".");
+                    } else
+                        varNameShort = varName;
+					if((this.a_cntl.a_cols[i].alias == varName)||
+                        (this.a_cntl.a_cols[i].alias.substr(0,varNameShort.length) == varNameShort)||
+                        (this.a_cntl.a_cols[i].alias.substr(0,varNameVeryShort.length) == varNameVeryShort)||
+                        (this.a_cntl.a_cols[i].dis == varName)||
+                        (this.a_cntl.a_cols[i].field == varName)||
+                        (this.a_cntl.a_cols[i].field.substr(0,varNameShort.length) == varNameShort)||
+                        (this.a_cntl.a_cols[i].field.substr(0,varNameVeryShort.length) == varNameVeryShort)||
+                        (this.a_cntl.a_cols[i].name == varName)||
+                        (this.a_cntl.a_cols[i].name == varNameShort)||
+                        (this.a_cntl.a_cols[i].name == varNameVeryShort)||
+                        (this.a_cntl.a_cols[i].qualname == varNameShort)||
+                        (this.a_cntl.a_cols[i].qualname == varName)) {
+						aggfields[j] = "$$$$";
+                        found = true;
+                        break;
+                    }
+                }
+			}
+			if(!found)
+            if(bys && this.a_capt[i].isby) {
+                for(j=0; j < bys.length; j++) {
+                    varName = bys[j];
+                    varNameShort = varName.split(".");
+                    varNameVeryShort = varNameShort[varNameShort.length-1];
+                    if(varNameShort.length>1) {
+                        varNameShort.splice(0,1);
+                        varNameShort = varNameShort.join(".");
+                    } else
+                        varNameShort = varName;
+                    if((this.a_cntl.a_cols[i].alias == varName)||
+                        (this.a_cntl.a_cols[i].alias.substr(0,varNameShort.length) == varNameShort)||
+                        (this.a_cntl.a_cols[i].alias.substr(0,varNameVeryShort.length) == varNameVeryShort)||
+                        (this.a_cntl.a_cols[i].dis == varName)||
+                        (this.a_cntl.a_cols[i].field == varName)||
+                        (this.a_cntl.a_cols[i].field.substr(0,varNameShort.length) == varNameShort)||
+                        (this.a_cntl.a_cols[i].field.substr(0,varNameVeryShort.length) == varNameVeryShort)||
+                        (this.a_cntl.a_cols[i].name == varName)||
+                        (this.a_cntl.a_cols[i].name == varNameShort)||
+                        (this.a_cntl.a_cols[i].name == varNameVeryShort)||
+                        (this.a_cntl.a_cols[i].qualname == varNameShort)||
+                        (this.a_cntl.a_cols[i].qualname == varName)) {
+                    	bys[j] = "$$$$";
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if(!found) {
+                this.a_capt[i].fromFocTransForm = true;
+                this.a_capt[i].b_hide = true;
+            }
+		}
+
         if (this.a_capt[i].isby) { ++nLevel; }
         if(typeof(a_capt[i].userFunc)!='undefined') {
             this.a_capt[i].userFunc = a_capt[i].userFunc;
@@ -3989,13 +4088,6 @@ function TTable(a_capt, a_cont, o_look, a_cntl, a_styles, subtab,tstrings,acdLin
     if(this.a_cntl.dataReport) {
             var dataReportIndex = getReportByName(this.a_cntl.dataReport);
             MyTable[dataReportIndex].dataReportList[this.id] = this;
-    }
-
-	if(this.a_cntl.fullfex) {
-		var ff = this.a_cntl.fullfex;
-		if(typeof ff == "object")
-			ff = ff.join('');
-        this.fexParts = splitUpOriginalFex(ff);
     }
 
     if((this.a_cntl.cacheMode) && (this.a_cntl.arcacheInclude)) {
@@ -4389,11 +4481,22 @@ function showBottomMenu(noMenu){
         }
 
         menuContainerA.style.display = "none";
+        var showUndo = false;
+        /* uncomment once we have an icon for undo.
+        if(mytable.chartFiltersForUndo) {
+            var iicc = mytable.chartFiltersForUndo.length;
+            for(var ii = 0 ; ii < iicc; ii++)
+                if(!mytable.chartFiltersForUndo[ii].obj.deleted) {
+                    if (mytable.chartFiltersForUndo[ii].obj.undoStack.stack.length > 2)
+                        showUndo = true;
+                }
+        }
+        */
         menuContainerA.innerHTML = '<table><tr>'+
             '<td valign="BOTTOM" align="RIGHT" span><span title="'+ibiMsgStr["showData"]+'" style="cursor:pointer;" onclick="mshowReport('+this.id+')">'+ibiSkin.roll1icon+'<\/span><\/td>'+
             '<td valign="BOTTOM" align="RIGHT" span><span title="'+ibiMsgStr["rso"]+'" style="cursor:pointer;" onclick="mresetDashboard('+this.id+')">'+ibiSkin.initchart+'<\/span><\/td>'+
             ((ibiCompound.chartFilters.length==0)?'':''+
-                '<td valign="BOTTOM" align="RIGHT" span><span title="'+ibiMsgStr["untcflt"]+'" style="cursor:pointer;" onclick="ibiChart.undoFilter('+this.id+')">'+ibiSkin.pvicon1+'<\/span><\/td>'+
+				((showUndo)?'<td valign="BOTTOM" align="RIGHT" span><span title="'+ibiMsgStr["untcflt"]+'" style="cursor:pointer;" onclick="ibiChart.undoFilter('+this.id+')">'+ibiSkin.pvicon1+'<\/span><\/td>':'')+
                 '<td valign="BOTTOM" align="RIGHT" span><span title="'+ibiMsgStr["crtcflt"]+'" style="cursor:pointer;" onclick="ibiChart.removeFilter()">'+ibiSkin.cflticon+'<\/span><\/td>')+
             '<\/tr><\/table>';
         menuContainerS.innerHTML = '<div style="background-color:#c0c0c0;cursor:pointer;" onclick="toggleBottomMenu('+this.id+')">'+ibiSkin.pvicon6+'<\/div>';
@@ -4469,6 +4572,12 @@ function mresetDashboard(id) {
 		MyTable[i].ru_o_look = MyTable[i].copyObject(MyTable[i].restore_ru_o_look);
 		MyTable[i].ru_a_cntl = MyTable[i].copyObject(MyTable[i].restore_ru_a_cntl);
         MyTable[i].a_cntl.autoFit = saveAutoFit;
+        if(MyTable[i].a_cntl.fullfex) {
+            var ff = MyTable[i].a_cntl.fullfex;
+            if(typeof ff == "object")
+                ff = ff.join('');
+            MyTable[i].fexParts = splitUpOriginalFex(ff);
+        }
 		delete MyTable[i].swapFieldFirstCall;
 		delete MyTable[i].swapFieldOriginal;
 		delete MyTable[i].overrideToolTip;
@@ -5467,7 +5576,7 @@ function IGetChartValues(x_col,y_col,sumres,res,groupbyArray,get_all,isnotfirst,
                     calccols += fc+fld+' ';
                     cols += fld + ' ';
                 } else {
-                    if(this.a_capt[x_col[i]].computeText.substr(0,5)!="MAP__") {
+					if(!this.a_capt[x_col[i]].fromFocTransForm) {
                         computeStr = 'COMPUTE ' + this.a_capt[x_col[i]].computeText;
                         calccols += computeStr + ' ';
                         cols += computeStr + ' AS C' + i + ' ';
@@ -6625,7 +6734,7 @@ function ICallFiltReal(r_body,e_filt,filter_type,filter_andor,record,doingHighLi
                         var filterFormat = pmytable.a_capt[colBeingFiltered].format.match(/\w+/);
                         var fformat = pmytable.a_capt[colBeingFiltered].format;
                         dataType = pmytable.a_capt[colBeingFiltered].type;
-                        if(e_filt[i].datatype) {
+							if (e_filt[i].datatype && (pmytable.a_cntl.cacheWriteMode != 4)) {
                             dataType = e_filt[i].datatype;
                             filterFormat = e_filt[i].dataformat.match(/\w+/);
                             fformat = e_filt[i].dataformat;
@@ -6819,7 +6928,7 @@ function ICallFiltReal(r_body,e_filt,filter_type,filter_andor,record,doingHighLi
                             wherestr = p1;
                         } else {
                             //
-                            var genWhereClause = function(p1,p2,col,filt,ftype,isMulti)
+							var genWhereClause = function(p1,p2,col,filt,ftype,isMulti,dontOverrideFormat)
                             {
                                 var isString = false;
                                 var isDate = false;
@@ -6918,7 +7027,7 @@ function ICallFiltReal(r_body,e_filt,filter_type,filter_andor,record,doingHighLi
                                 var fformat = pmytable.a_capt[colBeingFiltered].format;
 
                                 dataType = pmytable.a_capt[colBeingFiltered].type;
-                                if (filt.datatype) {
+								if (filt.datatype && !dontOverrideFormat) {
                                     dataType = filt.datatype;
                                     filterFormat = filt.dataformat.match(/\w+/);
                                     fformat = filt.dataformat;
@@ -6929,7 +7038,7 @@ function ICallFiltReal(r_body,e_filt,filter_type,filter_andor,record,doingHighLi
                                 } else if (dataType == IBIDATE) {
                                     isDate = cacheDateField = useIbiDateToFormat = true;
                                     useDTF = cacheDateFieldInGrid = false;
-                                    if (isGrid) {
+                                    if (isGrid && (pmytable.a_cntl.cacheWriteMode != 4)) {
                                         var dtFmt = filterFormat[0].toUpperCase();
                                         useIbiDateToFormat = false;
                                         if ((fformat[1] == "H") || (dtFmt.match(/^(?=.*JUL).*$/))) {
@@ -7012,7 +7121,10 @@ function ICallFiltReal(r_body,e_filt,filter_type,filter_andor,record,doingHighLi
                                 if (ii)
                                     wherestr = " AND ";
                                         //if (filt.an_fcol.length > 1) wherestr += "(";
-                                if (!fixMathBug) {
+                                if (!fixMathBug ||
+									(ftype == arConstants.FILTER_EQ  ) ||
+									(ftype == arConstants.FILTER_CONTAIN_CS ) ||
+									(ftype == arConstants.FILTER_CONTAIN )){
                                     wherestr += cname + ' ';
                                 }
                                 if (isDate) {
@@ -7212,7 +7324,7 @@ function ICallFiltReal(r_body,e_filt,filter_type,filter_andor,record,doingHighLi
                                         wherestr += "(";
                                     for (ij = 0; ij < lcols.length; ij++) {
                                         p1 = selectedListArray[ik][ij];
-                                        wherestr += genWhereClause(p1,null, lcols[ij], e_filt[i], vftype,true);
+                                        wherestr += genWhereClause(p1,null, lcols[ij], e_filt[i], vftype,true,(pmytable.a_cntl.cacheWriteMode == 4));
                                         if(ij<(lcols.length-1)) {
                                             if (vftype == arConstants.FILTER_EQ)
                                                 wherestr += " AND ";
@@ -7284,11 +7396,13 @@ function ICallFiltReal(r_body,e_filt,filter_type,filter_andor,record,doingHighLi
                     }
                     
                     } else {
-
- 						if(isNumber) {
- 							for(var sl =0; sl < selectedList.length; sl++)
- 								selectedList[sl] = selectedList[sl]*1;
-						}
+                        if(isNumber) {
+                            for(var sl =0; sl < selectedList.length; sl++) {
+                                if (selectedList[sl] != missingVal) {
+                                    selectedList[sl] = selectedList[sl] * 1;
+                                }
+                            }
+                        }
                         if (!(
                             (e_filt[i].an_ftype == arConstants.FILTER_NE && !inarray(selectedList, inarraySearchValue)) ||
                             (e_filt[i].an_ftype == arConstants.FILTER_NOTIN && !inarray(selectedList, inarraySearchValue)) ||
@@ -7456,12 +7570,15 @@ function getColbyFoc(a_capt,col)
     return -1;
 }
 
-function getColbyName(columns,fieldName)
+function getColbyName(columns,fieldName,startAt)
 {
     var i = 0;
-    for(i=0;i<columns.length;i++)
+	var start = 0;
+	if(typeof startAt != "undefined")
+		start = startAt;
+	for(i=start;i<columns.length;i++)
         if(columns[i].field == fieldName) return i;
-    for(i=0;i<columns.length;i++)
+    for(i=start;i<columns.length;i++)
         if(columns[i].name == fieldName) return i;
     return -1;
 }
@@ -7592,7 +7709,7 @@ function _IgetStyleNode(snode, stnode, parent)
 var styleHasCond = false;
 function IgetStyleNode(snode,col,row,stnode,parent,values,acrossColumn,printColNum,dataType,colCapt)
 {
-    var usethis = false, thisAcrossColumn = false;
+    var usethis = false, thisColumn = false;
     var scol = snode.column;
     var dt = dataType;
     if(typeof(dataType)=="undefined") dt = ST_DATA;
@@ -7602,10 +7719,14 @@ function IgetStyleNode(snode,col,row,stnode,parent,values,acrossColumn,printColN
             if (acrossColumn < 0) return;
             if ((printColNum < snode.attrib.firstAcross) ||
                 (printColNum > snode.attrib.lastAcross)) { // printColNum: avoids noprint cols
-                thisAcrossColumn = false;
+                thisColumn = false;
             } else {
                 var mod = (printColNum - snode.attrib.firstAcross) % snode.attrib.acrossGroupCols;
-                thisAcrossColumn = ((mod + snode.attrib.firstAcross) == acrossColumn);
+                thisColumn = ((mod + snode.attrib.firstAcross) == acrossColumn);
+            }
+        } else if (snode.column == arConstants.CD_AllField) {
+            if (this.a_cntl.a_cols[col].name == snode.colname) {
+                thisColumn = true;
             }
         }
     }
@@ -7613,7 +7734,7 @@ function IgetStyleNode(snode,col,row,stnode,parent,values,acrossColumn,printColN
     if (((snode.type==ST_REPORT) && ((scol == -1) || (getRealColumn(this,scol-1) == col))) ||
         ((scol==-1) && (snode.type==dt)) ||
         ((snode.type==dt) && ((getRealColumn(this,scol-1) == col)||((scol==10001)&&(colCapt.isTotal))))   ||
-        thisAcrossColumn) {
+        thisColumn) {
         if (snode.attrib.cond) {
             var val1, val2, col1 = -1, col2, cond;
             cond = snode.attrib.cond;

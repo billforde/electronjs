@@ -7,6 +7,10 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180413 1750 wjf 200536 VIS: ESRI Map throws error in preview, when GEO_ALIASING is
+* 180413 1600 wjf 200536 VIS: ESRI Map throws error in preview, when GEO_ALIASING is
+* 180412 1605 wjf 200536 VIS: ESRI Map throws error in preview, when GEO_ALIASING is
+* 180319 1824 wjf 201208 Vis : Add fields with "Dark.sty" theme throws error on canva
 * 171221 1507 wjf 198693 Vis: Drilldown on map doesn't work correctly at run time, w
 * 171221 1214 wjf 198693 Vis: Drilldown on map doesn't work correctly at run time, w
 * 171221 1020 wjf 198693 Vis: Drilldown on map doesn't work correctly at run time, w
@@ -253,7 +257,7 @@
 //[p147526] Make sure all fields are urlencoded when passed
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arcache"]="$Revision: 20171221.1507 $";
+ActiveJSRevision["arcache"]="$Revision: 20180413.1750 $";
 
 (function() {
 
@@ -276,12 +280,13 @@ var remoteRollDataF = [];
 
 function splitUpOriginalFex(orignalFex) {
     var i,j;
-	var validKeywords = ["SUM","PRINT","BY","ON","HEADING"];
+	var validKeywords = ["SUM","PRINT","BY","ON","HEADING","WRITE"];
 	var fexParts = {
 		graph_script: '',
 		graph_js: '',
         graph_js_final: '',
 		table_style: '',
+		graph_style: '',
 		focus_cmd: ''
 	};
 	var s = orignalFex.split("SET STYLE *");
@@ -304,21 +309,39 @@ function splitUpOriginalFex(orignalFex) {
 		fexParts.focus.aggfields = [];
 		fexParts.focus.aggtype = null;
 		var currentKeyword = fexParts.focus.aggtype;
-		for(i=3; i < keywords.length; i++) {
+		var varname;
+		i = 3;
+		while( i < keywords.length) {
 			if(inarray(validKeywords,keywords[i])) {
                 currentKeyword = keywords[i];
-			} else
-			switch (currentKeyword) {
-				case 'SUM':
-				case 'PRINT':
-					if(fexParts.focus.aggtype==null)
-                        fexParts.focus.aggtype = currentKeyword;
-					fexParts.focus.aggfields[fexParts.focus.aggfields.length] = keywords[i];
-					break;
-				case 'BY':
-					fexParts.focus.bys[fexParts.focus.bys.length] = keywords[i];
-					break;
-			}
+			} else {
+				var keyW = keywords[i];
+				if(keyW== "COMPUTE") {
+                    i++;
+                    varname = keywords[i];
+                    varname = varname.split("/");
+                    keyW = varname[0];
+                    while ((keywords[i].indexOf(";") && (i < keywords.length)) < 0)
+                        i++;
+				}
+                switch (currentKeyword) {
+                    case 'SUM':
+                    case 'PRINT':
+                    case 'WRITE':
+                        varname = keyW.split("/");
+                        keyW = varname[0];
+                        if(fexParts.focus.aggtype==null)
+                            fexParts.focus.aggtype = currentKeyword;
+                            fexParts.focus.aggfields[fexParts.focus.aggfields.length] = keyW;
+                        break;
+                    case 'BY':
+                        varname = keyW.split("/");
+                        keyW = varname[0];
+                            fexParts.focus.bys[fexParts.focus.bys.length] = keyW;
+                        break;
+                }
+            }
+			i++;
 		}
 	}
 	if(s.length>1) {
@@ -333,6 +356,10 @@ function splitUpOriginalFex(orignalFex) {
 				case 'GRAPH_SCRIPT':
 					ss.splice(0,1);
 					fexParts.graph_script = ss.join("\n");
+					break;
+                case 'GRAPH_STYLE':
+                    ss.splice(0,1);
+                    fexParts.graph_style = ss.join("\n");
 					break;
 				case 'GRAPH_JS':
                     ss.splice(0,1);

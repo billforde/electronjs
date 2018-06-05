@@ -7,6 +7,8 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180531 1033 wjf 203539 AHTML: JSON output server crash with large images
+* 180424 1424 wjf 200246 AHML: Unify JSON output
 * 180227 1508 wjf 200246 AHML: Unify JSON output
 * 180227 1156 wjf 200246 AHML: Unify JSON output
 * 180226 1934 wjf 200246 AHML: Unify JSON output
@@ -270,7 +272,7 @@
 //[p140894] Missing mobile menu file.  If launched from api dont enable fullscreen mode.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arapi"]="$Revision: 20180227.1508 $";
+ActiveJSRevision["arapi"]="$Revision: 20180531.1033 $";
 var ApiEnableGlobal=true;
 var Events=[];
 Events['onclick']={'type':'onclick','callback':null,'tables':[]};
@@ -371,10 +373,26 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
         updateJsonReport:APIupdateJsonReport,
 		deleteJsonReport:APIdeleteJsonReport,
 		getFilter:APIgetFilter,
+		getInfo: APIgetInfo,
 		findFilterById: APIfindFilter,
 		originalJson: null
     };
     
+	function APIgetInfo() {
+		var obj = {};
+		var container = document.getElementById("orgdivinner0");
+		var dashBar = document.getElementById("IBILAYOUTDIV0");
+		obj.reportWidth = 0;
+		obj.reportHeight = 0;
+		if(container) {
+			obj.reportHeight = container.scrollHeight;
+			obj.reportWidth = container.scrollWidth;
+		}
+		if(dashBar) {
+			obj.reportHeight += dashBar.offsetHeight;
+		}
+		return obj;
+	}
 
 	function APIgetFilter(name) {
 		if(typeof ibiCompound.drawObjectsPtr[name] != "undefined")
@@ -1847,6 +1865,11 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
                         newObj.reports[i].T_cntl.graphProps[j].json  = newObj.reports[i].T_cntl.graphProps[j].json.join('');
                 }
             }
+            if(typeof JsonObj.reports[i].globalProps != "undefined") {
+            	if(typeof ibiStd.globalProps == "undefined")
+            		ibiStd.globalProps = {};
+                ibiStd.globalProps = ibiStd.mergeObject(ibiStd.globalProps, JsonObj.reports[i].globalProps);
+            }
             if(typeof JsonObj.reports[i].savedSettings != "undefined")
                 newObj.reports[i].savedSettings = JsonObj.reports[i].savedSettings;
 
@@ -1894,6 +1917,8 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
                     for(j=0; j < JsonObj.images.length; j++) {
                         if(JsonObj.images[j].name == JsonObj.LayoutObjects[i].image) {
                             LayoutObjects[LayoutObjects.length-1].image = JsonObj.images[j].html;
+                            if(typeof LayoutObjects[LayoutObjects.length-1].image == "object" )
+                                LayoutObjects[LayoutObjects.length-1].image = LayoutObjects[LayoutObjects.length-1].image.join('');
                             break;
                         }
                     }
@@ -2012,6 +2037,8 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
 				}
 				report.gridlook = ibiStd.copyObject(MyTable[i].ru_o_look);
 				report.globalProps = {};
+				if(typeof ibiStd.globalProps != "undefined")
+                    report.globalProps = ibiStd.copyObject(ibiStd.globalProps);
 				report.data = ibiStd.copyObject(MyTable[i].a_cont);
 				report.settings = ibiStd.copyObject(MyTable[i].a_cntl);
 				report.savedSettings = {
@@ -2290,6 +2317,7 @@ function getAReportObj(useDiv)
 	this.getFilter = window.ibiApiReportObj.getFilter;
 	this.findFilterById = window.ibiApiReportObj.findFilterById;
     this.saveJsonReport = window.ibiApiReportObj.saveJsonReport;
+    this.getInfo = window.ibiApiReportObj.getInfo;
     this.originalJson = null;
     this.numOfTable = 0;
     this.reportString = null;

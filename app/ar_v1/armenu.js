@@ -7,6 +7,10 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180523 0959 bjd 194659 In-Document Analytics, menu pops up to left and you can't s
+* 180516 1445 bjd 194659 In-Document Analytics, menu pops up to left and you can't s
+* 180516 1123 bjd 194659 In-Document Analytics, menu pops up to left and you can't s
+* 180510 1156 wjf 194659 In-Document Analytics, menu pops up to left and you can't s
 * 180227 1508 wjf 200246 AHML: Unify JSON output
 * 180226 1344 wjf 200246 AHML: Unify JSON output
 * 180222 1518 wjf 200246 AHML: Unify JSON output
@@ -77,7 +81,7 @@
 //[p136411] Fix  javascript error with dashboard on mobile, when wmenu/wbody not defined.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["armenu"]="$Revision: 20180227.1508 $";
+ActiveJSRevision["armenu"]="$Revision: 20180523.0959 $";
 (function() {
     if (typeof(window.ibiMenu) !== 'undefined') {
         return;
@@ -581,7 +585,7 @@ ActiveJSRevision["armenu"]="$Revision: 20180227.1508 $";
         var c,csp;
         var item_text;
         var item_dis;
-        var n_depth,width,style;
+        var n_depth,width,style, maxWidth;
         var a_tpl  = thismenu.a_tpl;
         var spacing;
         var s_;
@@ -590,6 +594,7 @@ ActiveJSRevision["armenu"]="$Revision: 20180227.1508 $";
         dstyle = mitem_getstyle(thismenu,0, 0, 1);
         var scrollStr = 'overflow:visible;';
         var cstr,a_config;
+        var doc_dir=((document.dir=='rtl')?'px;right:':'px;left:');
         n_depth = mn_depth;
         if(!mn_depth) {
             delay = mitem_getprop(thismenu,'hide_delay',1);
@@ -632,7 +637,11 @@ ActiveJSRevision["armenu"]="$Revision: 20180227.1508 $";
             thismenu.a_index[n_id].child_div = null;
             thismenu.a_index[n_id].mytable = mytable;
 
-            if(item_text[2]) item_dis = item_text[2];
+            if(item_text[2])
+                item_dis = item_text[2];
+            else
+            if(!item_text[3])
+                item_dis = item_text[0];
 
             var checked=false,line;
             csp = 1;
@@ -657,19 +666,20 @@ ActiveJSRevision["armenu"]="$Revision: 20180227.1508 $";
                 s_='<td width=15 id="'+textid+'">'+line+'<\/td>';
                 (b_ie?menuline[ln++]=s_:menuline+=s_);
             }
-            s_='<td COLSPAN='+csp+' wIDTH="*" ';
+            s_='<td COLSPAN='+csp+' WIDTH="*" ';
             (b_ie?menuline[ln++]=s_:menuline+=s_);
             if(item_dis) {
                 s_= ' title="'+item_dis+'" ';
                 (b_ie?menuline[ln++]=s_:menuline+=s_);
             }
-            s_='><span id="s'+textid+'">'+item_text[0]+'<\/span>';
+
+            maxWidth = width - (15 + 15);
+            s_='><span style="max-width:'+maxWidth+'px;overflow:hidden;display:block;text-overflow:ellipsis;white-space:nowrap" id="s'+textid+'">'+item_text[0]+'<\/span>';
             (b_ie?menuline[ln++]=s_:menuline+=s_);
 
             c = null;
             var aline = '&nbsp;';
             if (a_config.length > 3) { 
-                var doc_dir=((document.dir=='rtl')?'px;right:':'px;left:');
                 c = 'd' + n_id;
                 var n_x =  mitem_getprop(thismenu,'left',n_depth);
                 var n_y =  mitem_getprop(thismenu,'top',n_depth);

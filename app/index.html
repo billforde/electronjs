@@ -262,7 +262,7 @@
            // process.env.USERPROFILE) + '/.credentials/';
         TOKEN_DIR = './credentials/'
         TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
-        app = require('electron').remote.app;
+        app = require('electron').remote.app; //require the library called 'electron'
 
         app.on('open', function(filename){
             var parm = filename.split(' ');
@@ -281,7 +281,8 @@
         //remove all the options
         args = [];
         for (var i=0; i<origArgs.length; i++)
-            if (origArgs[i].substr(0,2)!= "--") //not a option
+            if (origArgs[i].substr(0,2)!= "--" && //ignore option
+                    origArgs[i]!= "./app" ) //ignore root app directory
                 args[args.length] = origArgs[i];
 
         console.log(args);
@@ -367,6 +368,7 @@
         reportFrame.setAttribute('allownw',true);
         reportFrame.setAttribute('nwdisable',false);
         reportFrame.setAttribute('name',filename);
+        //save the line below
         reportFrame.setAttribute('style','display:flex;height:100%;width:100%;');
         tabItem.appendChild(reportFrame);
 
@@ -391,7 +393,7 @@
                 reportFrame.addEventListener("did-finish-load", function(){
                     //after loading the iframe content page
                     //reportFrame.openDevTools();
-                   reportFrame.executeJavaScript(htmltxt);
+                    reportFrame.executeJavaScript(htmltxt);
                 });
                 //reportFrame.src = "iFrameContent.html";
                 var path = require('path');
@@ -413,13 +415,18 @@
     function printReport(){
 
         var mywebview =  document.getElementById("w_"+currentTabActive);
+        mywebview.setAttribute('style','display:flex;height:3000px;width:3000px;');
+
         //get the webwiew window
         //var webviewWin = nw.Window.get(mywebview.contentWindow);
-        var executetxt = "window.alert(\"Opening \");var win=window; win.print({'autoprint':false})";
-        mywebview.executeJavaScript(executetxt);
-        //webviewWin.print({
-            //"autoprint":false
-        //})
+        //var executetxt = "window.alert(\"Opening for printing\");var win=window; win.print({'autoprint':false})";
+
+        window.setTimeout(function() {
+            mywebview.print();
+        },100);
+        //var executetxt = "var win=window; win.print({'autoprint':false})";
+        //mywebview.executeJavaScript(executetxt);
+
     }
 
     /***************************************************/

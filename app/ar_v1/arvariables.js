@@ -7,6 +7,11 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180504 1543 bjd 202889 Invoking "XFOCUS" Reporting server console throws error.
+* 180503 1032 bjd 202855 AHTML: COLUMN=field(*) formatting does not format computed f
+* 180425 0844 bjd 202656 AHTML:Filter marker selection is different in Edge browser
+* 180416 1222 wjf 196843 Visualization: Exclude column results in Error; page hangs
+* 180408 1106 wjf 202042 VIS: Apply lasso filter on "Sale,Year/Month", display error
 * 180306 1442 wjf 200246 AHML: Unify JSON output
 * 180301 1128 wjf 200246 AHML: Unify JSON output
 * 180220 0915 wjf 200246 AHML: Unify JSON output
@@ -183,7 +188,7 @@
 //[p140572][>branch8001] Add activereport.js that will automatically include all the necessary active report js files.  Also added activereport.css that contains the styling for active.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arvariables"]="$Revision: 20180306.1442 $";
+ActiveJSRevision["arvariables"]="$Revision: 20180504.1543 $";
 
 if(typeof(T_look)=="undefined") {
 var w = window;
@@ -308,7 +313,15 @@ var arConstants = {
    SUB_SUM_IMP : 20,
 
    // cache related
-   RECLIMIT: 50000
+   RECLIMIT: 50000,
+
+   // Column Info
+   CD_DefaultStart: 10000,
+   CD_AllRowTotal : 10001,
+   CD_AcrossColumn: 10002,
+   CD_AllField    : 10003,
+   CD_AllBy       : 10004,
+   CD_AllVerb     : 10005
 };
 
 var arSet = {
@@ -597,9 +610,9 @@ var a_calc_typesDATE;
 var a_calc_types;
 var a_calc_scatt_types;
 var a_calc_roll_types;
-var a_calc_all_types;
+var a_calc_all_types, a_calc_all_types_display;
 
-var check_mark='<span style="font-family:symbol;font-size:8pt">&#8730;<\/span>';
+var check_mark='<span style="font-family:Helvetica;font-size:8pt">&#8730;<\/span>';
 if(b_ie_version)
     check_mark='<span style="font-family:symbol;font-size:8pt">&#0214;<\/span>';
 
@@ -1024,6 +1037,10 @@ function initvars()
         } else
         if(d.indexOf("/")>-1) {
             d = d.split("/");
+            if(d.length != 3) {
+                //may already be formated
+                return iDate;
+            }
             d = d.join("");
             d = ibiStd.ibiDateToJavaScriptDate(d,format,true)+'';
         } else
@@ -1129,7 +1146,9 @@ function initvars()
         yyp = format.indexOf('YY');
         mp = format.indexOf('M');
         dp = format.indexOf('D');
+        var mmp = (format.indexOf('m') != -1);
         var tp = format.indexOf('t');
+        var parts = d.split("/").length;
        if(yp!=-1) {
           yi = 0;
           if((mp!=-1)&&(mp<yp))
@@ -1170,6 +1189,14 @@ function initvars()
                 mm++;
             d1 = mm+'/01/2016';
             d2 = Date.parse(d1);
+            d2 = new Date(d2).getTime();
+            ibiStd.id2jdLookup[key] = d2;
+            return d2;
+        } else
+        if(isNaN(iDate) && mmp  && parts==2) {
+            d1 = d.split("/");
+            d2 = d1[0]+"/01/"+d1[1];
+            d2 = Date.parse(d2);
             d2 = new Date(d2).getTime();
             ibiStd.id2jdLookup[key] = d2;
             return d2;

@@ -7,6 +7,7 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180327 1248 bjd 200037 AHTML:IE: Sending email second time displays warning messag
 * 180305 1222 bjd 167765 AHTML : Export to excel, % is exported as & #x25;
 * 180116 1536 iys 162870 AHTML/MOB:New dashboard layout option / mobile small screens
 * 171012 0915 bjd 196199 When exporting an Active Report with Null values to Excel,
@@ -71,7 +72,7 @@
 //[p138525][>branch8001][>branch80_maint] Fix eye catcher so that we dont break tscq.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["aractivex"]="$Revision: 20180305.1222 $";
+ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
 (function() {
     var pptApp = null;
     var wdApp = null;
@@ -529,7 +530,10 @@ ActiveJSRevision["aractivex"]="$Revision: 20180305.1222 $";
 
 
     function do_emailme(filename) {
-        if (oute != null) do_emailsend(filename);
+        if (oute != null) {
+            do_emailsend(filename);
+            oute = null;
+        }
     }
 
 

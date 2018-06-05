@@ -7,6 +7,8 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180313 1325 iys 201237 Mobile:Adaptive Dashboard:Scrolling up/down with a large rep
+* 180312 1326 iys 200991 Mobile:Adaptive Dashboard:Doc with textbox and image click i
 * 180125 1507 iys 168850 NFR:AHTML FREEZING HEADINGS IN ACTIVE REPORT OUTPUT
 * 171114 1609 ppl 195844 IN AHTML on report heading is not wrapping
 * 171108 0927 bjd 173921 Active report with freeze-column wont resize
@@ -138,7 +140,7 @@
 //[p134795] Fix issue in api, when reloading component with new json.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["argrid"]="$Revision: 20180125.1507 $";
+ActiveJSRevision["argrid"]="$Revision: 20180313.1325 $";
 (function() {
     var mytable = null;
     var isHead=1;
@@ -602,7 +604,7 @@ function IShow (fromRemoteFilter,mytable_in) {
     } else {
         var tstr = IBuild();
         mytable.o_main.innerHTML = tstr;
-    }
+    } 
     
     var ppp=mytable;
     window.setTimeout(function(){ibiGrid.show2(fromRemoteFilter,ppp);},0);
@@ -730,6 +732,21 @@ function IShow2(fromRemoteFilter,mytable)
     if(pmytable.fullScreenOn && useDiv) {
         ibiIosGrid.show(mytable,useDiv);
     } 
+
+    if(ibiCompound.ibiLayout.length && b_ios && arDisplayMode === DISPLAY_MODE_ADAPTIVE && (typeof ARMobileDashboards != 'undefined')) {
+        var currentLayoutSlide = ARMobileDashboards[0].getCurrentLayoutSlide();
+        var gridHeight = mytable.maintable.wbodyMain.querySelector('.arGrid').offsetHeight + mytable.maintable.wmenu.offsetHeight;
+
+        // resize the root container in Adaptive mode so that the grid can be scrolled vertically
+        if(!mytable.isRollUp && (gridHeight > ARMobileDashboards[0].contentSectionHeight)) {
+            mytable.maintable.root.style.height = gridHeight + 'px';
+        }
+        
+        // in case rollup is opened when grid is scrolled left, reset scrollLeft so the rollup is in view
+        currentLayoutSlide.slides[currentLayoutSlide.slideIndex][0].scrollLeft = 0;
+
+        ARMobileDashboards[0].updateCurrentChart();
+    }
     //if(mytable.sizeToGrid) {
 //because of rendering issues in IE we resize twice
         //setTimeout("ibiGrid.resizeGrid("+mytable.a_cntl.table_number+");",1000);
@@ -1260,7 +1277,7 @@ function IBuildPage() {
         mytable.o_paging.s_tt.replace('%inds',indStr).replace(sp2, mytable.o_paging.c+1).replace('%frcs',frcs).replace('%lrcs',lrcs).replace('%trcs',trcs).replace('%pers',pers).replace('%pgs', n_a+1).replace('%rcs', mytable.n_rows).replace(sp, mytable.a_cntl.table_number) + 
         '<\/td>' + tdstart + sce + '<\/td><\/tr><\/table><\/td>';
     
-    if(!mytable.isRollUp && (mytable.a_cntl.menuops.fsappmode || b_mobile))
+    if(arDisplayMode !== DISPLAY_MODE_ADAPTIVE && !mytable.isRollUp && (mytable.a_cntl.menuops.fsappmode || b_mobile))
         if(!b_ie || (b_ie_version>7))
               a_[n_cnt++] = '<td width=30><span title="'+ibiMsgStr["fsr"]+'" style="cursor:pointer;" onclick="ibiIosGrid.cancelDrags();ibi_iPadMenu.fullScreen('+mytable.a_cntl.table_number+',true,true)">'+ibiSkin.fullicon1+'<\/span><\/td>';
     a_[n_cnt++] = '<\/tr><\/table><\/td><\/tr><\/table>';

@@ -7,6 +7,18 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180507 0950 wjf 201752 If you sort vertical axis values in Visualization, the legen
+* 180425 0950 bjd 202185 NLS:Fixed Currency Symb displays as HTML entities instead
+* 180423 1022 txk 202185 NLS:Fixed Currency Symb displays as HTML entities instead
+* 180419 1022 wjf 199221 Vis Esri Postal Code to City drill down and vise versa at r
+* 180406 1006 wjf 199238 AHTML:Tooltip info displays measure values twice for pie ch
+* 180403 1011 wjf 201843 AHTML:Incorrect chart title displaying after selecting chart
+* 180326 1229 wjf 201634 Active\vis : While adding Bin field to color bucket, chart d
+* 180326 1118 wjf 199235 AHTML:Tooltip info shows all measure values for line charts
+* 180322 0852 bjd 201556 Active\vis : Bin field format not reflected to color legend
+* 180321 1033 wjf 199943 Conversion from Any chart type to Tagcloud with two BY fiel
+* 180320 1729 bjd 198078 Active\vis : Bin field format not reflected to Rows\columns
+* 180312 1326 iys 200991 Mobile:Adaptive Dashboard:Doc with textbox and image click i
 * 180125 1428 wjf 191009 Bucketize Pyramid Chart
 * 171222 0856 wjf 198693 Vis: Drilldown on map doesn't work correctly at run time, w
 * 171221 1629 wjf 198693 Vis: Drilldown on map doesn't work correctly at run time, w
@@ -773,7 +785,7 @@
 //[p139757] use the width specified in "size" to set the width of the menu area.
 // 
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["archart"]="$Revision: 20180125.1428 $";
+ActiveJSRevision["archart"]="$Revision: 20180507.0950 $";
 
 (function() {
 
@@ -958,14 +970,14 @@ function MakeChartSwapBuckets(mytable,fromChart,toChart) {
         if(tdginfo.iaChartMappings) {
             o = null;
             for(i=0; i < tdginfo.iaChartMappings.length; i++)
-                if(tdginfo.iaChartMappings[i].fromChart == info.internalType) {
+                if(tdginfo.iaChartMappings[i].fromChart.toLowerCase() == info.internalType.toLowerCase()) {
                     o = tdginfo.iaChartMappings[i];
                     break;
                 }
             if(o) {
                 o1 = null;
                 for(i = 0; i < o.targets.length; i++)
-                    if(o.targets[i].toChart == info2.internalType) {
+                    if(o.targets[i].toChart.toLowerCase() == info2.internalType.toLowerCase()) {
                         o1 = o.targets[i];
                         break;
                     }
@@ -1101,8 +1113,12 @@ function MakeChartSwapBuckets(mytable,fromChart,toChart) {
         }
     }
     for (i = 0; i < tdgKnownBucketLen; ++i) {
-        if ((tdginfo.knownBuckets[i] != "TOOLTIP") &&
-            (newBuckets[tdginfo.knownBuckets[i]].length)) {
+        if (((tdginfo.knownBuckets[i] != "TOOLTIP")
+               && (tdginfo.knownBuckets[i] != "Y-AXIS")
+                && ((tdginfo.knownBuckets[i] != "MEASURE")||(info2.base != info.base))
+            )
+            && (typeof newBuckets[tdginfo.knownBuckets[i]] != "undefined")
+            && (newBuckets[tdginfo.knownBuckets[i]].length)) {
             if(typeof newBuckets["TOOLTIP"] != "object")
                 newBuckets["TOOLTIP"] = [];
             for(j = 0; j < newBuckets[tdginfo.knownBuckets[i]].length; j++)
@@ -1203,6 +1219,8 @@ function MakeChartAddXcol(win_num,x_col,remove,t_num,subTable)
     if(subTable!=-1) pn = pn.children[subTable];
     pn.xars=null;
     x_cols = pn.saveable.x_cols;
+    if(mytable)
+        delete mytable.editTool;
     if(!remove) {
         mytable.a_capt[x_col].b_hide = false; // explicitly selected
         if((pn.saveable.ctype!=chartIsPie)&&((pn.saveable.ctype!=chartIsScat)||(arGraphEngine>1))
@@ -1258,6 +1276,8 @@ function MakeChartAddYcol(win_num,y_col,remove,pvrowcol,doshift,t_num,subTable)
     if(!mytable)pn.xars=null;
     
     mytable = getMyTable(t_num);
+    if(mytable)
+        delete mytable.editTool;
     if(doshift>0) {
         if(doshift==1) {
             if(pvrowcol==1) {
@@ -3389,7 +3409,7 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                     matrixProperties.colHeader.text += ibiChart.stripComma(tcntl.a_cols[buckets['COLUMN'][j]].dis);
             }
             matrixProperties.colLabels = {};
-            matrixProperties.colLabels.labels = genNestedBucket(buckets['COLUMN'],tcapt,tcont,ibs,true,true);
+            matrixProperties.colLabels.labels = genNestedBucket(buckets['COLUMN'],tcapt,tcont,ibs,true,true,true);
         }
 
         if(buckets.ROW.length) {
@@ -3401,7 +3421,7 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                     matrixProperties.rowHeader.text += ibiChart.stripComma(tcntl.a_cols[buckets['ROW'][j]].dis);
             }
             matrixProperties.rowLabels = {};
-            matrixProperties.rowLabels.labels = genNestedBucket(buckets['ROW'],tcapt,tcont,ibs,true,true);
+            matrixProperties.rowLabels.labels = genNestedBucket(buckets['ROW'],tcapt,tcont,ibs,true,true,true);
         }
     }
 
@@ -3432,7 +3452,7 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
             series[0].series = "all";
             if (series[0].tooltip)
                 saveTooltip = series[0].tooltip;
-            var cSeries = genNestedBucket(colorbucket, tcapt, tcont, ibs, true, true);
+            var cSeries = genNestedBucket(colorbucket, tcapt, tcont, ibs, true, true, true);
             cSeries = genNestedBucketRemoveNP(cSeries,colorbucket,tcapt);
             cc = 1;
             for (j = 0; j < cSeries.length; j++) {
@@ -3915,7 +3935,11 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                     var alreadyInToolTip = [];
                     for(j=0; j < series[i].tooltip.length; j++) {
                         if(series[i].tooltip[j].type == "nameValue") {
-                            alreadyInToolTip[alreadyInToolTip.length] = getColbyName(tcntl.a_cols,series[i].tooltip[j].name);
+                            var tpos = getColbyName(tcntl.a_cols,series[i].tooltip[j].name);
+                            while(tpos != -1) {
+                                alreadyInToolTip[alreadyInToolTip.length] = tpos;
+                                tpos = getColbyName(tcntl.a_cols,series[i].tooltip[j].name,tpos+1);
+                            }
                         }
                     }
                     useToolTipBucket = [];
@@ -4100,7 +4124,10 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
             if(tooltip.value.indexOf(ex)>-1) {
             } else {
                 var fieldReplaced = false;
-                var c = mytable.getColumnByName(tooltip.name);
+                var c = mytable.getColumnByName(tooltip.name,undefined,true);
+                if(c == -1)
+                    c = mytable.getColumnByName(tooltip.name);
+
                 var aggtype = "";
                 if(c>=0) {
                     if(mytable.a_capt[c].aggType)
@@ -4255,6 +4282,7 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
     function generateBucketData(chartType,dataArrayMap,notLatLongMap,bycol,tcont,tcapt,tcntl,ibs,series,groupM, groupLabels,xaxis,yaxis,cSeries, buckets,colorbucket,sizebucket,detailbucket,ybucket,xbucket)
     {
         var sval;
+        var ssval;
         var svalD;
         var cval;
         var spos;
@@ -4348,13 +4376,18 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                         type = tcapt[colorbucket[firstcolor]].type;
                         if(typeof tcapt[colorbucket[firstcolor]].realType != "undefined")
                             type = tcapt[colorbucket[firstcolor]].realType;
-                        if(type == "IBIDATE")
+                        if(type == "IBIDATE") {
                             cval = ibs[tcont[j][colorbucket[firstcolor]][DASTR]]+'';
-                        else
+                            ssval = cval;
+                        } else {
                             cval = bgetDataValue(tcont[j][colorbucket[firstcolor]],ibs,tcapt[colorbucket[firstcolor]].type);
+                            ssval = bgetDataValue(tcont[j][colorbucket[firstcolor]], ibs, tcapt[colorbucket[firstcolor]].type,true);
+                        }
+
                         //svalD = ibs[tcont[j][colorbucket[firstcolor]][DASTR]];
                         for (k = 0; k < series.length-1; k++) {
-                            if (series[k+1].ibiDataValue == cval) {
+                            if ((series[k+1].ibiDataValue == cval)||
+                                (series[k+1].ibiDataValue == ssval)){
                                 cpos = series[k+1].series;
                                 break;
                             }
@@ -4639,16 +4672,21 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                         type = tcapt[colorbucket[firstcolor]].type;
                         if(typeof tcapt[colorbucket[firstcolor]].realType != "undefined")
                             type = tcapt[colorbucket[firstcolor]].realType;
-                        if(type == "IBIDATE")
+                        if(type == "IBIDATE") {
                             sval = ibs[tcont[j][colorbucket[firstcolor]][DASTR]]+'';
-                        else
+                            ssval = sval;
+                        } else {
                             sval = bgetDataValue(tcont[j][colorbucket[firstcolor]],ibs,tcapt[colorbucket[firstcolor]].type);
+                            ssval = bgetDataValue(tcont[j][colorbucket[firstcolor]], ibs, tcapt[colorbucket[firstcolor]].type,true);
+                        }
                         var slabel = '';
                         if(yb[i] != -1)
                             slabel = tcntl.a_cols[yb[i]].name+':';
                         for (kk = 0; kk < series.length-1; kk++) {
                             if ((series[kk+1].ibiDataValue == sval) ||
-                                (series[kk+1].ibiDataValue == slabel+sval)){
+                                (series[kk+1].ibiDataValue == slabel+sval)||
+                                (series[kk+1].ibiDataValue == ssval) ||
+                                (series[kk+1].ibiDataValue == slabel+ssval)){
                                 k = kk;
                                 break;
                             }
@@ -4703,16 +4741,21 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                         type = tcapt[colorbucket[firstcolor]].type;
                         if(typeof tcapt[colorbucket[firstcolor]].realType != "undefined")
                             type = tcapt[colorbucket[firstcolor]].realType;
-                        if(type == "IBIDATE")
+                        if(type == "IBIDATE") {
                             sval = ibs[tcont[j][colorbucket[firstcolor]][DASTR]]+'';
-                        else
+                            ssval = sval;
+                        } else {
                             sval = bgetDataValue(tcont[j][colorbucket[firstcolor]],ibs,tcapt[colorbucket[firstcolor]].type);
+                            ssval = bgetDataValue(tcont[j][colorbucket[firstcolor]], ibs, tcapt[colorbucket[firstcolor]].type,true);
+                        }
                         var slabel = '';
                         if(yb[i] != -1)
                             slabel = tcntl.a_cols[yb[i]].name+':';
                         for (kk = 0; kk < series.length-1; kk++) {
                             if ((series[kk+1].ibiDataValue == sval) ||
-                                (series[kk+1].ibiDataValue == slabel+sval)){
+                                (series[kk+1].ibiDataValue == slabel+sval)||
+                                (series[kk+1].ibiDataValue == ssval) ||
+                                (series[kk+1].ibiDataValue == slabel+ssval)){
                                 k = kk;
                                 break;
                             }
@@ -4767,10 +4810,13 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                 for(j=0; j < tcont.length; j++) {
                     pdata = data[i];
                     if(ybucket.length) {
-                        if(tcapt[ybucket[0]].type == IBIDATE)
+                        if(tcapt[ybucket[0]].type == IBIDATE) {
                             sval = bgetDataValue(tcont[j][ybucket[0]],ibs,tcapt[ybucket[0]].type,true);
-                        else
+                            ssval = sval;
+                        } else {
                             sval = bgetDataValue(tcont[j][ybucket[0]],ibs,tcapt[ybucket[0]].type);
+                            ssval = bgetDataValue(tcont[j][ybucket[0]], ibs, tcapt[ybucket[0]].type,true);
+                        }
                         for (k = 0; k < series.length-1; k++) {
                             if(typeof series[k+1].ibiDataValue == "object") {
                                 if(typeof series[k+1].ibiDataValue[sval] != "undefined" ) {
@@ -4778,7 +4824,8 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                                     break;
                                 }
                             } else
-                            if (series[k+1].ibiDataValue == sval) {
+                            if ((series[k+1].ibiDataValue == sval)||
+                                (series[k+1].ibiDataValue == ssval)){
                                 spos = k;
                                 break;
                             }
@@ -4877,16 +4924,21 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                         type = tcapt[colorbucket[firstcolor]].type;
                         if(typeof tcapt[colorbucket[firstcolor]].realType != "undefined")
                             type = tcapt[colorbucket[firstcolor]].realType;
-                        if(type == "IBIDATE")
+                        if(type == "IBIDATE") {
                             sval = ibs[tcont[j][colorbucket[firstcolor]][DASTR]]+'';
-                        else
+                            ssval = sval;
+                        } else {
                             sval = bgetDataValue(tcont[j][colorbucket[firstcolor]],ibs,tcapt[colorbucket[firstcolor]].type);
+                            ssval = bgetDataValue(tcont[j][colorbucket[firstcolor]], ibs, tcapt[colorbucket[firstcolor]].type,true);
+                        }
                         for (k = 0; k < series.length-1; k++) {
                             vlabel = "";
                             if(yb[i]!= -1)
                                 vlabel = tcntl.a_cols[yb[i]].name+':';
                             if ((series[k+1].ibiDataValue == sval) ||
-                                (series[k+1].ibiDataValue == vlabel+sval)){
+                                (series[k+1].ibiDataValue == vlabel+sval)||
+                                (series[k+1].ibiDataValue == ssval) ||
+                                (series[k+1].ibiDataValue == vlabel+ssval)){
                                 spos = k;
                                 break;
                             }
@@ -5018,16 +5070,21 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                         spos = 0;
                         if(typeof tcapt[colorbucket[firstcolor]].realType != "undefined")
                             type = tcapt[colorbucket[firstcolor]].realType;
-                        if(type == "IBIDATE")
+                        if(type == "IBIDATE") {
                             sval = ibs[tcont[j][colorbucket[firstcolor]][DASTR]]+'';
-                        else
+                            ssval = sval;
+                        } else {
                             sval = bgetDataValue(tcont[j][colorbucket[firstcolor]],ibs,tcapt[colorbucket[firstcolor]].type);
+                            ssval = bgetDataValue(tcont[j][colorbucket[firstcolor]], ibs, tcapt[colorbucket[firstcolor]].type,true);
+                        }
                         for (k = 0; k < series.length-1; k++) {
                             vlabel = "";
                             if(yb[i]!= -1)
                                 vlabel = tcntl.a_cols[yb[i]].name+':';
                             if ((series[k+1].ibiDataValue == sval) ||
-                                (series[k+1].ibiDataValue == vlabel + sval)){
+                                (series[k+1].ibiDataValue == vlabel + sval) ||
+                                (series[k+1].ibiDataValue == ssval) ||
+                                (series[k+1].ibiDataValue == vlabel + ssval)){
                                 spos = k;
                                 break;
                             }
@@ -5147,8 +5204,12 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
 
     function bgetDataValue(record,ibs,type,returnString) {
         var val;
-        if(returnString)
-            return ibs[record[DASTR]]+'';
+        if (returnString) {
+            return (ibs[record[DASTR]] + '')
+                .replace(/&pound;/g, '\u00a3')
+                .replace(/&yen;/g, '\u00a5')
+                .replace(/&euro;/g, '\u20ac');
+        }
         if(record[DARAW] == arConstants.MISSING_OR_NODATA || record[DARAW]== -1) {
             if (type == IBINUM)
                 return undefined;
@@ -5746,28 +5807,62 @@ function generateBucketDataProvider(ibuckets,yc,xc,mytable,ptcont,tcapt1,tcntl1,
                     mytable.tdg_props = {};
                 if(mytable.fexParts) {
                     if(mytable.fexParts.graph_js_final) {
-                        if (mytable.fexParts.graph_js_final.indexOf("map_by_field") > -1) {
-                            if(typeof mytable.fexParts.save_graph_js_final == "undefined")
-                                mytable.fexParts.save_graph_js_final = mytable.fexParts.graph_js_final;
-                            var l = mytable.fexParts.save_graph_js_final.split("\"map_by_field\":");
-                            mytable.fexParts.graph_js_final = l[0]+"\"map_by_field\":\""+fieldInfo.cols[toField].qualname+'"';
-                            l = l[1].split('"');
-                            l.splice(0,2);
-                            mytable.fexParts.graph_js_final += l.join('"');
+                        if(typeof mytable.fexParts.graph_js_final_org == "undefined") {
+                            mytable.fexParts.graph_js_final_org = mytable.fexParts.graph_js_final;
                         }
-                        if (mytable.fexParts.graph_js_final.indexOf("geoRoleIndex") > -1) {
-                            if (typeof mytable.fexParts.save_graph_js_final == "undefined")
-                                mytable.fexParts.save_graph_js_final = mytable.fexParts.graph_js_final;
-                            var l = mytable.fexParts.save_graph_js_final.split("\"geoRoleIndex\":");
-                            mytable.fexParts.graph_js_final = l[0] + "\"geoRoleIndex\":" + (toField+1) + '';
-                            l = l[1];
-                            var lp = l.indexOf(",");
-                            var lp2 = l.indexOf("}");
-                            if((lp>-1) & (lp <lp2))
-                                lp2 = lp;
-                            mytable.fexParts.graph_js_final += l.substr(lp2);
+                        mytable.fexParts.graph_js_final = mytable.fexParts.graph_js_final_org;
+                        if(mytable.swapFieldOriginal[0].field != mytable.a_cntl.a_cols[toField].field) {
+                            try {
+                                var jsGF = JSON.parse("{" + mytable.fexParts.graph_js_final + "}");
+                                if (jsGF.extensions) {
+                                    if (jsGF.extensions["com.esri.map"]) {
+                                        if (typeof jsGF.extensions["com.esri.map"].geoRoleIndex != "undefined") {
+                                            jsGF.extensions["com.esri.map"].geoRoleIndex = (toField + 1);
+                                        }
+                                        if (jsGF.extensions["com.esri.map"].overlayLayers) {
+                                            var ll = jsGF.extensions["com.esri.map"].overlayLayers;
+                                            for (i = 0; i < ll.length; i++) {
+                                                if (ll[i].ibiDataLayer) {
+                                                    if (ll[i].ibiDataLayer["map-metadata"]) {
+                                                        ll[i].ibiDataLayer["map-metadata"]["map_by_field"] = fieldInfo.cols[toField].qualname;
+                                                    }
+                                                    if (ll[i].ibiDataLayer["map-location"]) {
+                                                        delete ll[i].ibiDataLayer["map-location"];
+                                                        ll[i].ibiDataLayer["map-metadata"] = {};
+                                                        ll[i].ibiDataLayer["map-metadata"]["map_by_field"] = fieldInfo.cols[toField].qualname;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                mytable.fexParts.graph_js_final = JSON.stringify(jsGF);
+                                mytable.fexParts.graph_js_final = mytable.fexParts.graph_js_final.substr(1);
+                                mytable.fexParts.graph_js_final = mytable.fexParts.graph_js_final.substr(0, mytable.fexParts.graph_js_final.length - 1);
+                            } catch (e) {
+                                if (mytable.fexParts.graph_js_final.indexOf("map_by_field") > -1) {
+                                    if(typeof mytable.fexParts.save_graph_js_final == "undefined")
+                                        mytable.fexParts.save_graph_js_final = mytable.fexParts.graph_js_final;
+                                    var l = mytable.fexParts.save_graph_js_final.split("\"map_by_field\":");
+                                    mytable.fexParts.graph_js_final = l[0]+"\"map_by_field\":\""+fieldInfo.cols[toField].qualname+'"';
+                                    l = l[1].split('"');
+                                    l.splice(0,2);
+                                    mytable.fexParts.graph_js_final += l.join('"');
+                                }
+                                if (mytable.fexParts.graph_js_final.indexOf("geoRoleIndex") > -1) {
+                                    if (typeof mytable.fexParts.save_graph_js_final == "undefined")
+                                        mytable.fexParts.save_graph_js_final = mytable.fexParts.graph_js_final;
+                                    var l = mytable.fexParts.save_graph_js_final.split("\"geoRoleIndex\":");
+                                    mytable.fexParts.graph_js_final = l[0] + "\"geoRoleIndex\":" + (toField+1) + '';
+                                    l = l[1];
+                                    var lp = l.indexOf(",");
+                                    var lp2 = l.indexOf("}");
+                                    if((lp>-1) & (lp <lp2))
+                                        lp2 = lp;
+                                    mytable.fexParts.graph_js_final += l.substr(lp2);
+                                }
+                            }
                         }
-
                     }
                 } else
                 ibiStd.mergeObject(mytable.tdg_props,
@@ -6194,6 +6289,7 @@ function genNestedBucket(bucket,tcapt,tcont,ibs,sort,compress,formatedString)
     var vChange = [];
     var type;
     var pvs;
+    var numberMapping = {};
     var fs = false;
     if(formatedString)
         fs = true;
@@ -6221,7 +6317,7 @@ function genNestedBucket(bucket,tcapt,tcont,ibs,sort,compress,formatedString)
             //    continue;
             dc++;
             if(type == "IBIDATE" || (fs && type == "IBINUM"))
-                vs = ibs[tcont[j][col][DASTR]]+'';
+                vs = bgetDataValue(tcont[j][col],ibs,type,true)+'';
             else
                 vs = bgetDataValue(tcont[j][col],ibs,tcapt[col].type)+"";
             pvs+=vs;
@@ -6229,6 +6325,10 @@ function genNestedBucket(bucket,tcapt,tcont,ibs,sort,compress,formatedString)
                 vChange[i] = vs;
                 //for(k=i+1;k<bucket.length;k++)
                 //    glist[k] = {};
+            }
+            if(formatedString && type == "IBINUM") {
+                var v1 = bgetDataValue(tcont[j][col],ibs,tcapt[col].type);
+                numberMapping[vs] = v1*1;
             }
 
             if((dc) < displayCount) {
@@ -6270,12 +6370,12 @@ function genNestedBucket(bucket,tcapt,tcont,ibs,sort,compress,formatedString)
         }
     }
     if(sort)
-        sortNestedLabels(labels,tcapt,bucket,0);
+        sortNestedLabels(labels,tcapt,bucket,0,numberMapping,formatedString);
     return labels;        
 }
 
 
-function sortNestedLabels(labels,tcapt,bucket,bucketpos)
+function sortNestedLabels(labels,tcapt,bucket,bucketpos,numberMapping,numberIsString)
 {
     var isArray;
     var nextpos = bucketpos +1;
@@ -6324,14 +6424,26 @@ function sortNestedLabels(labels,tcapt,bucket,bucketpos)
                 if ((tcapt[bucket[bucketpos]].orow == arConstants.OROW_LOWEST) ||
                     (tcapt[bucket[bucketpos]].orow == arConstants.OROW_LOW_NOPR))
                     labels.sort(function (x, y) {
-                        if (x*1 < y*1)  return -1;
-                        if (x*1 > y*1)  return 1;
+                        var lx = x;
+                        var ly = y;
+                        if(numberIsString) {
+                            lx = numberMapping[lx];
+                            ly = numberMapping[ly];
+                        }
+                        if (lx*1 < ly*1)  return -1;
+                        if (lx*1 > ly*1)  return 1;
                         return 0;
                     });
                 else
                     labels.sort(function (x, y) {
-                        if (x*1 > y*1)  return -1;
-                        if (x*1 < y*1)  return 1;
+                        var lx = x;
+                        var ly = y;
+                        if(numberIsString) {
+                            lx = numberMapping[lx];
+                            ly = numberMapping[ly];
+                        }
+                        if (lx*1 > ly*1)  return -1;
+                        if (lx*1 < ly*1)  return 1;
                         return 0;
                     });
             }
@@ -6422,13 +6534,17 @@ function sortNestedLabels(labels,tcapt,bucket,bucketpos)
                             ly = z;
                             break;
                         }
+                        if(numberIsString) {
+                            lx = numberMapping[lx];
+                            ly = numberMapping[ly];
+                        }
                         if (lx*1 < ly*1) return -1;
                         if (lx*1 > ly*1) return 1;
                         return 0;
                     });
                 else
                     labels.sort(function (x, y) {
-                        var lx, l, z;
+                        var lx, l, z,ly;
                         for(var z in x) {
                             lx = z;
                             break;
@@ -6436,6 +6552,10 @@ function sortNestedLabels(labels,tcapt,bucket,bucketpos)
                         for(var z in y) {
                             ly = z;
                             break;
+                        }
+                        if(numberIsString) {
+                            lx = numberMapping[lx];
+                            ly = numberMapping[ly];
                         }
                         if (lx*1 > ly*1)  return -1;
                         if (lx*1 < ly*1)  return 1;
@@ -6822,7 +6942,7 @@ function build_chartdrop(mytable,id,win,icon,sline,pn,ctype,subTable) {
     //    else
     //        MI_FT[0][i++]=[[ibiMsgStr['fsr']],null,{'ocv':'newchart','oc' : 'ibiChart.makeChartFullScreen('+win+','+mytable.a_cntl.table_number+','+subTable+',true)'}];
     //} else 
-    if(b_mobile) {
+    if(arDisplayMode !== DISPLAY_MODE_ADAPTIVE && b_mobile) {
         if(mytable.fullScreenOn)
             MI_FT[0][i++]=[[ibiMsgStr['ogv']],null,{'ocv':'newchart','oc' : 'ibi_iPadMenu.fullScreen('+mytable.id+',true,false);'}];
         else

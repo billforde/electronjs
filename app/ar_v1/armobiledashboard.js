@@ -7,6 +7,7 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180312 1326 iys 200991 Mobile:Adaptive Dashboard:Doc with textbox and image click i
 * 180124 1016 iys 162870 AHTML/MOB:New dashboard layout option / mobile small screens
 * 180116 1536 iys 162870 AHTML/MOB:New dashboard layout option / mobile small screens
 * 170531 1006 iys 162870 AHTML/MOB:New dashboard layout option / mobile small screens
@@ -22,7 +23,7 @@
 *-------------------------------------------------------------------*/
 
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["armobiledashboard"]="$Revision: 20180124.1016 $";
+ActiveJSRevision["armobiledashboard"]="$Revision: 20180312.1326 $";
 
 function ARMobileDashboard(settings) {
     var _dashboard = this;
@@ -36,7 +37,7 @@ function ARMobileDashboard(settings) {
     this.id = settings.id || 'ARMobileDashboard_' + Math.round(Math.random() * 1000);
     this.layoutSectionsLength = 0;
     this.parent = settings.parent || 'body';
-    this.slidesNavigatorSectionHeight = 88;
+    this.slidesNavigatorSectionHeight = 48;
     this.tabSectionWidth = settings.tabSectionWidth || 35;
     this.themeColor = settings.themeColor || "#005F90";
     this.layoutTabMargin = settings.layoutTabMargin || 4;
@@ -148,7 +149,13 @@ function ARMobileDashboard(settings) {
             // Ex: dashboard component object for MAINTABLE_* will have a rollups object containing all its associated chart rollups. 
             if(currentComponent.isGrid) {
                 if(MyTable[currentComponent.tableNumber].currTab > 0) {
-                    currentComponentResizeContainer.style.overflow = 'hidden';
+                    // if rollups has the current window, then rollup component is a chart and there shouldn't be scrolling
+                    if(currentComponent.rollups["window" + MyTable[currentComponent.tableNumber].currTab]) {
+                        currentComponentResizeContainer.style.overflow = 'hidden';
+                    } else {
+                        // otherwise assume it's grid rollup which requires ability to scroll content
+                        currentComponentResizeContainer.style.overflow = 'scroll';
+                    }
 
                     if(currentComponent.div.clientWidth < _dashboard.contentSectionWidth) {
                         currentComponent.div.style.width = '100%';
@@ -272,11 +279,19 @@ function ARMobileDashboard(settings) {
             if(!this.filtersSection.isClosed) {
                 this.filtersSection.close();
             }
+
+            if(this.mergeFilterSelect) {
+                this.mergeFilterSelect.blur();
+            }
         }.bind(this));
 
         this.tabsSection.addEventListener('touchstart', function() {
             if(!this.filtersSection.isClosed && this.layoutTabsOrientation != 'vertical') {
                 this.filtersSection.close();
+            }
+
+            if(this.mergeFilterSelect) {
+                this.mergeFilterSelect.blur();
             }
         }.bind(this));
 
@@ -697,6 +712,7 @@ function ARMobileDashboard(settings) {
         });
 
         ibiUtil.cssText(icon, {
+            fontSize: '26px',
             padding: '6px',
             position: 'absolute',
             right: '0'
@@ -709,8 +725,9 @@ function ARMobileDashboard(settings) {
         var filterPanelStateIcon = document.createElement('i');
         var filterPanelIconWrapper = filterPanel.titleText[0].querySelector('.icon');
 
-        filterPanelStateIcon.classList.add('fa');
-        filterPanelStateIcon.classList.add((filterPanel.isClosed) ? 'fa-chevron-right' : 'fa-chevron-down');
+        filterPanelStateIcon.classList.add((filterPanel.isClosed) ? 'icon-angle-right' : 'icon-angle-down');
+
+        filterPanelStateIcon.style.fontWeight = 'bold';
         
         filterPanelIconWrapper.innerHTML = '';
         filterPanelIconWrapper.appendChild(filterPanelStateIcon);
@@ -825,7 +842,7 @@ function ARMobileDashboard(settings) {
                 'width': this.contentSectionWidth,
                 'navigatorColor': this.themeColor,
                 'navigatorHeight': this.slidesNavigatorSectionHeight,
-                'navigatorOverlaysContent': true,
+                'navigatorOverlaysContent': false,
                 'left': '0px',
                 'top': '0px',
                 'slideElements': slideElements,
