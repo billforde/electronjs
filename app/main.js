@@ -115,7 +115,7 @@ function createWindow () {
     }));
 
     //show debug screen
-    //mainWin.webContents.openDevTools();
+    mainWin.webContents.openDevTools();
 
     //load the index.html of the app.
     mainWin.loadURL(url.format({

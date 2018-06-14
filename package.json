@@ -2,6 +2,7 @@
   "dependencies": {
     "electron": "^1.8.4",
     "electron-regedit": "^1.0.6",
+    "emailjs": "^2.1.0",
     "googleapis": "^28.1.0"
   },
   "devDependencies": {
@@ -10,13 +11,16 @@
     "electron-installer-windows": "^1.1.0",
     "electron-packager": "^12.0.1"
   },
-  "build":{
-    "appId":"idfViewer",
-    "fileAssociations":{
-      "ext":["adf", "idf"]
+  "build": {
+    "appId": "idfViewer",
+    "fileAssociations": {
+      "ext": [
+        "adf",
+        "idf"
+      ]
     },
     "win": {
-      "icon":"app/assets/favicon2.png"
+      "icon": "app/assets/favicon2.png"
     }
   },
   "scripts": {

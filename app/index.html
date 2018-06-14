@@ -13,7 +13,7 @@
     <script type="text/javascript"></script>
 </head>
 <body style="width: 100%; height: 100%;">
-<input style="display:none;" id="fileDialog" type="file" />
+<input style="display:none;" id="loadFileDialog" type="file" />
 <input style="display:none;" id="saveDialog" saveas type="file" />
 <!-- Dialog prompt for filename... -->
 <div id="dialog-message" title="Enter Filename" style="display: none;">
@@ -61,7 +61,7 @@
             if (this.isEnabled()) {
                 //alert($(this).attr('id') + ' clicked');
                 if ($(this).attr('id')=='open-file-button')
-                    chooseFile("#fileDialog");
+                    chooseFile("#loadFileDialog");
                 if ($(this).attr('id')=='print-button')
                     printReport();
                 if ($(this).attr('id')=='save-button')
@@ -73,7 +73,7 @@
         $('#tabsContainer').tabs();
         $("#tabsContainer").tabs("option", "heightStyle", "fill");
         //handle file selection from the dialog
-        $('#fileDialog').change(function(){
+        $('#loadFileDialog').change(function(){
             //alert(this.value);
             var myNextTabId = addTabs(this.files[0].path);
             loadDocIntoTab(this.files[0].path, myNextTabId);
@@ -82,21 +82,14 @@
             //alert(this.value);
             saveCurrentTab(this.files[0].path);
         });
-        /***** not jquery syntax
-        var chooser = document.querySelector('#fileDialog');
-        chooser.addEventListener("change", function(evt) {
-            alert(this.value);
-            var myNextTabId = addTabs(this.value);
-            loadDocIntoTab(this.value, myNextTabId);
-        }, false);
-         ******/
-    });
-    //display the file dialog
+       });
+    //open the file selector
     function chooseFile(name) {
         var chooser = document.querySelector(name);
         chooser.value = "";
         chooser.click();
     }
+    //display the save file dialog
     function saveFile(name) {
       var dialog = require('electron').remote.dialog;
       //dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'promptToCreate']});
@@ -105,8 +98,6 @@
             saveCurrentTab(filename[0]);
         });
     }
-
-    //chooseFile('#fileDialog');
 
 </script>
 <!--div style="height: 202px; "-->
@@ -123,7 +114,7 @@
                     <img class="ribbon-icon ribbon-normal" src="assets/001-floppy-disk-1.png" width="32"/>
                 </div>
                 <div title="Print" class="ribbon-button ribbon-button-large" id="print-button">
-                    <img class="ribbon-icon ribbon-normal" src="assets/015-print.png" width="32"/>
+                    <img class="ribbon-icon ribbon-normal" src="assets/013-printer-1.png" width="32"/>
                 </div>
                 <div title="Email" class="ribbon-button ribbon-button-large" id="email-button">
                     <img class="ribbon-icon ribbon-normal" src="assets/004-envelope.png" width="32"/>
@@ -141,6 +132,7 @@
                         </li>
                     </ul>
                 </div>
+
             </div>
 
 
@@ -244,12 +236,6 @@
         google = require('googleapis').google;
         googleAuth = require('google-auth-library');
         SCOPES = ['https://www.googleapis.com/auth/drive'];
-        // 'https://www.googleapis.com/auth/drive.appdata',
-        //'https://www.googleapis.com/auth/drive.file'];
-// If modifying these scopes, delete your previously saved credentials
-// at ~/.credentials/drive-nodejs-quickstart.json
-       // var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
-           // process.env.USERPROFILE) + '/.credentials/';
         TOKEN_DIR = './credentials/'
         TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
         app = require('electron').remote.app; //require the library called 'electron'
@@ -290,8 +276,6 @@
                 loadDocIntoTab(filename, myNextTabId);
             });
         }
-
-        //createHomeMenu();
     }
     /**********************************************************************************/
     /* Load the active report using html page or json object passed from the cmd line */
@@ -310,8 +294,6 @@
         else
             holdfileString = fs.readFileSync(filename).toString();
 
-        //var holdfileString = fs.readFileSync('./hold.txt').toString();
-
         //at the time being, don't call the Json parser
         //Converted to Json object but error bc ==>Actually, Json parser generates mixed quotes
         //var holdfileJsonObj = JSON.parse(holdfileString);
@@ -328,30 +310,16 @@
             htmltxt = "data:text/html;base64," + htmltxt;
             isHtmlPage = true;
         } else { //if Json object(hold.txt) ==> put it into the report One div
-            //htmltxt = "iFrameContent.html";
+
             //var iFrameContent = fs.readFileSync('iFrameContent.html').toString();
             //htmltxt must be a fully formed html doc for webview
-            //htmltxt = iFrameContent.replace(/abcdefghij/i, holdfileString);
-            //var newArray = iFrameContent.split("abcdefghij");
-           //htmltxt = newArray[0] + holdfileString + newArray[1];
-
-            //fs.writeFileSync("C:\\Users\\pl04334\\Documents\\abc", htmltxt, 'utf8');
-            //htmltxt = new Buffer(htmltxt).toString('base64');
-            //htmltxt = "data:text/html;base64," + htmltxt;
 
             //holdfileString is the string version of the json object
             htmltxt = "loadActiveReport("+holdfileString+")";
-            /**************
-            //javascript eval to convert the string to js object
-            eval("var holdfileObj="+holdfileString);
 
-            //using the Active Report api: rendering the active report into a div
-            arObj.addJsonReport(holdfileObj, tabItem);
-            ****************/
         }
 
-        //create a container
-        //var reportFrame = document.createElement('iframe');
+        //create a webview as the container
         var reportFrame = document.createElement('webview');
         reportFrame.setAttribute('id',"w_" + tabId);
         reportFrame.setAttribute('partition','trusted');
@@ -385,7 +353,7 @@
                     //reportFrame.openDevTools();
                     reportFrame.executeJavaScript(htmltxt);
                 });
-                //reportFrame.src = "iFrameContent.html";
+
                 var path = require('path');
                 var url = require('url');
                 reportFrame.src = url.format({
@@ -399,6 +367,7 @@
         //firstTime = false;
         currentTabActive = tabId;
     }//loadDocIntoTab()
+
     /***************************************************/
     /*Print ==> print preview to send a doc to the printer */
     /***************************************************/
@@ -416,15 +385,58 @@
         },100);
         //var executetxt = "var win=window; win.print({'autoprint':false})";
         //mywebview.executeJavaScript(executetxt);
-
     }
 
-    /***************************************************/
-    /* Email                                           */
-    /***************************************************/
+    /********************************************************************/
+    /* Email using smtp protocol (mailto) by talking to the smtp server */
+    /* ==>currently won't let me attach to the email because of the     */
+    /* blocking of the IBI email server, who knows it may block any port*/
+    /********************************************************************/
     function emailFile()
     {
+        var tmp = require('tmp');
 
+        var tmpobj = tmp.fileSync({ prefix: 'ar-', postfix: '.adf' });
+        console.log('File: ', tmpobj.name);
+        console.log('Filedescriptor: ', tmpobj.fd);
+        saveCurrentTab(tmpobj.name);
+
+        //return;
+
+                //process.env.TEMP;
+        var email 	= require("emailjs");
+        var server 	= email.server.connect({
+            user:    "patricia.cp.lam@gmail.com",
+            password:"je4pl2us",
+            //host:    "ibismtp",
+            host:    "smtp.gmail.com",
+            ssl:     true //for secure server
+        });
+
+// send the message and get a callback with an error or details of the message that was sent
+        server.send({
+            text:    "i hope this works",
+            from:    "myself<patricia_lam@ibi.com>",
+            to:      "someone <patricia_lam@ibi.com>",
+            //cc:      "else <else@your-email.com>",
+            subject: "testing emailjs",
+            attachment:
+                    [
+                        {data:"<html>i <i>hope</i> this works!</html>", alternative:true},
+                        {path:tmpobj.name, type:"application/adf", name:"report.adf"}
+                    ]
+        }, function(err, message) {
+            console.log(err || message);
+
+            // If we don't need the file anymore we could manually call the removeCallback
+            // But thanpt is not necessary if we didn't pass the keep option because the library
+            // will clean after itself.
+            tmpobj.removeCallback();
+        });
+
+
+
+        /********************
         var mywebview =  document.getElementById("w_"+currentTabActive);
         //Need to email the change of the report so ==> must do save first
         var executetxt = "$AR.saveJsonReport()";
@@ -444,70 +456,9 @@
                     //fs.writeFileSync(newfilename, JSON.stringify(jsonObject[0]));
 
                 });
-
+        ***********/
     }
-    /***************************************************/
-    /* Create the home menu: load an active report     */
-    /***************************************************/
-    function createHomeMenu(obj){
-        // Create a menu
-        var menu = new nw.Menu();
 
-        // Add some items with label
-        menu.append(new nw.MenuItem({
-            label: 'Item A',
-            click: function(){
-                //alert('You have clicked at "Item A"');
-            }
-        }));
-        menu.append(new nw.MenuItem({
-                    label: 'Load Active Report',
-                    click: function(){
-                        var tabId = addTabs();
-                        loadDocIntoTab('./hold.htm', tabId); //html
-                    }
-                }
-        ));
-
-        menu.append(new nw.MenuItem({ type: 'separator' }));
-        menu.append(new nw.MenuItem({
-                    label: 'Load Active Report APIs',
-                    click: function(){
-                        var tabId = addTabs();
-                        loadDocIntoTab('./hold.txt', tabId); //json
-                }}
-        ));
-
-        $('#homeI').on('click',function(e){
-            menu.popup(e.offsetX, e.offsetY);
-        });
-
-    }
-    /***************************************************/
-    /***** Create the save menu: save to disk or cloud */
-    /***************************************************/
-    function createSaveMenu(obj){
-
-        var menu = new nw.Menu();
-
-        // Add some items with label
-        menu.append(new nw.MenuItem({
-            label: 'save to computer',
-            click: function(){
-                alert('You have clicked at "Save"');
-            }
-        }));
-        menu.append(new nw.MenuItem({
-            label: 'save to cloud',
-            click: function(){
-                alert('You have clicked at "Save"');
-            }
-        }));
-        $('#saveI').on('click',function(e){
-            menu.popup(e.offsetX, e.offsetY);
-        });
-
-    }
     /*********************************************/
     /***** Saving the content of the current tab.*/
     /*********************************************/
@@ -521,7 +472,7 @@
                  function(jsonObject){
                      var fs =  require('fs'); //load the node js file system library
 
-                     //need to make sure that filename ends with .adf
+                     //if the filename don't end with .adf, then append the 'adf' extension to it
                      var extension = filename.split('.');
                      var newfilename = filename;
                      if (extension[extension.length-1]!== 'adf')
@@ -529,7 +480,6 @@
 
                      //write the content of the json object to a file
                      fs.writeFileSync(newfilename, JSON.stringify(jsonObject));
-
                  });
     }
 
@@ -857,10 +807,5 @@
             });
     }
 </script>
-<!--div style="display: none">
-    <iframe src="iFrameContent.html" name="dummy"/>
-</div-->
-
-
 </body>
 </html>
