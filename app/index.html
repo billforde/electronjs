@@ -15,6 +15,7 @@
 <body style="width: 100%; height: 100%;">
 <input style="display:none;" id="loadFileDialog" type="file" />
 <input style="display:none;" id="saveDialog" saveas type="file" />
+
 <!-- Dialog prompt for filename... -->
 <div id="dialog-message" title="Enter Filename" style="display: none;">
     <p>
@@ -22,14 +23,24 @@
     </p>
     <input type="text" id="googleFilename"/>
 </div>
+
 <div id="dialog-listFiles" title="Select Files" style="display: none;">
     <p>
         Select the files to load from your Google Drive.
     </p>
     <div id="download-list" style="height:300px;overflow:scroll">
-
     </div>
 </div>
+
+<div id="dialog-email" title="Message" style="display: none;">
+    <p>
+        Enter your email information below.
+    </p>
+    From: &nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="emailFrom"/><br><br>
+    To: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="emailTo"/><br><br>
+    Subject: <input type="text" id="emailSubject"/><br>
+</div>
+
 <!--End Dialog prompt for filename... -->
 <script type="text/javascript">
     $(document).ready(function () {
@@ -65,9 +76,9 @@
                 if ($(this).attr('id')=='print-button')
                     printReport();
                 if ($(this).attr('id')=='save-button')
-                    saveFile("#saveDialog");
+                    showSaveDialog("#saveDialog");
                 if ($(this).attr('id')=='email-button')
-                    emailFile();
+                    displayEmailDialog("emailDialog");
             }
         });
         $('#tabsContainer').tabs();
@@ -83,14 +94,14 @@
             saveCurrentTab(this.files[0].path);
         });
        });
-    //open the file selector
+    //open the file selector from the file system
     function chooseFile(name) {
         var chooser = document.querySelector(name);
         chooser.value = "";
         chooser.click();
     }
-    //display the save file dialog
-    function saveFile(name) {
+    //show the system file dialog and let you enter the file name or browse the file system for saving
+    function showSaveDialog(name) {
       var dialog = require('electron').remote.dialog;
       //dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'promptToCreate']});
         dialog.showOpenDialog({properties: ['promptToCreate','createDirectory','openFile'],buttonLabel:"Save"},function(filename){
@@ -290,7 +301,7 @@
 
         var holdfileString;
         if (filename == null)
-            holdfileString = JSON.stringify(data);//response.data from openGoogleFile
+            holdfileString = JSON.stringify(data);//response.data from downloadAndOpenGoogleFile
         else
             holdfileString = fs.readFileSync(filename).toString();
 
@@ -389,10 +400,10 @@
 
     /********************************************************************/
     /* Email using smtp protocol (mailto) by talking to the smtp server */
-    /* ==>currently won't let me attach to the email because of the     */
-    /* blocking of the IBI email server, who knows it may block any port*/
+    /* ==> currently can attach to the email but take a while to     */
+    /* be received , need to close outlook and reopen it to see it */
     /********************************************************************/
-    function emailFile()
+    function emailFile(emailFrom, emailTo, emailSubject)
     {
         var tmp = require('tmp');
 
@@ -406,20 +417,23 @@
                 //process.env.TEMP;
         var email 	= require("emailjs");
         var server 	= email.server.connect({
-            user:    "patricia.cp.lam@gmail.com",
-            password:"je4pl2us",
+            //user:    "patricia.cp.lam@gmail.com",
+            //password:"",
             //host:    "ibismtp",
-            host:    "smtp.gmail.com",
-            ssl:     true //for secure server
+            host:    "ibismtp",
+            //ssl:     true //for secure server
         });
 
 // send the message and get a callback with an error or details of the message that was sent
         server.send({
             text:    "i hope this works",
-            from:    "myself<patricia_lam@ibi.com>",
-            to:      "someone <patricia_lam@ibi.com>",
+            //from:    "myself<patricia_lam@ibi.com>",
+            //to:      "someone <patricia_lam@ibi.com>",
+            from: emailFrom,
+            to: emailTo,
+            subject: emailSubject,
             //cc:      "else <else@your-email.com>",
-            subject: "testing emailjs",
+            //subject: "testing emailjs",
             attachment:
                     [
                         {data:"<html>i <i>hope</i> this works!</html>", alternative:true},
@@ -580,7 +594,7 @@
             if (dowhat == 'upload')
                 authorize(JSON.parse(content), displayUploadDialog);
             else if (dowhat == 'download')
-                authorize(JSON.parse(content), openGooglefile, fileId, filename);
+                authorize(JSON.parse(content), downloadAndOpenGooglefile, fileId, filename);
             else if (dowhat == 'listfiles')
                     authorize(JSON.parse(content), listFilesFromGoogle);
         });
@@ -671,13 +685,10 @@
         console.log('Token stored to ' + TOKEN_PATH);
     }
 
-    /**
-     * Download the names and IDs of up to 10 files.
-     *
-     * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
-     * @param {fileId: id of the file that will be downloaded}.
-     */
 
+    /******************************************************/
+    /* Show a dialog for entering the name  */
+    /******************************************************/
     function listFilesFromGoogle(auth, fileId) {
 
         var drive = google.drive({ version: 'v3', auth: auth });
@@ -704,7 +715,9 @@
         }
         );
     }
-
+    /******************************************************/
+    /* Show a list of files from Google Drive for download */
+    /******************************************************/
     function displayDownloadDialog(auth, files){
 
         var element = document.createElement('ol');
@@ -737,7 +750,11 @@
         } );
     }
 
-    function openGooglefile(auth, fileId, filename){
+    /********************************************************/
+    //using google drive api to get a file from google drive.
+    //then open the file into a tab.
+    /*********************************************************/
+    function downloadAndOpenGooglefile(auth, fileId, filename){
 
         var drive = google.drive({ version: 'v3', auth: auth });
         drive.files.get({
@@ -754,6 +771,9 @@
         });
     }
 
+    /******************************************/
+    //display an upload dialog (jquery dialog)
+    /******************************************/
     function displayUploadDialog(auth){
         $( function() {
             $( "#dialog-message" ).dialog({
@@ -773,6 +793,36 @@
             });
         } );
     }
+
+    /**********************************************/
+    //display an email dialog (jquery dialog)
+    /**********************************************/
+    function displayEmailDialog(auth){
+        $( function() {
+            $( "#dialog-email" ).dialog({
+                modal: true,
+                buttons: {
+                    Send: function() {
+                        var emailFrom = document.querySelector("#emailFrom");
+                        var emailTo = document.querySelector("#emailTo");
+                        var emailSubject = document.querySelector("#emailSubject");
+                        if (emailFrom.value != "" && emailTo.value != "") {
+                            $(this).dialog("close");
+                            emailFile(emailFrom.value, emailTo.value, emailSubject.value);
+                        }
+                    },
+                    Cancel: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
+        } );
+    }
+    /**************************************************************************/
+    //Get the webview and execute the saved json report command (by calling the Active api to save the output to json).
+    //Then passing the json output to google drive api to save it.
+    //Then call the google drive api to create a new file to google drive.
+    /**************************************************************************/
     function googleUpload(auth, filename) {
         var mywebview =  document.getElementById("w_"+currentTabActive);
 
@@ -790,7 +840,7 @@
                     mimeType: 'text/plain',
                     body: JSON.stringify(jsonObject)
                 };
-                drive.files.create({
+                drive.files.create({ //create the file in google drive
                     //resource: fileMetadata,
                     media: media
                     //fields: 'id' need data.id
