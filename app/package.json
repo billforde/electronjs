@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "emailjs": "^2.1.0",
+    "gmail-api-create-message-body": "^1.0.0",
     "googleapis": "^31.0.2",
     "tmp": "0.0.33"
   }

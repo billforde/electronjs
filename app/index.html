@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Active Report Viewer</title>
+    <title>In-Document Analytics Viewer</title>
     <link rel="stylesheet" href="jquery-ui-1.12.1/jquery-ui.min.css">
     <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
     <link href="Office-Ribbon/ribbon/ribbon.css" rel="stylesheet" type="text/css" />
@@ -11,6 +11,8 @@
     <script src="jquery-ui-1.12.1/jquery-ui.min.js"></script>
     <script type="text/javascript" src="Office-Ribbon/ribbon/ribbon.js"></script>
     <script type="text/javascript"></script>
+    <script src="mime-js/src/base64.js" type="text/javascript"></script>
+    <script src="mime-js/dist/mime-js.js" type="text/javascript"></script>
 </head>
 <body style="width: 100%; height: 100%;">
 <input style="display:none;" id="loadFileDialog" type="file" />
@@ -36,9 +38,9 @@
     <p>
         Enter your email information below.
     </p>
-    From: &nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="emailFrom"/><br><br>
-    To: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="emailTo"/><br><br>
-    Subject: <input type="text" id="emailSubject"/><br>
+    <span style="display:inline-block;width:60px">From: </span><input type="text" id="emailFrom"/><br><br>
+    <span style="display:inline-block;width:60px">To: </span><input type="text" id="emailTo"/><br><br>
+    <span style="display:inline-block;width:60px">Subject: </span><input type="text" id="emailSubject"/><br>
 </div>
 
 <!--End Dialog prompt for filename... -->
@@ -79,6 +81,8 @@
                     showSaveDialog("#saveDialog");
                 if ($(this).attr('id')=='email-button')
                     displayEmailDialog("emailDialog");
+                if ($(this).attr('id')=='gmail-button')
+                    signinToGoogle("gmail");
             }
         });
         $('#tabsContainer').tabs();
@@ -113,7 +117,7 @@
 </script>
 <!--div style="height: 202px; "-->
     <div id="ribbon">
-        <span class="ribbon-window-title">Active Report Viewer</span>
+        <span class="ribbon-window-title">In-Document Analytics Viewer</span>
         <div class="ribbon-tab" id="file-tab">
             <span class="ribbon-title">File</span>
             <div class="ribbon-section">
@@ -129,6 +133,9 @@
                 </div>
                 <div title="Email" class="ribbon-button ribbon-button-large" id="email-button">
                     <img class="ribbon-icon ribbon-normal" src="assets/004-envelope.png" width="32"/>
+                </div>
+                <div title="Gmail" class="ribbon-button ribbon-button-large" id="gmail-button">
+                    <img class="ribbon-icon ribbon-normal" src="assets/002-gmail-1.png" width="32"/>
                 </div>
                 <div class="ribbon-button ribbon-button-large" id="google-drive-button">
                     <ul id="google-drive-menu">
@@ -246,7 +253,11 @@
         readline = require('readline');
         google = require('googleapis').google;
         googleAuth = require('google-auth-library');
-        SCOPES = ['https://www.googleapis.com/auth/drive'];
+        SCOPES = ['https://www.googleapis.com/auth/drive',
+            'https://mail.google.com/',
+            'https://www.googleapis.com/auth/gmail.modify',
+            'https://www.googleapis.com/auth/gmail.compose',
+            'https://www.googleapis.com/auth/gmail.send'];
         TOKEN_DIR = './credentials/'
         TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
         app = require('electron').remote.app; //require the library called 'electron'
@@ -398,85 +409,10 @@
         //mywebview.executeJavaScript(executetxt);
     }
 
-    /********************************************************************/
-    /* Email using smtp protocol (mailto) by talking to the smtp server */
-    /* ==> currently can attach to the email but take a while to     */
-    /* be received , need to close outlook and reopen it to see it */
-    /********************************************************************/
-    function emailFile(emailFrom, emailTo, emailSubject)
-    {
-        var tmp = require('tmp');
-
-        var tmpobj = tmp.fileSync({ prefix: 'ar-', postfix: '.adf' });
-        console.log('File: ', tmpobj.name);
-        console.log('Filedescriptor: ', tmpobj.fd);
-        saveCurrentTab(tmpobj.name);
-
-        //return;
-
-                //process.env.TEMP;
-        var email 	= require("emailjs");
-        var server 	= email.server.connect({
-            //user:    "patricia.cp.lam@gmail.com",
-            //password:"",
-            //host:    "ibismtp",
-            host:    "ibismtp",
-            //ssl:     true //for secure server
-        });
-
-// send the message and get a callback with an error or details of the message that was sent
-        server.send({
-            text:    "i hope this works",
-            //from:    "myself<patricia_lam@ibi.com>",
-            //to:      "someone <patricia_lam@ibi.com>",
-            from: emailFrom,
-            to: emailTo,
-            subject: emailSubject,
-            //cc:      "else <else@your-email.com>",
-            //subject: "testing emailjs",
-            attachment:
-                    [
-                        {data:"<html>i <i>hope</i> this works!</html>", alternative:true},
-                        {path:tmpobj.name, type:"application/adf", name:"report.adf"}
-                    ]
-        }, function(err, message) {
-            console.log(err || message);
-
-            // If we don't need the file anymore we could manually call the removeCallback
-            // But thanpt is not necessary if we didn't pass the keep option because the library
-            // will clean after itself.
-            tmpobj.removeCallback();
-        });
-
-
-
-        /********************
-        var mywebview =  document.getElementById("w_"+currentTabActive);
-        //Need to email the change of the report so ==> must do save first
-        var executetxt = "$AR.saveJsonReport()";
-
-        mywebview.executeJavaScript(executetxt,false,
-                function(jsonObject){
-                    var fs =  require('fs'); //load the node js file system library
-
-                    nw.Shell.openExternal('mailto:?subject=test&body=report&attach="c:\\IDF-Viewer\\hold.adf"');
-                    //need to make sure that filename ends with .adf
-                    //var extension = filename.split('.');
-                   // var newfilename = filename;
-                    //if (extension[extension.length-1]!== 'adf')
-                       // newfilename += '.adf';
-
-                    //write the content of the json object to a file
-                    //fs.writeFileSync(newfilename, JSON.stringify(jsonObject[0]));
-
-                });
-        ***********/
-    }
-
     /*********************************************/
     /***** Saving the content of the current tab.*/
     /*********************************************/
-    function saveCurrentTab(filename){
+    function saveCurrentTab(filename,callback){
 
         var mywebview =  document.getElementById("w_"+currentTabActive);
         //get the webwiew window
@@ -494,6 +430,8 @@
 
                      //write the content of the json object to a file
                      fs.writeFileSync(newfilename, JSON.stringify(jsonObject));
+                     if(typeof(callback) != "undefined")
+                             callback();
                  });
     }
 
@@ -596,7 +534,9 @@
             else if (dowhat == 'download')
                 authorize(JSON.parse(content), downloadAndOpenGooglefile, fileId, filename);
             else if (dowhat == 'listfiles')
-                    authorize(JSON.parse(content), listFilesFromGoogle);
+                authorize(JSON.parse(content), listFilesFromGoogle);
+            else if (dowhat == 'gmail')
+                authorize(JSON.parse(content), displayGmailDialog);
         });
     }
     /**
@@ -734,15 +674,7 @@
             $( "#dialog-listFiles" ).dialog({
                 modal: true,
                 buttons: {
-                    /********
-                    Ok: function() {
-                        var chooser = document.querySelector("#googleFilename");
-                        if (chooser.value!= "") {
-                            $(this).dialog("close");
-                            googleUpload(auth, chooser.value);
-                        }
-                    ,***********/
-                    Cancel: function() {
+                   Cancel: function() {
                         $( this ).dialog( "close" );
                     }
                 }
@@ -818,6 +750,152 @@
             });
         } );
     }
+
+    /********************************************************************/
+    /* Email using smtp protocol (mailto) by talking to the smtp server */
+    /* ==> currently can attach to the email but take a while to     */
+    /* be received , need to close outlook and reopen it to see it */
+    /********************************************************************/
+    function emailFile(emailFrom, emailTo, emailSubject) {
+        var tmp = require('tmp');
+
+        var tmpobj = tmp.fileSync({prefix: 'ar-', postfix: '.adf'});
+        console.log('File: ', tmpobj.name);
+        console.log('Filedescriptor: ', tmpobj.fd);
+        saveCurrentTab(tmpobj.name, function(){emailFile2(emailFrom, emailTo, emailSubject, tmpobj.name)});
+
+        //return;
+    }
+
+    function emailFile2(emailFrom, emailTo, emailSubject, filename){
+
+        //process.env.TEMP;
+        var email 	= require("emailjs");
+        var server 	= email.server.connect({
+            //user:    "patricia.cp.lam@gmail.com",
+            //password:"",
+            //host:    "ibismtp",
+            host:    "ibismtp",
+            //ssl:     true //for secure server
+        });
+
+    // send the message and get a callback with an error or details of the message that was sent
+        server.send({
+            text:    "i hope this works",
+            //from:    "myself<patricia_lam@ibi.com>",
+            //to:      "someone <patricia_lam@ibi.com>",
+            from: emailFrom,
+            to: emailTo,
+            subject: emailSubject,
+            //cc:      "else <else@your-email.com>",
+            //subject: "testing emailjs",
+            attachment:
+                    [
+                        {data:"<html>i <i>hope</i> this works!</html>", alternative:true},
+                        {path:filename, type:"application/adf", name:"report.adf"}
+                    ]
+        }, function(err, message) {
+            console.log(err || message);
+            if (err)
+                alert(err);
+            else alert("mail sent successfully!")
+
+            // If we don't need the file anymore we could manually call the removeCallback
+            // But thanpt is not necessary if we didn't pass the keep option because the library
+            // will clean after itself.
+            tmpobj.removeCallback();
+        });
+    }
+
+/**********************************************/
+    //display a Gmail dialog (jquery dialog)
+    /**********************************************/
+    function displayGmailDialog(auth, filename){
+        $( function() {
+            $( "#dialog-email" ).dialog({
+                modal: true,
+                buttons: {
+                    Send: function() {
+                        var emailFrom = document.querySelector("#emailFrom");
+                        var emailTo = document.querySelector("#emailTo");
+                        var emailSubject = document.querySelector("#emailSubject");
+                        if (emailFrom.value != "" && emailTo.value != "") {
+                            $(this).dialog("close");
+                            sendMessage(auth, emailFrom.value, emailTo.value, emailSubject.value);
+                        }
+                    },
+                    Cancel: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
+        } );
+    }
+    /**************************************************************************************/
+    function createBody(from, to, subject, message,filename){
+
+        var fs = require('fs');
+        var dataBase64 = fs.readFileSync(filename);
+        dataBase64 = dataBase64.toString('base64');
+
+        var originalMail = {
+            "to": to,
+            //"cc": "email2@example.com",
+            "subject": subject,
+            "fromName": "Patricia Lam",
+            "from": from,
+            "body": message,
+            "cids": [],
+            "attaches" : [{"base64":dataBase64,"name":"report.adf","type":"application/adf"}]
+        };
+        var mimeTxt = Mime.toMimeTxt(originalMail);
+        var mimeObj = Mime.toMimeObj(mimeTxt);
+        console.log(mimeTxt);
+        console.log(mimeObj);
+        var encodedMail = new Buffer(mimeTxt).toString("base64").replace(/\+/g, '-').replace(/\//g, '_');
+        return encodedMail;
+    }
+
+/***************************
+    function makeBody(to, from, subject, message) {
+        var str = ["Content-Type: text/plain; charset=\"UTF-8\"\n",
+            "MIME-Version: 1.0\n",
+            "Content-Transfer-Encoding: 7bit\n",
+            "to: ", to, "\n",
+            "from: ", from, "\n",
+            "subject: ", subject, "\n\n",
+            message
+        ].join('');
+
+        var encodedMail = new Buffer(str).toString("base64").replace(/\+/g, '-').replace(/\//g, '_');
+        return encodedMail;
+    }
+ ******************************/
+
+    function sendMessage(auth, from, to, subject) {
+        var tmp = require('tmp');
+        var tmpobj = tmp.fileSync({ prefix: 'ar-', postfix: '.adf' });
+        console.log('File: ', tmpobj.name);
+        console.log('Filedescriptor: ', tmpobj.fd);
+        saveCurrentTab(tmpobj.name, function() {sendMessage2(auth,from, to, subject,tmpobj.name)});
+    }
+
+    function sendMessage2(auth, from, to, subject, filename) {
+
+        const gmail = google.gmail({version: 'v1', auth});
+
+        var raw = createBody(from, to, subject, 'test gmail message',filename);
+        gmail.users.messages.send({
+            auth: auth,
+            userId: 'me',
+            resource: {
+                raw: raw
+            }
+        }, function(err, response) {
+            console.log(err || response)
+        });
+    }
+
     /**************************************************************************/
     //Get the webview and execute the saved json report command (by calling the Active api to save the output to json).
     //Then passing the json output to google drive api to save it.
