@@ -40,7 +40,16 @@
     </p>
     <span style="display:inline-block;width:60px">From: </span><input type="text" id="emailFrom"/><br><br>
     <span style="display:inline-block;width:60px">To: </span><input type="text" id="emailTo"/><br><br>
+    <span style="display:inline-block;width:60px">Cc: </span><input type="text" id="ccTo"/><br><br>
     <span style="display:inline-block;width:60px">Subject: </span><input type="text" id="emailSubject"/><br>
+</div>
+<div id="dialog-gmail" title="Message" style="display: none;">
+    <p>
+        Enter your email information below.
+    </p>
+    <span style="display:inline-block;width:60px">To: </span><input type="text" id="gmailTo"/><br><br>
+    <span style="display:inline-block;width:60px">CC: </span><input type="text" id="gccTo"/><br><br>
+    <span style="display:inline-block;width:60px">Subject: </span><input type="text" id="gmailSubject"/><br>
 </div>
 
 <!--End Dialog prompt for filename... -->
@@ -80,7 +89,7 @@
                 if ($(this).attr('id')=='save-button')
                     showSaveDialog("#saveDialog");
                 if ($(this).attr('id')=='email-button')
-                    displayEmailDialog("emailDialog");
+                    showEmailDialog("emailDialog");
                 if ($(this).attr('id')=='gmail-button')
                     signinToGoogle("gmail");
             }
@@ -257,9 +266,10 @@
             'https://mail.google.com/',
             'https://www.googleapis.com/auth/gmail.modify',
             'https://www.googleapis.com/auth/gmail.compose',
-            'https://www.googleapis.com/auth/gmail.send'];
+            'https://www.googleapis.com/auth/gmail.send',
+            'https://www.googleapis.com/auth/userinfo.profile'];
         TOKEN_DIR = './credentials/'
-        TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
+        TOKEN_PATH = TOKEN_DIR + 'googleService.json';
         app = require('electron').remote.app; //require the library called 'electron'
 
         app.on('open', function(filename){
@@ -530,22 +540,61 @@
             // Authorize a client with the loaded credentials, then call the
             // Drive API.
             if (dowhat == 'upload')
-                authorize(JSON.parse(content), displayUploadDialog);
+                authorize(JSON.parse(content), showUploadDialog);
             else if (dowhat == 'download')
                 authorize(JSON.parse(content), downloadAndOpenGooglefile, fileId, filename);
             else if (dowhat == 'listfiles')
                 authorize(JSON.parse(content), listFilesFromGoogle);
             else if (dowhat == 'gmail')
-                authorize(JSON.parse(content), displayGmailDialog);
+                authorize(JSON.parse(content), showGmailDialog);
         });
     }
-    /**
+
+    /*******************************************************************************************/
+    /* Get user profile from Google and glpbally store it into googleInfo  */
+    /*******************************************************************************************/
+    var googleInfo = {};
+
+    function getProfile(auth){
+        const gmail = google.gmail({version: 'v1', auth});
+
+        gmail.users.getProfile({
+            auth: auth,
+            userId: 'me'
+        }, function(err, res) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(res);
+                googleInfo.emailAddress = res.data.emailAddress;
+            }
+        });
+
+        var oauth2 = google.oauth2({
+            auth: auth,
+            version: 'v2'
+        });
+
+        oauth2.userinfo.v2.me.get(
+                function(err, res) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        googleInfo.fromName = res.data.name;
+                        googleInfo.picture = res.data.picture;
+                        console.log(res);
+                    }
+                });
+    }
+
+
+    /******************************************************************************
      * Create an OAuth2 client with the given credentials, and then execute the
      * given callback function.
      *
      * @param {Object} credentials The authorization client credentials.
      * @param {function} callback The callback to call with the authorized client.
-     */
+     *****************************************************************************/
     function authorize(credentials, callback, fileId, filename) {
         var clientSecret = credentials.installed.client_secret;
         var clientId = credentials.installed.client_id;
@@ -559,6 +608,7 @@
                 getNewToken(oauth2Client, callback);
             } else {
                 oauth2Client.credentials = JSON.parse(token);
+                getProfile(oauth2Client);
                 callback(oauth2Client, fileId, filename);
             }
         });
@@ -599,6 +649,7 @@
                     }
                     oauth2Client.credentials = token;
                     storeToken(token);
+                    getProfile(oauth2Client);
                     callback(oauth2Client);
                 });
             };
@@ -706,7 +757,7 @@
     /******************************************/
     //display an upload dialog (jquery dialog)
     /******************************************/
-    function displayUploadDialog(auth){
+    function showUploadDialog(auth){
         $( function() {
             $( "#dialog-message" ).dialog({
                 modal: true,
@@ -727,9 +778,9 @@
     }
 
     /**********************************************/
-    //display an email dialog (jquery dialog)
+    //Show an email dialog (jquery dialog)
     /**********************************************/
-    function displayEmailDialog(auth){
+    function showEmailDialog(auth){
         $( function() {
             $( "#dialog-email" ).dialog({
                 modal: true,
@@ -737,10 +788,11 @@
                     Send: function() {
                         var emailFrom = document.querySelector("#emailFrom");
                         var emailTo = document.querySelector("#emailTo");
+                        var ccTo = document.querySelector("#ccTo");
                         var emailSubject = document.querySelector("#emailSubject");
                         if (emailFrom.value != "" && emailTo.value != "") {
                             $(this).dialog("close");
-                            emailFile(emailFrom.value, emailTo.value, emailSubject.value);
+                            emailFile(emailFrom.value, emailTo.value, ccTo.value, emailSubject.value);
                         }
                     },
                     Cancel: function() {
@@ -756,18 +808,19 @@
     /* ==> currently can attach to the email but take a while to     */
     /* be received , need to close outlook and reopen it to see it */
     /********************************************************************/
-    function emailFile(emailFrom, emailTo, emailSubject) {
-        var tmp = require('tmp');
+    var tmpobj;
 
-        var tmpobj = tmp.fileSync({prefix: 'ar-', postfix: '.adf'});
+    function emailFile(emailFrom, emailTo, ccTo, emailSubject) {
+        var tmp = require('tmp');
+        tmpobj = tmp.fileSync({prefix: 'ar-', postfix: '.adf'});
         console.log('File: ', tmpobj.name);
         console.log('Filedescriptor: ', tmpobj.fd);
-        saveCurrentTab(tmpobj.name, function(){emailFile2(emailFrom, emailTo, emailSubject, tmpobj.name)});
+        saveCurrentTab(tmpobj.name, function(){emailFile2(emailFrom, emailTo, ccTo, emailSubject, tmpobj.name)});
 
         //return;
     }
 
-    function emailFile2(emailFrom, emailTo, emailSubject, filename){
+    function emailFile2(emailFrom, emailTo, ccTo, emailSubject, filename){
 
         //process.env.TEMP;
         var email 	= require("emailjs");
@@ -786,6 +839,7 @@
             //to:      "someone <patricia_lam@ibi.com>",
             from: emailFrom,
             to: emailTo,
+            cc: ccTo,
             subject: emailSubject,
             //cc:      "else <else@your-email.com>",
             //subject: "testing emailjs",
@@ -807,21 +861,22 @@
         });
     }
 
-/**********************************************/
-    //display a Gmail dialog (jquery dialog)
     /**********************************************/
-    function displayGmailDialog(auth, filename){
+    //Show a Gmail dialog (jquery dialog)
+    /**********************************************/
+    function showGmailDialog(auth, filename){
         $( function() {
-            $( "#dialog-email" ).dialog({
+            $( "#dialog-gmail" ).dialog({
                 modal: true,
                 buttons: {
                     Send: function() {
-                        var emailFrom = document.querySelector("#emailFrom");
-                        var emailTo = document.querySelector("#emailTo");
-                        var emailSubject = document.querySelector("#emailSubject");
-                        if (emailFrom.value != "" && emailTo.value != "") {
+                        var gmailTo = document.querySelector("#gmailTo");
+                        var gccTo = document.querySelector("#gccTo");
+                        var gmailSubject = document.querySelector("#gmailSubject");
+                        if (gmailTo.value != "") {
                             $(this).dialog("close");
-                            sendMessage(auth, emailFrom.value, emailTo.value, emailSubject.value);
+                            sendMessage(auth, gmailTo.value, gccTo.value, gmailSubject.value);
+                            //sendMessage(auth, gmailFrom.value, gmailTo.value, gmailSubject.value);
                         }
                     },
                     Cancel: function() {
@@ -832,18 +887,18 @@
         } );
     }
     /**************************************************************************************/
-    function createBody(from, to, subject, message,filename){
+    function createBody(to, ccTo, subject, message, filename){
 
         var fs = require('fs');
         var dataBase64 = fs.readFileSync(filename);
         dataBase64 = dataBase64.toString('base64');
 
         var originalMail = {
+            "from": googleInfo.emailAddress,
             "to": to,
-            //"cc": "email2@example.com",
+            "cc": ccTo,
             "subject": subject,
-            "fromName": "Patricia Lam",
-            "from": from,
+            "fromName": googleInfo.fromName,
             "body": message,
             "cids": [],
             "attaches" : [{"base64":dataBase64,"name":"report.adf","type":"application/adf"}]
@@ -872,19 +927,19 @@
     }
  ******************************/
 
-    function sendMessage(auth, from, to, subject) {
+    function sendMessage(auth, to, ccTo, subject) {
         var tmp = require('tmp');
         var tmpobj = tmp.fileSync({ prefix: 'ar-', postfix: '.adf' });
         console.log('File: ', tmpobj.name);
         console.log('Filedescriptor: ', tmpobj.fd);
-        saveCurrentTab(tmpobj.name, function() {sendMessage2(auth,from, to, subject,tmpobj.name)});
+        saveCurrentTab(tmpobj.name, function() {sendMessage2(auth, to, ccTo, subject,tmpobj.name)});
     }
 
-    function sendMessage2(auth, from, to, subject, filename) {
+    function sendMessage2(auth, to, ccTo, subject, filename) {
 
         const gmail = google.gmail({version: 'v1', auth});
 
-        var raw = createBody(from, to, subject, 'test gmail message',filename);
+        var raw = createBody(to, ccTo, subject, 'test gmail message', filename);
         gmail.users.messages.send({
             auth: auth,
             userId: 'me',
