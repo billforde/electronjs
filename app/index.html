@@ -467,7 +467,8 @@
         var shortname = filename.split('\\');
         shortname = shortname[shortname.length-1];
         //anch.innerHTML = "report " + tabItemCount + "&nbsp;&nbsp;<span onclick='closeTabs("+tabItemCount+")' style='cursor:pointer;color: red'>X</span>";
-        anch.innerHTML = shortname + "&nbsp;&nbsp;<span onclick='closeTabs("+tabItemCount+")' style='cursor:pointer;color: red'>X</span>";
+
+        anch.innerHTML = '<input onclick="toggleCheckbox(event,this)" style="background-color:blue" type="checkbox"/>' + shortname + "&nbsp;&nbsp;<span onclick='closeTabs("+tabItemCount+")' style='cursor:pointer;color: red'>X</span>";
         anch.title = filename; //for hover over it
         listItem.appendChild(anch);
         tabList.appendChild(listItem);
@@ -490,6 +491,11 @@
        // liContent.setAttribute('style', 'overflow:visible');
         return listItemId;
     }
+    function toggleCheckbox(e,cb){
+        e.stopPropagation();
+        //cb.checked = !cb.checked;
+    }
+
     /***************************************/
     /***** remove this tab from the tabList. */
     /***************************************/
