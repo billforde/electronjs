@@ -6,11 +6,20 @@
 <body>
     <link rel="stylesheet" href="Charts/leaflet.css"/>
     <link rel="stylesheet" href="Charts/leaflet.draw.css"/>
+    <style type="text/css">
+        @media print and (orientation:portrait){
+            body { -webkit-print-color-adjust: exact;zoom: 85%;}
+            }
+        @media print and (orientation:landscape){
+            body { -webkit-print-color-adjust: exact;zoom: 110%;}
+        }
+    </style>
     <script src="jquery/jquery_min.js"></script>
     <script src="jquery/jquery_ui_ar_min.js"></script>
     <script src='charts/tdgchart-min.js'></script>
     <script src='ar_v1/activereport.js'></script>
     <script type='text/javascript' language='JavaScript'>
+
         <!--
         //console.log(parent);
         //console.log('here');
