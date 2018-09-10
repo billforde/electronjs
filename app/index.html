@@ -83,7 +83,7 @@
             if (this.isEnabled()) {
                 //alert($(this).attr('id') + ' clicked');
                 if ($(this).attr('id')=='open-file-button')
-                    chooseFile("#loadFileDialog");
+                    showOpenFileDialog("#loadFileDialog");
                 if ($(this).attr('id')=='print-button')
                     printReport();
                 if ($(this).attr('id')=='save-button')
@@ -96,22 +96,26 @@
         });
         $('#tabsContainer').tabs();
         $("#tabsContainer").tabs("option", "heightStyle", "fill");
-        //handle file selection from the dialog
-        $('#loadFileDialog').change(function(){
-            //alert(this.value);
-            var myNextTabId = addTabs(this.files[0].path);
-            loadDocIntoTab(this.files[0].path, myNextTabId);
-        });
-        $('#saveDialog').change(function(){
-            //alert(this.value);
-            saveCurrentTab(this.files[0].path);
-        });
-       });
+
+       } //end of callback for document.ready()
+    ); //end of $(document).ready(function ()
+
     //open the file selector from the file system
-    function chooseFile(name) {
-        var chooser = document.querySelector(name);
-        chooser.value = "";
-        chooser.click();
+    function showOpenFileDialog(name) {
+        var dialog = require('electron').remote.dialog;
+        dialog.showOpenDialog({
+            filters: [
+                {name: 'idfViewer files',  extensions: ["adf", "idf", "pdf"]}
+            ],
+            properties: ['openFile', 'multiSelections']}, function(filename){
+            for (var i=0; i<filename.length; i++){
+                var myNextTabId = addTabs(filename[i]);
+                loadDocIntoTab(filename[i], myNextTabId);
+            }
+        });
+        //var chooser = document.querySelector(name);
+        //chooser.value = "";
+        //chooser.click();
     }
     //show the system file dialog and let you enter the file name or browse the file system for saving
     function showSaveDialog(name) {
@@ -358,6 +362,7 @@
         aWebview.setAttribute('id',"w_" + tabId);
         aWebview.setAttribute('partition','trusted');
         aWebview.setAttribute('allownw',true);
+        aWebview.setAttribute('plugins',true);
         aWebview.setAttribute('nwdisable',false);
         aWebview.setAttribute('name',filename);
         //save the line below
@@ -397,6 +402,7 @@
                     var path = require('path'); //open the path library and assign it to the variale called path
                     var url = require('url');
 
+                    //load the jsonObjectLoaderPage.html
                     //set the url format on the browser url bar as: file://.../jsonObjectLoaderPage.html
                     aWebview.src = url.format({
                         //_dirname is the current directory
@@ -421,14 +427,6 @@
                 break;
         }
 
-        //at the time being, don't call the Json parser
-        //Converted to Json object but error bc ==>Actually, Json parser generates mixed quotes
-        //var holdfileJsonObj = JSON.parse(holdfileString);
-
-        //var arObj = new activeReport();
-        //var reportContainer =  document.getElementById('reportContainer');
-
-
         /*************
         if (holdfileString.substr(0,9)== '<!DOCTYPE') { //if we have an html page ==> create the iframe
             htmltxt = new Buffer(holdfileString).toString('base64'); //64 encoded
@@ -443,27 +441,8 @@
             //javascriptCmd = "loadActiveReport("+holdfileString+")";
 
         //}
-**************/
+        **************/
 
-        /********
-        //create a webview as the container
-        var reportFrame = document.createElement('webview');
-        reportFrame.setAttribute('id',"w_" + tabId);
-        reportFrame.setAttribute('partition','trusted');
-        reportFrame.setAttribute('allownw',true);
-        reportFrame.setAttribute('nwdisable',false);
-        reportFrame.setAttribute('name',filename);
-        //save the line below
-        reportFrame.setAttribute('style','display:flex;height:100%;width:100%;');
-        tabItem.appendChild(reportFrame);
-        *********/
-
-        //empty the iframe to initialize
-        //mine type: stream is text, processed as html, the encoding is expected as base64
-        //reportFrame.src = "data:text/html;base64," + new Buffer("<html></html>").toString('base64');
-
-        //firstTime = false;
-        //currentTabActive = tabId;
     }//loadDocIntoTab()
 
     /***************************************************/
@@ -534,7 +513,7 @@
         shortname = shortname[shortname.length-1];
         //anch.innerHTML = "report " + tabItemCount + "&nbsp;&nbsp;<span onclick='closeTabs("+tabItemCount+")' style='cursor:pointer;color: red'>X</span>";
 
-        anch.innerHTML = '<input onclick="toggleCheckbox(event,this)" checked style="background-color:blue" type="checkbox"/>' + shortname + "&nbsp;&nbsp;<span onclick='closeTabs("+tabItemCount+")' style='cursor:pointer;color: red'>X</span>";
+        anch.innerHTML = '<input onclick="toggleCheckbox(event,this)" style="background-color:blue" type="checkbox"/>' + shortname + "&nbsp;&nbsp;<span onclick='closeTabs("+tabItemCount+")' style='cursor:pointer;color: red'>X</span>";
         anch.title = filename; //for hover over it
         listItem.appendChild(anch);
         tabList.appendChild(listItem);
