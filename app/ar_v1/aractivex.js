@@ -7,6 +7,10 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180823 1206 bjd 103932 AHTML:Export to Excel:ACROSS column values be in heading
+* 180629 1043 bjd 103932 AHTML:Export to Excel/CSV:ACROSS column values be in heading
+* 180621 1615 bjd 203630 AHTML: Implement the Save Changes for non-IE browsers
+* 180604 1600 bjd 203630 AHTML: Implement the Save Changes for non-IE browsers
 * 180327 1248 bjd 200037 AHTML:IE: Sending email second time displays warning messag
 * 180305 1222 bjd 167765 AHTML : Export to excel, % is exported as & #x25;
 * 180116 1536 iys 162870 AHTML/MOB:New dashboard layout option / mobile small screens
@@ -72,7 +76,7 @@
 //[p138525][>branch8001][>branch80_maint] Fix eye catcher so that we dont break tscq.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
+ActiveJSRevision["aractivex"]="$Revision: 20180823.1206 $";
 (function() {
     var pptApp = null;
     var wdApp = null;
@@ -82,7 +86,6 @@ ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
     var ForWriting = 2;
     var ForAppending = 8;
     var TriStateFalse = 0;
-    var fsObj = null;
     var gds;
     var oute = null;
     var outmsg = null;
@@ -108,11 +111,12 @@ ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
         ExcelExport: excelexport,
         PptGraph: pptgraph,
         EmailMe: emailme,
-        Save_AR: save_AR,
+        DoEmailMe: do_emailme,
         PromptUser: promptuser,
-        Do_SaveAR: do_saveAR,
-        Prompts: prompts
+        Prompts: prompts,
+        MsAppError: msappError
     };
+    window.ibiActiveX.fsObj = null;
 
 
     function buildCell(ctitles, dataArray, isExcel, yart) {
@@ -372,8 +376,54 @@ ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
         gds = exApp.WorkBooks(1).WorkSheets(1);
         gds.cells.clear();
 
-        var i, j, curCol, numCols, numRows, row, darawVal, dastrVal, x = 0, focNumFmt;
+        var i, j, curCol, numCols, numRows, row, darawVal, dastrVal, focNumFmt;
+        var xlRow, xlCol;
         var exlFormat = {};
+        var actualNumCols = mytable.n_cols;
+
+        for (i = actualNumCols - 1; i >= 0; --i) {
+            if (mytable.a_capt[i].noprint) {
+                --actualNumCols;
+            }
+        }
+
+        var _writeHeadFoot = function(headFoot, spanZero) {
+            var r, c, colSpan, begCell, endCell, addrRange;
+            for (r = 0, numRows = headFoot.length; r < numRows; ++r) {
+                xlCol = 1;
+                for (c = 0, numCols = headFoot[r].length; c < numCols; ++c) {
+                    cell = gds.cells(xlRow, xlCol);
+                    cell.numberFormat = "@";
+                    cell.value = headFoot[r][c].name
+                                 .replace(/^\<tt\>/, "")
+                                 .replace(/\<\/tt\>$/, "");
+
+                    colSpan = headFoot[r][c].colspan * 1;
+                    if (colSpan == 0) {
+                        colSpan = (spanZero) ? actualNumCols : 1;
+                    }
+                    if (colSpan > 1) {
+                        begCell = getExlColNum(xlCol);
+                        endCell = getExlColNum(xlCol + colSpan - 1);
+                        addrRange = begCell + xlRow + ":" + endCell + xlRow;
+                        mytable.exSheet.Range(addrRange).MergeCells = true;
+                    }
+                    xlCol += colSpan;
+                }
+                ++xlRow;
+            }
+        }; // end _writeHeadFoot()
+
+        xlRow = 1;
+        if (mytable.a_cntl.heading) {
+            _writeHeadFoot(mytable.a_cntl.heading, true);
+        }
+
+        if (mytable.a_cntl.acheading) {
+            _writeHeadFoot(mytable.a_cntl.acheading, false);
+        }
+
+        xlCol = 1;
         for (i = 0, numCols = mytable.n_cols; i < numCols; i++) {
             curCol = mytable.a_capt[i];
             if (!curCol.noprint) {
@@ -381,20 +431,22 @@ ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
                     ((curCol.type == IBIDATE) || (curCol.type == IBINUM))) {
                     ISetExlFormat(curCol, exlFormat);
                 }
-                cell = gds.cells(1, x + 1);
+                cell = gds.cells(xlRow, xlCol);
                 cell.value = mytable.a_cntl.a_cols[i].dis; //need ASname (.dis) instead of .name;
-                x++;
+                ++xlCol;
             }
         }
+        ++xlRow;
+
         numCols = mytable.a_capt.length;
         for (i = 0, numRows = mytable.a_f_body.length; i < numRows; i++) {
             row = mytable.a_f_body[i][0];
-            x = 0;
+            xlCol = 1;
             for (j = 0; j < numCols; j++) {
                 curCol = mytable.a_capt[j];
                 if (!curCol.noprint) {
                     darawVal = mytable.a_cont[row][j][DARAW];
-                    cell = gds.cells(i + 2, x + 1);
+                    cell = gds.cells(xlRow, xlCol);
                     if (darawVal == missingVal) {
                         cell.value = '';
                     } else {
@@ -425,10 +477,16 @@ ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
                         }
                         cell.value = val;
                     }
-                    x++;
+                    ++xlCol;
                 }
             }
+            ++xlRow;
         }
+
+        if (mytable.a_cntl.footing) {
+            _writeHeadFoot(mytable.a_cntl.footing, true);
+        }
+
         if (exApp !== null) {
             exApp.visible = true;
             if (exlExportMsgWindow != null) { exlExportMsgWindow.close(); }
@@ -514,16 +572,16 @@ ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
                 msappError();
             }
         }
-        if (fsObj == null) {
+        if (window.ibiActiveX.fsObj == null) {
             try {
-                fsObj = new ActiveXObject('Scripting.FileSystemObject');
+                window.ibiActiveX.fsObj = new ActiveXObject('Scripting.FileSystemObject');
             }
             catch (E) {
                 msappError();
             }
         }
-        if (!fsObj) return;
-        var tempdir = fsObj.GetSpecialFolder(2);
+        if (!window.ibiActiveX.fsObj) return;
+        var tempdir = window.ibiActiveX.fsObj.GetSpecialFolder(2);
         var filename = tempdir + '\\ActiveReport.htm';
         promptuser(ibiMsgStr['pmsave'], filename, 40, mytable.a_cntl.table_number, save_and_email, ptypeEmail);
     }
@@ -535,7 +593,6 @@ ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
             oute = null;
         }
     }
-
 
 
     function do_emailsend(filename) {
@@ -634,18 +691,27 @@ ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
                            ibiMsgStr['addnotes'] + "&nbsp;<\/div><\/td><\/tr><\/table><\/td><\/tr>";
                 }
             } else {
-                line += "<form name='promptform' action='javascript:nop();' onSubmit='return ibiActiveX.Do_SaveAR(" + tablenumber + ");'>" +
+                line += "<form name='promptform' action='javascript:nop();' onSubmit='return IDo_SaveAR(" + 
+                    tablenumber + "," + ptype + ");'>" +
                     "<table><tr><td>" + str + "<\/td><\/tr>" +
                     "<tr><td><input type=text name='pvalue' size=" + size + " value=\"" + varname + "\"><\/td><\/tr>";
 
-                line += "<tr><td><input checked='checked' type='checkbox' name='override'>" + ibiMsgStr['pmov'] + "<\/td><\/tr>";
+                if (b_hasActiveX) {
+                    try {
+                        if (ptype == ptypeEmail || mytable.tableJson.useActiveX) {
+                            line += "<tr><td><input checked='checked' type='checkbox' name='override'>" + ibiMsgStr['pmov'] + "<\/td><\/tr>";
+                        }
+                    } catch(e) {}
+                }
+
                 if (mytable.a_filter_body != null)
                     line += "<tr><td><input type='checkbox' name='filtered'>" + ibiMsgStr['pmfl'] + "<\/td><\/tr>";
                 if (ptype == ptypeEmail)
                     line += "<tr><td><input checked='checked' type='checkbox' name='savechange'>" + ibiMsgStr['pmsac'] + "<\/td><\/tr>";
                 if (ibiCompound.ibiLayout.length && MyTable.length > 1)
                     line += "<tr><td><input type='checkbox' name='saveAll'>" + ibiMsgStr['pmsal'] + "<\/td><\/tr>";
-                line += "<tr><td><table><tr><td style=\"white-space:nowrap;cursor:pointer\" onclick=\"ibiActiveX.Do_SaveAR(" + tablenumber + ")\">" +
+                line += "<tr><td><table><tr><td style=\"white-space:nowrap;cursor:pointer\" onclick=\"IDo_SaveAR(" +
+                    tablenumber + "," + ptype + ")\">" +
                     "<div width=\"100%\" class=\"arPromptButton\" style=\"cursor:pointer\">&nbsp;" +
                         ibiMsgStr['pmsre'] + "&nbsp;<\/div><\/td><\/tr><\/table><\/td><\/tr>";
             }
@@ -656,351 +722,7 @@ ActiveJSRevision["aractivex"]="$Revision: 20180327.1248 $";
         }
     }
 
-    function save_AR(tn) {
-        var mytable = getMyTable(tn);
-        var filename = 'c:\\ARsave.html';
-
-        if (fsObj == null) {
-            try {
-                fsObj = new ActiveXObject('Scripting.FileSystemObject');
-            }
-            catch (err) {
-                msappError();
-            }
-        }
-        if (!fsObj) return;
-        promptuser(ibiMsgStr['pmsav'], filename, 40, mytable.a_cntl.table_number, save_AR_now, ptypeSave);
-    }
-
-
-
-    function do_saveAR(tablenumber) {
-        var nF = null;
-        var filename = d.promptform.pvalue.value;
-        var doOverride = false;
-        var openBrowser = false;
-        var saveState = true;
-        var filtonly = false;
-        var saveCurOnly = true;
-
-        filename = filename.replace(/\\/g, '\\\\');
-        if (d.promptform.override.checked) doOverride = true;
-        if (d.promptform.openbrowser)
-            if (d.promptform.openbrowser.checked) openBrowser = true;
-        if (d.promptform.filtered)
-            if (d.promptform.filtered.checked) filtonly = true;
-        if (d.promptform.savechange)
-            if (!d.promptform.savechange.checked) saveState = false;
-        if (d.promptform.saveAll)
-            if (!d.promptform.saveAll.checked) saveCurOnly = false;
-        if (1) {
-            try {
-                /* -1, unicode format designator, fixes issue with writing out araesdecode.js */
-                var nF = fsObj.CreateTextFile(filename, doOverride, true);
-            }
-            catch (err) {
-                fnError(err);
-            }
-        }
-        if (nF) {
-            closewin(prompts.win);
-            prompts.win = -1;
-            prompts.callback(nF, tablenumber, false, filename, filtonly, openBrowser, saveState, saveCurOnly);
-        }
-        return false;
-    }
-
     function save_and_email(nF, tablenumber, x, filename, filtonly, openBrowser, saveState, saveCurOnly) {
-        save_AR_now(nF, tablenumber, true, filename, filtonly, openBrowser, saveState, saveCurOnly);
-    }
-
-    function getExternalJSFile(url) {
-        var IRreq = ibiUtil.GetXmlHttpObject();
-        if ((IRreq != null) && (url != "")) {
-            IRreq.open("GET", url, false);
-            IRreq.send(null);
-            if ((IRreq.readyState == 4) && (IRreq.status != 404))
-                return (IRreq.responseText);
-        }
-        return ("");
-    }
-
-    function dummyfix(str) {
-        var reg;
-        reg = new RegExp("SPACE", "g");
-        str = str.replace(reg, ' ');
-        return (str);
-    }
-
-    function save_AR_now(nF, tnumber, dosendemail, filename, filtonly, openBrowser, saveState, saveCurOnly, noScript) {
-        var x, i;
-        var dse = '\/\/-' + '-' + '>';
-        var metatag = '';
-        var ma = d.getElementsByTagName('META');
-        var sty = d.getElementById('ibiArCustomStyle');
-        var styUser = d.getElementById('ibiArCustomStyleUser');
-
-        if (ma)
-            for (i = 0; i < ma.length; i++) {
-            if (ma[i].httpEquiv != "")
-                metatag += '<' + 'meta http-Equiv="' + ma[i].httpEquiv + '" content="' + ma[i].content + '">\r\n';
-            else
-                if (ma[i].name != "")
-                metatag += '<' + 'meta name="' + ma[i].name + '" content="' + ma[i].content + '">\r\n';
-        }
-        var sahb = '<' + '!DOCTYPE html>\r\n' +
-            '<' + 'html>\r\n<' + 'head>\r\n' + metatag + '<' + 'title>WebFOCUS Active Report<\/title>\r\n';
-        if (sty) {
-            sahb += '<' + 'style id="ibiArCustomStyle" type="text/css">\r\n' + sty.innerHTML + '<\/style>\r\n';
-        }
-        if (styUser) {
-            sahb += '<' + 'style id="ibiArCustomStyleUser" type="text/css">\r\n' + styUser.innerHTML + '<\/style>\r\n';
-        }
-        var sahe = '<\/head>\r\n<' + 'body>\r\n';
-        var jsdisabledmsg = document.querySelector('noscript');
-        var ttcall = dse + '\r\n<' + '\/script>\r\n' +
-            '<' + 'script language="JavaScript">\r\n<' + '!' + '-' + '-\r\n' +
-            'genTables_delay();\r\n' +
-            dse + '\r\n<' + '\/script>\r\n';
-        var vainit = 'T_cont[NumOfTable]=new Array();\r\na_T_cont[NumOfTable]=new Array();\r\nb_T_cont[NumOfTable]=new Array();\r\n';
-        var ba = d.getElementsByTagName('BASE');
-        var sahi = '';
-        if (ba) {
-            for (var i = 0; i < ba.length; i++)
-                if (ba[i].href) sahi = '<base href="' + ba[i].href + '">\r\n';
-        } else sahi = '';
-
-        var sah = sahb + sahi + sahe;
-        if(jsdisabledmsg) {
-            sah += '<noscript>\r\n' + jsdisabledmsg.innerText + '\r\n<\/noscript>\r\n';
-        }
-        var dss = "\/\/startSPACEofSPACEjavascript"; // shorten eye catcher so that we dont break tscq.
-        dss = dummyfix(dss);
-        var pos = d.body.innerHTML.indexOf(dss) + dss.length;
-        var a = d.body.innerHTML.substr(pos);
-        var dss2 = "\/\/SPACEendSPACEofSPACEinclud"; // shorten eye catcher so that we dont break tscq.
-        dss2 = dummyfix(dss2);
-        var b = a.substr(0, a.lastIndexOf(dss2));
-        var g;
-        var mytable = null;
-        var end;
-
-        if (saveCurOnly) {
-            start = tnumber;
-            end = tnumber + 1;
-        } else {
-            start = 0;
-            end = MyTable.length;
-        }
-        if (!noScript) {
-            nF.Write(sah);
-            nF.Write('<' + 'script language="JavaScript">\r\n<' + '!--\r\n');
-            nF.Write(dss + '\r\n');
-            var hasScripts = d.getElementsByTagName("script");
-            if (hasScripts) {
-                var bb = '';
-                for (i = 0; i < hasScripts.length; i++) {
-                    //only way to get script is through AJAX call
-                    if (hasScripts[i].src != "") {
-                        var txt = getExternalJSFile(hasScripts[i].src) + "\r\n";
-                        nF.Write(txt);
-                    }
-                }
-            }
-            nF.Write(b + '\r\n');
-
-            nF.Write('\r\n' + dss2 + 'es\r\n' + dse + '\r\n<' + '\/SCRIPT>\r\n');
-            nF.Write('<' + 'script language="JavaScript">\r\n<' + '!--\r\n');
-        }
-        for (var tablenumber = start; tablenumber < end; tablenumber++) {
-            mytable = getMyTable(tablenumber);
-            if(mytable.isRollUp) continue;
-            var savt = mytable.ru_a_cntl.table_number;
-            mytable.ru_a_cntl.table_number = 0;
-
-            if (saveState) {
-                for (var j = 0; j < mytable.n_cols; j++)
-                    mytable.a_capt[j].popmenu = '<div id="popid' + (tablenumber - start) + '_' + j + '"><\/div>';
-                cstr = writeobjout(mytable.a_capt);
-                for (var j = 0; j < mytable.n_cols; j++)
-                    mytable.a_capt[j].popmenu = '<div id="popid' + tablenumber + '_' + j + '"><\/div>';
-            } else {
-                for (var j = 0; j < mytable.ru_a_capt.length; j++)
-                    mytable.ru_a_capt[j].popmenu = '<div id="popid' + (tablenumber - start) + '_' + j + '"><\/div>';
-                cstr = writeobjout(mytable.ru_a_capt);
-            }
-            nF.Write('T_capt[NumOfTable]=' + cstr + ';\r\n');
-
-            cstr = writeobjout(mytable.o_look.styles);
-            nF.Write('t_T_capt[NumOfTable]=' + cstr + ';\r\n');
-
-            cstr = writeobjout(mytable.ru_o_look);
-            nF.Write('T_look[NumOfTable]=' + cstr + ';\r\n');
-
-            var sanr = mytable.ru_a_cntl.NumRecords;
-            if (filtonly && mytable.a_filter_cont) mytable.ru_a_cntl.NumRecords = mytable.a_filter_cont.length;
-            else mytable.ru_a_cntl.NumRecords = mytable.a_all_cont.length;
-            cstr = writeobjout(mytable.ru_a_cntl);
-            mytable.ru_a_cntl.NumRecords = sanr;
-            nF.Write('T_cntl[NumOfTable]=' + cstr + ';\r\n');
-
-            nF.Write(vainit);
-
-            if (filtonly && mytable.a_filter_cont) cstr = writeobjout(mytable.a_filter_cont);
-            else cstr = writeobjout(mytable.a_all_cont);
-
-            nF.Write('T_cont[NumOfTable]= ' + cstr + ';\r\n');
-
-            cstr = writeobjout(mytable.acdLines);
-            nF.Write('a_T_cont[NumOfTable]=' + cstr + ';\r\n');
-
-            cstr = writeobjout(mytable.acdList);
-            nF.Write('b_T_cont[NumOfTable]=' + cstr + ';\r\n');
-
-            cstr1 = "'n_freeze_column':" + mytable.n_freeze_column + "," +
-                "'n_freeze_column_before_hide':" + mytable.n_freeze_column_before_hide + "," +
-                "'n_rows':" + mytable.n_rows + "," +
-                "'o_paging_n':" + mytable.o_paging.n + "," +
-                "'o_paging_c':" + mytable.o_paging.c + "," +
-                "'AccordionIsOn':" + mytable.AccordionIsOn + ",\r\n" +
-                "'a_sort':" + writeobjout(mytable.a_sort) + ",\r\n" +
-                "'top_aggregate':" + mytable.top_aggregate + "," +
-                "'bottom_aggregate':" + mytable.bottom_aggregate + "," +
-                "'WindowDisplay':'" + mytable.a_cntl.WindowDisplay + "'," +
-                "'groupSort':'" + mytable.groupSort + "'," +
-                "'calcType':" + mytable.calcType + "," +
-                "'sublevel':" + mytable.sublevel + "," +
-                "'reportView':" + mytable.a_cntl.reportView + "," +
-                "'showsubHF':" + mytable.showsubHF + ",\r\n";
-            if (mytable.org_capt) {
-                cstr1 += "'a_capt':" + writeobjout(mytable.a_capt) + ",\r\n";
-                cstr1 += "'a_capt_org':" + writeobjout(mytable.org_capt) + ",\r\n";
-                var sa = [];
-                for (var i = 0; i < mytable.bykeys.length; i++) {
-                    sa[i] = mytable.bykeys[i].subcalcData;
-                    mytable.bykeys[i].subcalcData = null;
-                }
-                cstr1 += "'bykeys':" + writeobjout(mytable.bykeys) + ",\r\n";
-                for (var i = 0; i < mytable.bykeys.length; i++) {
-                    mytable.bykeys[i].subcalcData = sa[i];
-                }
-            }
-            cstr1 += "'agg':[";
-            for (var i = 0; i < mytable.n_cols; i++) {
-                cstr1 += "{";
-                cstr1 += "'SUM':" + mytable.a_capt[i].SUM + ",";
-                cstr1 += "'MIN':" + mytable.a_capt[i].MIN + ",";
-                cstr1 += "'MAX':" + mytable.a_capt[i].MAX + ",";
-                cstr1 += "'AVG':" + mytable.a_capt[i].AVG + ",";
-                cstr1 += "'COU':" + mytable.a_capt[i].COU + ",";
-                cstr1 += "'DIS':" + mytable.a_capt[i].DIS + ",";
-                cstr1 += "'vispct':" + mytable.a_capt[i].vispct + ",";
-                cstr1 += "'haspro':" + mytable.a_capt[i].haspro + ",";
-                cstr1 += "'vis':" + mytable.a_capt[i].vis + ",";
-                cstr1 += "'b_hide':" + mytable.a_capt[i].b_hide;
-                cstr1 += "}";
-                if (i < (mytable.n_cols - 1)) cstr1 += ",";
-            }
-            cstr1 += "],\r\n";
-
-            cstr1 += "'rowselection':[";
-            var ff = 0;
-            var obody = mytable.a_all_body;
-            if (filtonly && mytable.a_filter_body)
-                obody = mytable.a_filter_body;
-            var ol = obody.length;
-            for (i = 0; i < ol; i++)
-                if (obody[i][1] == 1) {
-                ff = 1;
-                cstr1 += i + ',';
-            }
-            if (ff) cstr1 = cstr1.substr(0, cstr1.length - 1);
-            cstr1 += '],\r\n';
-            if (filtonly && mytable.a_filter_cont)
-                cstr1 += "'a_col_filter':[],\r\n";
-            else
-                cstr1 += "'a_col_filter':" + writeobjout(mytable.a_col_filter) + ",\r\n";
-
-            if (saveState)
-                if (mytable.acdNode) {
-                cstr1 += "'acdNode':[";
-                for (i = 0; i < mytable.acdList.length; i++) {
-                    cstr1 += mytable.acdNode[mytable.acdList[i]];
-                    if (i < mytable.acdList.length - 1) cstr1 += ",";
-                }
-                cstr1 += "],\r\n";
-            }
-            cstr1 += "'charts':[";
-            var ff = 0;
-            for (var i = 0; i < maxwindows; i++)
-                if ((pwn[i].table_number == mytable.a_cntl.table_number) &&
-                    ((pwn[i].type == typechart) || (pwn[i].type == typepivot))) {
-                if (ff == 1) cstr1 += "\r\n";
-                ff = 1;
-                pwn[i].chartinfo.saveable.saveXpos = pwn[i].xpos;
-                pwn[i].chartinfo.saveable.saveYpos = pwn[i].ypos;
-                pwn[i].chartinfo.saveable.saveWidth = pwn[i].width;
-                pwn[i].chartinfo.saveable.saveHeight = pwn[i].height;
-                cstr1 += "{'chartinfo':" + writeobjout(pwn[i].chartinfo.saveable) + "},";
-            }
-            if (ff) cstr1 = cstr1.substr(0, cstr1.length - 1);
-            cstr1 += ']\r\n';
-
-            if (saveState) nF.Write('T_saveARs[NumOfTable]={' + cstr1 + '};\r\n');
-            nF.Write('NumOfTable++;\r\n');
-
-            mytable.ru_a_cntl.table_number = savt;
-            for (var j = 0; j < mytable.ru_a_capt.length; j++)
-                mytable.ru_a_capt[j].popmenu = '<div id="popid' + savt + '_' + j + '"><\/div>';
-        }
-        
-        if(ibiStd.globalProps) {
-            nF.Write('ibiStd.globalProps=' + writeobjout(ibiStd.globalProps) + ';\r\n');
-        }
-
-        cstr = writeobjout(ARstrings, false);
-        nF.Write('ARstrings = ' + cstr + ';\r\n');
-        if (isMergeReports) {
-            nF.Write('isMergeReports=true;\r\n');
-        }
-        if (LayoutObjects.length) {
-            cstr = writeobjout(LayoutObjects, false);
-            nF.Write('LayoutObjects=' + cstr + ';\r\n');
-        }
-        if (LayoutSection.length) {
-            cstr = writeobjout(LayoutSection, false);
-            nF.Write('LayoutSection=' + cstr + ';\r\n');
-        }
-        if ((typeof (ibiSkin.Images) != 'undefined') && (typeof (ibiSkin.IMGARRAY) != 'undefined')) {
-            nF.Write('ibiSkin.IMGARRAY=[];\r\n');
-            cstr = writeobjout(ibiSkin.ImgGlobalStyle);
-            nF.Write('ibiSkin.ImgGlobalStyle = ' + cstr + ';\r\n');
-            nF.Write('ibiSkin.Images = [];\r\n');
-            for (var j = 0; j < ibiSkin.Images.length; j++) {
-                cstr = writeobjout(ibiSkin.Images[j]);
-                nF.Write('ibiSkin.Images[' + j + ']=' + cstr + ';\r\n');
-            }
-            if (ibiSkin.IMGARRAY.length) {
-                savehtml = [];
-                for (var j = 0; j < ibiSkin.IMGARRAY.length; j++) {
-                    savehtml[j] = ibiSkin.IMGARRAY[j].html;
-                    ibiSkin.IMGARRAY[j].html = null;
-                }
-                cstr = writeobjout(ibiSkin.IMGARRAY);
-                nF.Write('ibiSkin.IMGARRAY=' + cstr + ';\r\n');
-                for (var j = 0; j < ibiSkin.IMGARRAY.length; j++)
-                    ibiSkin.IMGARRAY[j].html = savehtml[j];
-            }
-        }
-        if (!noScript) {
-            nF.Write(ttcall);
-            nF.Write('<\/body>\r\n<\/html>');
-        }
-        nF.Close();
-        if (dosendemail) do_emailme(filename);
-        if (openBrowser) {
-            var url = 'file:///' + filename.replace(/\\\\/g, '/');
-            var nw = d.open(url, '_blank', '');
-        }
+        ISave_AR_now(nF, tablenumber, true, filename, filtonly, openBrowser, saveState, saveCurOnly);
     }
 })();

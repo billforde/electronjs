@@ -7,6 +7,7 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180628 1505 iys 204291 AHTML HFREEZE - Drillmenu does not display when clicked on
 * 160610 1256 hms 180534 Remove tab characters from source files
 * 160111 1243 iys 164189 AHTML:Different Date formats are displayed on IE (9, 10, 11)
 * 140520 1546 iys 156992 AHTML:Data highlighted in grid after delete a comment
@@ -17,7 +18,7 @@
 *-------------------------------------------------------------------*/
 /*Copyright 1996-2011 Information Builders, Inc. All rights reserved.*/
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arnote"]="$Revision: 20160610.1256 $";
+ActiveJSRevision["arnote"]="$Revision: 20180628.1505 $";
 (function() {
     var mytable = null;
 
@@ -170,8 +171,18 @@ function addNotetoCol(tablenumber,row,col,id,skip){
 //map from grid to array
     var td = new Date();
     var rrow,mytable,notes,ntype,obj,objCell,ntext,i;
+    var commentCellId = 'C' + id;
 
     mytable=getMyTable(tablenumber);
+
+    if(mytable.isHFreezeEnabled) {
+        commentCellId = commentCellId.replace(/Im/, 'I');
+
+        if(id.indexOf('m') === -1) {
+            id = id.replace(/I/, 'Im');
+        }
+    }
+
     rrow = mytable.a_f_body[row][0];
     if(skip!=true) {
         if(typeof(mytable.a_cont[rrow][col][DANOTE])=="undefined")
@@ -183,7 +194,7 @@ function addNotetoCol(tablenumber,row,col,id,skip){
         mytable.NotesToSet[mytable.NotesToSet.length]=[mytable.a_cntl.table_number,row,col,id];
     } 
 
-    obj = d.getElementById('C'+id);
+    obj = d.getElementById(commentCellId);
     objCell = d.getElementById(id);
 
     if(obj) {

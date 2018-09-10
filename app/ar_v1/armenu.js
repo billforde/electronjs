@@ -7,6 +7,7 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180626 1614 iys 204125 Running the AHTML Document after promoting Freeze enabled re
 * 180523 0959 bjd 194659 In-Document Analytics, menu pops up to left and you can't s
 * 180516 1445 bjd 194659 In-Document Analytics, menu pops up to left and you can't s
 * 180516 1123 bjd 194659 In-Document Analytics, menu pops up to left and you can't s
@@ -81,7 +82,7 @@
 //[p136411] Fix  javascript error with dashboard on mobile, when wmenu/wbody not defined.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["armenu"]="$Revision: 20180523.0959 $";
+ActiveJSRevision["armenu"]="$Revision: 20180626.1614 $";
 (function() {
     if (typeof(window.ibiMenu) !== 'undefined') {
         return;
@@ -973,12 +974,21 @@ function displayTab(dtype,tablenumber,twin)
                     //if(pwn[i].save_t!=null) pwn[i].dobj_t.innerHTML=pwn[i].save_t;
                     //if(pwn[i].save_e!=null) pwn[i].dobj_e.innerHTML=pwn[i].save_e;
                     wobj = d.getElementById('WCS'+i);
+
+                    if(mytable.isHFreezeEnabled) {
+                        wobj = pwn[i].dobj_t.querySelector('#WCS' + i);
+                    }
+
                     if(pwn[i].dobj_e) pwn[i].dobj_e.style.display='block';
                     if(pwn[i].dobj_t) pwn[i].dobj_t.style.display='block';
                     if(wobj) wobj.style.display='block';
                     divToWin(i);
                     maxwin(i);
                     pwn[i].obj.style.zIndex = mytable.zIndexCounter++;
+
+                    if(mytable.isHFreezeEnabled) {
+                        pwn[i].obj.style.zIndex += 100;
+                    }
                 }
             }
         }

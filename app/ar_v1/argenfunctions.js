@@ -7,6 +7,8 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180702 1542 wjf 202864 NLV: NLV issues in Active Report in WF8203
+* 180604 1600 bjd 203630 AHTML: Implement the Save Changes for non-IE browsers
 * 180312 1326 iys 200991 Mobile:Adaptive Dashboard:Doc with textbox and image click i
 * 180220 0915 wjf 200246 AHML: Unify JSON output
 * 180207 0849 bjd 200086 AHTML: PopUp Menu Title Bar disappears when switching to Tab
@@ -230,7 +232,7 @@
 //[p136963]  If ARDEFAULTHEAD=ORIGINAL then use the heading from the original report.
 // 
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["argenfunctions"]="$Revision: 20180312.1326 $";
+ActiveJSRevision["argenfunctions"]="$Revision: 20180702.1542 $";
 
 // capture keystrokes
 
@@ -1395,6 +1397,12 @@ function generateMenuArray(mytable,icon,column,type) {
     var col = column;
     var jj,ck,v,btype,spot,spot2,hidearray,pagenum,offset, j;
 
+
+    if(!globalOnly) {
+       if (mytable.a_capt[col].type == IBINUM) btype = 'SUM';
+       else btype = 'COU';
+    }
+
     if(mytable.isRollUp) {
         var ppmytable = getMyTable(mytable.parent_table);
         while(ppmytable.isRollUp) ppmytable = getMyTable(ppmytable.parent_table);
@@ -1542,8 +1550,6 @@ function generateMenuArray(mytable,icon,column,type) {
         if((do_chart)&&(!norecords)) {
 			if(!globalOnly) {
             var c;
-            if (mytable.a_capt[col].type == IBINUM) btype = 'SUM';
-            else btype = 'COU';
                 MI_POP[0][item_count] = [[ibiMsgStr['crt']], null, null,
                 [[ibiMsgStr['crtpie']],null,null],
                 [[ibiMsgStr['crtline']],null,null],
@@ -1770,10 +1776,10 @@ function generateMenuArray(mytable,icon,column,type) {
                     'ocv': 'sendemail',
                     'oc': 'ibiActiveX.EmailMe(' + tn + ')'
                 }];
-        if(do_save && b_hasActiveX) 
+        if(do_save) 
                 MI_POP[0][item_count++] = [[ibiMsgStr['xsar']], null, {
                     'ocv': 'save',
-                    'oc': 'ibiActiveX.Save_AR(' + tn + ')'
+                    'oc': 'ISave_AR(' + tn + ')'
                 }];
         if(do_export && (b_pda==false) && (!norecords)) {
                 MI_POP[0][item_count++] = (mytable.a_cntl.cacheMode)

@@ -7,6 +7,12 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180710 1623 iys 204340 Active HFREEZE in Page Designer which is too wide is being t
+* 180710 1525 iys 204340 Active HFREEZE in Page Designer which is too wide is being t
+* 180703 1255 iys 204295 ACTIVE HFREEZE - small report which fits in the contain show
+* 180628 1505 iys 204291 AHTML HFREEZE - Drillmenu does not display when clicked on
+* 180626 1539 iys 204125 Running the AHTML Document after promoting Freeze enabled re
+* 180620 1248 iys 204081 AHTML HFREEZE issues with SUBHEAD, column titles do not line
 * 180131 1430 iys 168850 NFR:AHTML FREEZING HEADINGS IN ACTIVE REPORT OUTPUT
 * 180125 1807 iys 168850 NFR:AHTML FREEZING HEADINGS IN ACTIVE REPORT OUTPUT
 * 180125 1507 iys 168850 NFR:AHTML FREEZING HEADINGS IN ACTIVE REPORT OUTPUT
@@ -36,7 +42,7 @@
 *-------------------------------------------------------------------*/
 /*Copyright 1996-2011 Information Builders, Inc. All rights reserved.*/
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
+ActiveJSRevision["ariosgrid"]="$Revision: 20180710.1623 $";
 //$Revision: 1.23 $
 //$Log: ariosgrid.js,v $
 //Revision 1.23  2014/04/10 20:19:58  Israel_Schulman
@@ -646,10 +652,6 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
                 mytable: mytable
             });
 
-            // if single page report, set middiv width to width of page so slides are positioned properly
-            if(!middiv.style.width) {
-                middiv.style.width = window.innerWidth + 'px';
-            }
             topdiv.style.display = 'none';
             tabdiv.style.display = 'none';
             botdiv.style.position = 'absolute';
@@ -743,12 +745,14 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
             var dataTableContainerWrapperWidth;
 
             var tableBorderAdjustment;
+            var tableHasNoWidth = mytable.a_cntl.table_div.width <= 0;
             var isContainerWiderThanTable;
 
             // grid elements (regular / frozen section grid)
             var bottomBar;
             var statusBar;
             var dataTable;
+            var slideWrapper;
             var dataTableContainer;
             var dataTableContainerWrapper;
 
@@ -788,6 +792,7 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
                 
                 bottomGuidanceRow = slide.querySelector('.arGrid').querySelector('tbody').children[2];
 
+                slideWrapper = container.querySelector('#iosfullscreenmid' + mytable.id);
                 iosBottomBar = container.querySelector('#iosfullscreenbot' + mytable.id);
                 hfreezeStatusBar = container.querySelector('#hfreezeStatusBarWrapper_' + mytable.id);
 
@@ -803,16 +808,26 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
                 columnHeadingsWidth = columnHeadingsTable.getBoundingClientRect().width;
                 columnHeadingsHeight = columnHeadingsTable.getBoundingClientRect().height - columnHeadingsGuideRow.getBoundingClientRect().height;
 
-                containerWidth = (isCompound) ? container.getBoundingClientRect().width : window.innerWidth;
+                if(tableHasNoWidth) {
+                    slideWrapper.style.width = '10000px';
+                    hfreezeStatusBarHeight = hfreezeStatusBar.getBoundingClientRect().height;
+                    iosBottomBarHeight = iosBottomBar.getBoundingClientRect().height; 
+                }
+
+                containerWidth = (isCompound && mytable.a_cntl.table_div.width) ? container.getBoundingClientRect().width : Math.min(
+                    dataTable.getBoundingClientRect().width,
+                    window.innerWidth
+                );
+                
                 // if single page report, allow for the height to be less than height of page if the data doesn't fill entire page
-                containerHeight = (isCompound) ? container.getBoundingClientRect().height : Math.min(
-                    dataTable.getBoundingClientRect().height + columnHeadingsHeight + hfreezeStatusBarHeight, 
+                containerHeight = (isCompound && mytable.a_cntl.table_div.height) ? container.getBoundingClientRect().height : Math.min(
+                    dataTable.getBoundingClientRect().height + columnHeadingsHeight + hfreezeStatusBarHeight + ((isStatusBarOnBottom) ? 0 : iosBottomBarHeight), 
                     window.innerHeight
                 );
 
                 columnHeadingsContainerWidth = containerWidth;
 
-                slideHeight = containerHeight;
+                slideHeight = containerHeight - iosBottomBarHeight;
 
                 isContainerWiderThanTable = columnHeadingsWidth < containerWidth;
 
@@ -825,9 +840,9 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
 
                 dataTableWidth = 
                 columnHeadingsTableWidth = 
-                dataTableContainerWrapperWidth = (isCompound && isContainerWiderThanTable) ? containerWidth : columnHeadingsWidth;
+                dataTableContainerWrapperWidth = (isContainerWiderThanTable) ? containerWidth : columnHeadingsWidth;
 
-                dataTableContainerWidth = (isCompound) ? containerWidth : columnHeadingsWidth;
+                dataTableContainerWidth = containerWidth;
 
                 // if status bar is outside of botdiv then subtract it from dataSection and slide height
                 if(!isStatusBarOnBottom) {
@@ -893,9 +908,14 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
                         container: unfrozenDataTableContainer,
                         content: unfrozenDataTable,
                         onScrollHandler: function(positionData) {
+                            var grandTotalUnfrozenTable = grandTotalUnfrozenRow.querySelector('table');
+
                             if(positionData.direction === 'left') {
                                 unfrozenColumnHeadingsContainer.style.left = positionData.value;
-                                grandTotalUnfrozenRow.querySelector('table').style.left = positionData.value;
+
+                                if(grandTotalUnfrozenTable) {
+                                    grandTotalUnfrozenTable.style.left = positionData.value;
+                                }
                             }
 
                             if(positionData.direction === 'top') {
@@ -914,6 +934,11 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
                 slide.style.height = slideHeight + 'px';
                 slide.style.border = 'none';
 
+                if(!isCompound) {
+                    iosBottomBar.style.width = 
+                    hfreezeStatusBar.style.width = containerWidth + 'px';
+                }
+
                 columnHeadingsTable.style.width = columnHeadingsTableWidth + 'px';
                 columnHeadingsContainer.style.position = 'relative';
                 columnHeadingsContainer.style.width = columnHeadingsContainerWidth + 'px';
@@ -930,7 +955,10 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
 
                 bottomGuidanceRow.style.display = 'none';
                 columnHeadingsGuideRow.style.display = 'none';
-
+                
+                if(tableHasNoWidth) {
+                    slideWrapper.style.width = Math.max(slide.offsetWidth, iosBottomBar.offsetWidth) + 'px';
+                }
 
                 // apply virtual scroll
                 virtualScroll = new ibiUtil.virtualScroll({
@@ -1064,7 +1092,10 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
 
         var ll = tbobj1.children[0].rows[0].cells.length;
         var r1 = tbobj1.children[0].rows[0];
-        var r2 = tbobj2.children[0].rows[0];
+        // find the first row which has an id attribute since if there is one or more SUBHEADs in the
+        // report, the first row will only contain one cell and cause an error in the loop below.
+        // data rows have an id set while subhead rows do not. 
+        var r2 = tbobj2.children[0].querySelector('tr[id]');
         var r3 = tbobj3.children[0].rows[0];
 
         for(var i =0; i < ll; i++) {
@@ -1375,17 +1406,19 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
                 container.appendChild(grandTotalTable);
 
                 setTimeout(function() {
-                    grandTotalTable.style.width = getComputedStyle(dataTable).width;
+                    if(ibiCompound.isCompoundReport) {
+                        grandTotalTable.style.width = getComputedStyle(dataTable).width;
+                    }
 
                     for(i=0; i<dataTableGrandTotalRow.children.length; i++) {
                         grandTotalRowWidths.push(getComputedStyle(dataTableGrandTotalRow.children[i]).width);
                     }
 
                     grandTotalTable.appendChild(dataTableGrandTotalRow);
-
+                    
                     for(i=0; i<dataTableGrandTotalRow.children.length; i++) {
                         dataTableGrandTotalRow.children[i].style.width = grandTotalRowWidths[i];
-                    }
+                    }                    
                 }, 0);
             }
         }
@@ -1456,6 +1489,7 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
                         tableHFreezePage.innerHTML = tempDiv.innerHTML;
                         ibi_add_popmenu(mytable);
                         tempDiv.style.left = '0';
+                        ibiNotes.AddNotesArray(mytable.id);
                     }
                 });
             }, 0);
@@ -2515,7 +2549,13 @@ ActiveJSRevision["ariosgrid"]="$Revision: 20180131.1430 $";
                         if(mytable.a_capt[j].name.wrap==" NOWRAP") dline += " nowrap ";
                         else
                         if(mytable.a_capt[j].name.wrap!=" ") dline += ' style="width:'+mytable.a_capt[j].name.wrap+'pt;" ';
-                        dline += '>'+ exp_str + val2 +cellstr + '<\/td>';
+
+                        if(mytable.isHFreezeEnabled) {
+                            dline += '><div style="padding: 2px 0;">'+ exp_str + val2 +cellstr + '</div><\/td>';
+                        } else {
+                            dline += '>'+ exp_str + val2 +cellstr + '<\/td>';
+                        }
+                        
                         a_[n_c++]=dline;
                         if((mytable.a_capt[j].vis) || (mytable.a_capt[j].vispct)|| (mytable.a_capt[j].haspro))  {
                             sind = valr[DARAW];

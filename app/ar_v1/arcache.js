@@ -7,6 +7,8 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180628 1000 wjf 199150 Vis:Filter Chart at runtime returns error, with Define and
+* 180605 1100 wjf 203663 Visualization: Two COMPUTEs in Y axis cause agent to crash
 * 180413 1750 wjf 200536 VIS: ESRI Map throws error in preview, when GEO_ALIASING is
 * 180413 1600 wjf 200536 VIS: ESRI Map throws error in preview, when GEO_ALIASING is
 * 180412 1605 wjf 200536 VIS: ESRI Map throws error in preview, when GEO_ALIASING is
@@ -257,7 +259,7 @@
 //[p147526] Make sure all fields are urlencoded when passed
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arcache"]="$Revision: 20180413.1750 $";
+ActiveJSRevision["arcache"]="$Revision: 20180628.1000 $";
 
 (function() {
 
@@ -320,6 +322,8 @@ function splitUpOriginalFex(orignalFex) {
                     i++;
                     varname = keywords[i];
                     varname = varname.split("/");
+                    keyW = varname[0];
+                    varname = keyW.split(";");
                     keyW = varname[0];
                     while ((keywords[i].indexOf(";") && (i < keywords.length)) < 0)
                         i++;
@@ -1575,7 +1579,7 @@ function IgetCUniqColVals(tnum,col,limit,filtered,aggType,aggBy,getMinMax,async,
                     defineOnly = false;
 			} else
 			if(excols == '') {
-				if(!mytable.a_capt[i].isDefine){
+				if(!mytable.a_capt[i].isDefine && !mytable.a_capt[i].isCompute){
 					excols = getCacheFieldName(mytable,i)+" ";
 				}
             }
@@ -1612,7 +1616,7 @@ function IgetCUniqColVals(tnum,col,limit,filtered,aggType,aggBy,getMinMax,async,
         cfunc = "COLMINMAX";
     }
     var extraCols = '';
-    if(defineOnly) {
+    if(defineOnly && excols!='') {
     	extraCols = "&AR_EXCOL=MAX."+excols;
 	}
     var centZero = (typeof mytable.a_cntl.cent0 !== 'undefined') ? '&AR_CZ=ON' : '';

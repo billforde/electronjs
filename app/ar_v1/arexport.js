@@ -7,6 +7,10 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180823 1206 bjd 103932 AHTML:Export to Excel:ACROSS column values be in heading
+* 180629 1043 bjd 103932 AHTML:Export to Excel/CSV:ACROSS column values be in heading
+* 180621 1615 bjd 203630 AHTML: Implement the Save Changes for non-IE browsers
+* 180604 1600 bjd 203630 AHTML: Implement the Save Changes for non-IE browsers
 * 180305 1222 bjd 167765 AHTML : Export to excel, % is exported as & #x25;
 * 171117 1034 bjd 198030 AHTML: Export to XML (Excel) does not respect Scientific No
 * 171018 1044 bjd 195755 Export an Active Report to HTML results in page number and
@@ -32,7 +36,7 @@
 *-------------------------------------------------------------------*/
 /*Copyright 1996-2011 Information Builders, Inc. All rights reserved.*/
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arexport"]="$Revision: 20180305.1222 $";
+ActiveJSRevision["arexport"]="$Revision: 20180823.1206 $";
 function IExportHTML(dofilter,do_print) {
     if(this.a_cntl.cacheMode) {
         IexportData(this.a_cntl.table_number,'HTML',dofilter);
@@ -242,6 +246,37 @@ function IExportCSV(dofilter) {
 }
 
 /**
+ * Get Excel Column Number based on numeric colNum
+ * colNum: excel 1-based number
+ */
+function getExlColNum(colNum) {
+    var AAA_COLUMN = 702; //(0-based) col with 3 letters
+    var alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+                    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+                    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+                    'Y', 'Z'];
+    var alphabetLen = alphabet.length;
+    var exlColStr = "";
+
+    --colNum;
+
+    if (colNum >= AAA_COLUMN) {
+        var aCol = colNum - alphabetLen;
+        var rem = AAA_COLUMN - alphabetLen;
+        exlColStr += alphabet[((aCol / rem) | 0) - 1];
+        exlColStr += alphabet[(((aCol % rem) / alphabetLen) | 0)];
+        exlColStr += alphabet[(((aCol % rem) % alphabetLen) | 0)];
+    } else if (colNum >= alphabetLen) {
+        exlColStr += alphabet[((colNum / alphabetLen) | 0) - 1];
+        exlColStr += alphabet[((colNum % alphabetLen) | 0)];
+    } else {
+        exlColStr = alphabet[colNum];
+    }
+
+    return exlColStr;
+} // end getExlColNum()
+
+/**
  * Get Excel Number and Currency format for type IBINUM which includes currency
  */
 function getExlNumFormat(focNumFmt) {
@@ -427,7 +462,8 @@ function IExportXML(dofilter) {
         xmlStyDef += '<\/Style>\r\n';
 
     var xmltab  = '<Worksheet ss:Name="AHTML">\r\n';
-        xmltab += '<Table ss:ExpandedColumnCount="'+this.n_cols+'" ss:ExpandedRowCount="'+(this.a_f_body.length+1)+'" x:FullColumns="1"\r\n';
+//        xmltab += '<Table ss:ExpandedColumnCount="'+this.n_cols+'" ss:ExpandedRowCount="'+(this.a_f_body.length+1)+'" x:FullColumns="1"\r\n';
+        xmltab += '<Table x:FullColumns="1"\r\n';
         xmltab += 'x:FullRows="1">\r\n';
 
     var xmlend  = '<\/Table>\r\n';
@@ -442,17 +478,55 @@ function IExportXML(dofilter) {
     cursor_wait();
 
     var etype, i, curCol, darawVal, dastrVal;
-    var cols = this.n_cols;
+    var cols = this.n_cols, actualNumCols = 0;
     var xmlStyles = "";
     var styles = {};
-    var xmlColHeading = '<Row>\r\n';
+    var xmlColHeading = '';
     for (i = 0; i < cols; i++) {
         curCol = this.a_capt[i];
         if (!curCol.noprint) {
             delete curCol.exlFormat;
+            ++actualNumCols;
         }
     }
 
+    var _getHeadFootString = function(headFoot, spanZero) {
+        var r, c, numRows, numCols, colSpan, cellValue;
+        var headFootStr = '';
+        for (r = 0, numRows = headFoot.length; r < numRows; ++r) {
+            headFootStr += '<Row>\r\n';
+            for (c = 0, numCols = headFoot[r].length; c < numCols; ++c) {
+                cellValue = headFoot[r][c].name
+                            .replace(/^\<tt\>/, "")
+                            .replace(/\<\/tt\>$/, "");
+
+                colSpan = headFoot[r][c].colspan * 1;
+
+                cellColSpan = '';
+                if (colSpan > 1) {
+                    cellColSpan = ' ss:MergeAcross="' + (colSpan - 1) + '"';
+                } else if (spanZero && (colSpan == 0)) {
+                    cellColSpan = ' ss:MergeAcross="' + (actualNumCols - 1) + '"';
+                }
+
+                headFootStr += '<Cell' + cellColSpan + '><Data ss:Type="String">'
+                                 + cellValue
+                                 + '<\/Data><\/Cell>\r\n';
+            }
+            headFootStr += '<\/Row>\r\n';
+        }
+        return headFootStr;
+    }; // end _getHeadFootString()
+
+    if (this.a_cntl.heading) {
+        xmlColHeading += _getHeadFootString(this.a_cntl.heading, true);
+    }
+
+    if (this.a_cntl.acheading) {
+        xmlColHeading += _getHeadFootString(this.a_cntl.acheading, false);
+    }
+
+    xmlColHeading += '<Row>\r\n'
     for (i = 0; i < cols; i++) {
         curCol = this.a_capt[i];
         if (!curCol.noprint) {
@@ -513,6 +587,11 @@ function IExportXML(dofilter) {
         linex+= '<\/Row>\r\n';
         if(expline) line[line.length] = linex;
     }
+
+    if (this.a_cntl.footing) {
+        line[line.length] = _getHeadFootString(this.a_cntl.footing, true);
+    }
+
     line[line.length]= xmlend;
 	var l = line.join();
 	var l64 = window.btoa(unescape(encodeURIComponent(l)));
@@ -540,5 +619,415 @@ function IExportPDF(dofilter) {
     if (this.a_cntl.cacheMode) {
         IexportData(this.a_cntl.table_number, 'PDF', dofilter);
         cursor_clear();
+    }
+}
+
+
+function getExternalJSFile(url) {
+    var IRreq = ibiUtil.GetXmlHttpObject();
+    if ((IRreq != null) && (url != "")) {
+        IRreq.open("GET", url, false);
+        IRreq.send(null);
+        if ((IRreq.readyState == 4) && (IRreq.status != 404))
+            return (IRreq.responseText);
+    }
+    return ("");
+}
+
+
+function ISave_AR(tn) {
+    var mytable = getMyTable(tn);
+    var filename = 'ARsave.html';
+
+    if (b_hasActiveX &&
+        (typeof mytable.tableJson !== 'undefined' && mytable.tableJson.useActiveX)) {
+        filename = 'c:\\' + filename;
+        if (window.ibiActiveX.fsObj == null) {
+            try {
+                window.ibiActiveX.fsObj = new ActiveXObject('Scripting.FileSystemObject');
+            }
+            catch (err) {
+                window.ibiActiveX.MsAppError();
+                return;
+            }
+        }
+    }
+
+    window.ibiActiveX.PromptUser(ibiMsgStr['pmsav'], filename, 40, mytable.a_cntl.table_number, ISave_AR_now, ptypeSave);
+}
+
+
+function IDo_SaveAR(tablenumber, ptype) {
+    var nF = null, useActiveX = false;
+    var mytable = getMyTable(tablenumber);
+    var doOverride  = (d.promptform.override &&
+                       d.promptform.override.checked) ? true : false;
+    var openBrowser = (d.promptform.openbrowser &&
+                       d.promptform.openbrowser.checked) ? true : false;
+    var filtonly    = (d.promptform.filtered &&
+                       d.promptform.filtered.checked) ? true : false;
+    var saveState   = (d.promptform.savechange &&
+                      !d.promptform.savechange.checked) ? false : true;
+    var saveCurOnly = (d.promptform.saveAll &&
+                      !d.promptform.saveAll.checked) ? false : true;
+    var filename = d.promptform.pvalue.value;
+
+    filename = filename.replace(/\\/g, '\\\\');
+
+    if (ptype == ptypeEmail) {
+        useActiveX = true;
+    } else {
+        try {
+            if (b_hasActiveX && window.ibiActiveX.fsObj &&
+                mytable.tableJson.useActiveX) {
+                useActiveX = true;
+            }
+        } catch (e) { }
+    }
+
+    if (useActiveX) {
+        try {
+            /* -1, unicode format designator, fixes issue with writing out araesdecode.js */
+            nF = window.ibiActiveX.fsObj.CreateTextFile(filename, doOverride, true);
+        }
+        catch (err) {
+            alert(err.message); //fnError(err);
+        }
+    }
+
+    closewin(window.ibiActiveX.Prompts.win);
+    window.ibiActiveX.Prompts.win = -1;
+    if ((useActiveX && nF) || !useActiveX) {
+        window.ibiActiveX.Prompts.callback(nF, tablenumber, false, filename, filtonly, openBrowser, saveState, saveCurOnly);
+    }
+
+    return false;
+}
+
+
+function ISave_AR_now(nF, tnumber, dosendemail, filename, filtonly, openBrowser, saveState, saveCurOnly, noScript) {
+    var htmlLines = "";
+    var x, i, j, ff, numElem, saveTableNum, saveNumRec, saveElems;
+    var dse = '\/\/-' + '-' + '>';
+    var metatag = '';
+    var ma = d.getElementsByTagName('META');
+    if (ma) {
+        for (i = 0, numElem = ma.length; i < numElem; i++) {
+            if (ma[i].httpEquiv != "") {
+                metatag += '<' + 'meta http-Equiv="' + ma[i].httpEquiv + '" content="' + ma[i].content + '">\r\n';
+            } else if (ma[i].name != "") {
+                metatag += '<' + 'meta name="' + ma[i].name + '" content="' + ma[i].content + '">\r\n';
+            }
+        }
+    }
+
+    var sahb = '<' + '!DOCTYPE html>\r\n' +
+        '<' + 'html>\r\n<' + 'head>\r\n' + metatag + '<' + 'title>WebFOCUS Active Report<\/title>\r\n';
+
+    var sty = d.getElementById('ibiArCustomStyle');
+    if (sty) {
+        sahb += '<' + 'style id="ibiArCustomStyle" type="text/css">\r\n' + sty.innerHTML + '<\/style>\r\n';
+    }
+
+    var styUser = d.getElementById('ibiArCustomStyleUser');
+    if (styUser) {
+        sahb += '<' + 'style id="ibiArCustomStyleUser" type="text/css">\r\n' + styUser.innerHTML + '<\/style>\r\n';
+    }
+
+    var sahe = '<\/head>\r\n<' + 'body>\r\n';
+    var ttcall = dse + '\r\n<' + '\/script>\r\n' +
+        '<' + 'script language="JavaScript">\r\n<' + '!' + '-' + '-\r\n' +
+        'genTables_delay();\r\n' +
+        dse + '\r\n<' + '\/script>\r\n';
+    var vainit = 'T_cont[NumOfTable]=new Array();\r\na_T_cont[NumOfTable]=new Array();\r\nb_T_cont[NumOfTable]=new Array();\r\n';
+
+    var ba = d.getElementsByTagName('BASE');
+    var sahi = '';
+    if (ba) {
+        for (i = 0, numElem = ba.length; i < numElem; i++) {
+            if (ba[i].href) {
+                sahi = '<base href="' + ba[i].href + '">\r\n';
+            }
+        }
+    }
+
+    var sah = sahb + sahi + sahe;
+    var jsdisabledmsg = document.querySelector('noscript');
+    if (jsdisabledmsg) {
+        sah += '<noscript>\r\n' + jsdisabledmsg.innerText + '\r\n<\/noscript>\r\n';
+    }
+    var dss = "\/\/startSPACEofSPACEjavascript"; // shorten eye catcher so that we dont break tscq.
+    dss = dss.replace(/SPACE/g, ' ');  // dummyfix(dss);
+    var pos = d.body.innerHTML.indexOf(dss) + dss.length;
+    var a = d.body.innerHTML.substr(pos);
+    var dss2 = "\/\/SPACEendSPACEofSPACEinclud"; // shorten eye catcher so that we dont break tscq.
+    dss2 = dss2.replace(/SPACE/g, ' '); // dummyfix(dss2);
+    var b = a.substr(0, a.lastIndexOf(dss2));
+    var g;
+    var mytable = null;
+    var start, end;
+
+    if (saveCurOnly) {
+        start = tnumber;
+        end = tnumber + 1;
+    } else {
+        start = 0;
+        end = MyTable.length;
+    }
+
+    if (!noScript) {
+        htmlLines += sah;
+        htmlLines += ('<' + 'script language="JavaScript">\r\n<' + '!--\r\n');
+        htmlLines += (dss + '\r\n');
+        var hasScripts = d.getElementsByTagName("script");
+        if (hasScripts) {
+            var txt, bb = '';
+            for (i = 0, numElem = hasScripts.length; i < numElem; i++) {
+                //only way to get script is through AJAX call
+                if (hasScripts[i].src != "") {
+                    txt = getExternalJSFile(hasScripts[i].src) + "\r\n";
+                    htmlLines += txt;
+                }
+            }
+        }
+        htmlLines += (b + '\r\n');
+
+        htmlLines += ('\r\n' + dss2 + 'es\r\n' + dse + '\r\n<' + '\/SCRIPT>\r\n');
+        htmlLines += ('<' + 'script language="JavaScript">\r\n<' + '!--\r\n');
+    }
+
+    for (var tablenumber = start; tablenumber < end; tablenumber++) {
+        mytable = getMyTable(tablenumber);
+        if (mytable.isRollUp) continue;
+
+        saveTableNum = mytable.ru_a_cntl.table_number;
+        mytable.ru_a_cntl.table_number = 0;
+
+        if (saveState) {
+            numElem = mytable.a_capt.length;
+            for (j = 0; j < numElem; j++) {
+                mytable.a_capt[j].popmenu = '<div id="popid' + (tablenumber - start) + '_' + j + '"><\/div>';
+            }
+            cstr = writeobjout(mytable.a_capt);
+            for (j = 0; j < numElem; j++) {
+                mytable.a_capt[j].popmenu = '<div id="popid' + tablenumber + '_' + j + '"><\/div>';
+            }
+        } else {
+            for (j = 0, numElem = mytable.ru_a_capt.length; j < numElem; j++) {
+                mytable.ru_a_capt[j].popmenu = '<div id="popid' + (tablenumber - start) + '_' + j + '"><\/div>';
+            }
+            cstr = writeobjout(mytable.ru_a_capt);
+        }
+        htmlLines += ('T_capt[NumOfTable]=' + cstr + ';\r\n');
+
+        cstr = writeobjout(mytable.o_look.styles);
+        htmlLines += ('t_T_capt[NumOfTable]=' + cstr + ';\r\n');
+
+        cstr = writeobjout(mytable.ru_o_look);
+        htmlLines += ('T_look[NumOfTable]=' + cstr + ';\r\n');
+
+        saveNumRec = mytable.ru_a_cntl.NumRecords;
+        mytable.ru_a_cntl.NumRecords = (filtonly && mytable.a_filter_cont)
+            ? mytable.a_filter_cont.length
+            : mytable.a_all_cont.length;
+        cstr = writeobjout(mytable.ru_a_cntl);
+        htmlLines += ('T_cntl[NumOfTable]=' + cstr + ';\r\n');
+        mytable.ru_a_cntl.NumRecords = saveNumRec;
+
+        htmlLines += vainit;
+
+        cstr = (filtonly && mytable.a_filter_cont)
+            ? writeobjout(mytable.a_filter_cont)
+            : writeobjout(mytable.a_all_cont);
+        htmlLines += ('T_cont[NumOfTable]= ' + cstr + ';\r\n');
+
+        cstr = writeobjout(mytable.acdLines);
+        htmlLines += ('a_T_cont[NumOfTable]=' + cstr + ';\r\n');
+
+        cstr = writeobjout(mytable.acdList);
+        htmlLines += ('b_T_cont[NumOfTable]=' + cstr + ';\r\n');
+
+        cstr1 = "'n_freeze_column':" + mytable.n_freeze_column + "," +
+            "'n_freeze_column_before_hide':" + mytable.n_freeze_column_before_hide + "," +
+            "'n_rows':" + mytable.n_rows + "," +
+            "'o_paging_n':" + mytable.o_paging.n + "," +
+            "'o_paging_c':" + mytable.o_paging.c + "," +
+            "'AccordionIsOn':" + mytable.AccordionIsOn + ",\r\n" +
+            "'a_sort':" + writeobjout(mytable.a_sort) + ",\r\n" +
+            "'top_aggregate':" + mytable.top_aggregate + "," +
+            "'bottom_aggregate':" + mytable.bottom_aggregate + "," +
+            "'WindowDisplay':'" + mytable.a_cntl.WindowDisplay + "'," +
+            "'groupSort':'" + mytable.groupSort + "'," +
+            "'calcType':" + mytable.calcType + "," +
+            "'sublevel':" + mytable.sublevel + "," +
+            "'reportView':" + mytable.a_cntl.reportView + "," +
+            "'showsubHF':" + mytable.showsubHF + ",\r\n";
+        if (mytable.org_capt) {
+            cstr1 += "'a_capt':" + writeobjout(mytable.a_capt) + ",\r\n";
+            cstr1 += "'a_capt_org':" + writeobjout(mytable.org_capt) + ",\r\n";
+            saveElems = [];
+            numElem = mytable.bykeys.length;
+            for (i = 0; i < numElem; i++) {
+                saveElems[i] = mytable.bykeys[i].subcalcData;
+                mytable.bykeys[i].subcalcData = null;
+            }
+            cstr1 += "'bykeys':" + writeobjout(mytable.bykeys) + ",\r\n";
+            for (i = 0; i < numElem; i++) {
+                mytable.bykeys[i].subcalcData = saveElems[i];
+            }
+        }
+        cstr1 += "'agg':[";
+        for (i = 0, numElem = mytable.a_capt.length; i < numElem; i++) {
+            cstr1 += "{";
+            cstr1 += "'SUM':" + mytable.a_capt[i].SUM + ",";
+            cstr1 += "'MIN':" + mytable.a_capt[i].MIN + ",";
+            cstr1 += "'MAX':" + mytable.a_capt[i].MAX + ",";
+            cstr1 += "'AVG':" + mytable.a_capt[i].AVG + ",";
+            cstr1 += "'COU':" + mytable.a_capt[i].COU + ",";
+            cstr1 += "'DIS':" + mytable.a_capt[i].DIS + ",";
+            cstr1 += "'vispct':" + mytable.a_capt[i].vispct + ",";
+            cstr1 += "'haspro':" + mytable.a_capt[i].haspro + ",";
+            cstr1 += "'vis':" + mytable.a_capt[i].vis + ",";
+            cstr1 += "'b_hide':" + mytable.a_capt[i].b_hide;
+            cstr1 += "}";
+            if (i < (mytable.n_cols - 1)) cstr1 += ",";
+        }
+        cstr1 += "],\r\n";
+
+        cstr1 += "'rowselection':[";
+        ff = 0;
+        var obody = (filtonly && mytable.a_filter_body)
+            ? mytable.a_filter_body
+            : mytable.a_all_body;
+        var ol = obody.length;
+        for (i = 0; i < ol; i++) {
+            if (obody[i][1] == 1) {
+                ff = 1;
+                cstr1 += i + ',';
+            }
+        }
+        if (ff) {
+            cstr1 = cstr1.substr(0, cstr1.length - 1);
+        }
+        cstr1 += '],\r\n';
+        if (filtonly && mytable.a_filter_cont)
+            cstr1 += "'a_col_filter':[],\r\n";
+        else
+            cstr1 += "'a_col_filter':" + writeobjout(mytable.a_col_filter) + ",\r\n";
+
+        if (saveState && mytable.acdNode) {
+            cstr1 += "'acdNode':[";
+            for (i = 0, numElem = mytable.acdList.length; i < numElem; i++) {
+                cstr1 += mytable.acdNode[mytable.acdList[i]];
+                if (i < mytable.acdList.length - 1) cstr1 += ",";
+            }
+            cstr1 += "],\r\n";
+        }
+        cstr1 += "'charts':[";
+        ff = 0;
+        for (var i = 0; i < maxwindows; i++) {
+            if ((pwn[i].table_number == mytable.a_cntl.table_number) &&
+                ((pwn[i].type == typechart) || (pwn[i].type == typepivot))) {
+                if (ff == 1) cstr1 += "\r\n";
+                ff = 1;
+                pwn[i].chartinfo.saveable.saveXpos = pwn[i].xpos;
+                pwn[i].chartinfo.saveable.saveYpos = pwn[i].ypos;
+                pwn[i].chartinfo.saveable.saveWidth = pwn[i].width;
+                pwn[i].chartinfo.saveable.saveHeight = pwn[i].height;
+                cstr1 += "{'chartinfo':" + writeobjout(pwn[i].chartinfo.saveable) + "},";
+            }
+        }
+        if (ff) {
+            cstr1 = cstr1.substr(0, cstr1.length - 1);
+        }
+        cstr1 += ']\r\n';
+
+        if (saveState) {
+            htmlLines += ('T_saveARs[NumOfTable]={' + cstr1 + '};\r\n');
+        }
+        htmlLines += 'NumOfTable++;\r\n';
+
+        mytable.ru_a_cntl.table_number = saveTableNum;
+        for (j = 0, numElem = mytable.ru_a_capt.length; j < numElem; j++) {
+            mytable.ru_a_capt[j].popmenu = '<div id="popid' + saveTableNum + '_' + j + '"><\/div>';
+        }
+    }
+
+    if (ibiStd.globalProps) {
+        htmlLines += ('ibiStd.globalProps=' + writeobjout(ibiStd.globalProps) + ';\r\n');
+    }
+
+    cstr = writeobjout(ARstrings, false);
+    htmlLines += ('ARstrings = ' + cstr + ';\r\n');
+    if (isMergeReports) {
+        htmlLines += 'isMergeReports=true;\r\n';
+    }
+    if (LayoutObjects.length) {
+        cstr = writeobjout(LayoutObjects, false);
+        htmlLines += ('LayoutObjects=' + cstr + ';\r\n');
+    }
+    if (LayoutSection.length) {
+        cstr = writeobjout(LayoutSection, false);
+        htmlLines += ('LayoutSection=' + cstr + ';\r\n');
+    }
+    if ((typeof (ibiSkin.Images) != 'undefined') &&
+        (typeof (ibiSkin.IMGARRAY) != 'undefined')) {
+        htmlLines += 'ibiSkin.IMGARRAY=[];\r\n';
+        cstr = writeobjout(ibiSkin.ImgGlobalStyle);
+        htmlLines += ('ibiSkin.ImgGlobalStyle = ' + cstr + ';\r\n');
+        htmlLines += 'ibiSkin.Images = [];\r\n';
+        for (j = 0, numElem = ibiSkin.Images.length; j < numElem; j++) {
+            cstr = writeobjout(ibiSkin.Images[j]);
+            htmlLines += ('ibiSkin.Images[' + j + ']=' + cstr + ';\r\n');
+        }
+        if (ibiSkin.IMGARRAY.length) {
+            saveElems = [];
+            numElem = ibiSkin.IMGARRAY.length;
+            for (j = 0; j < numElem; j++) {
+                saveElems[j] = ibiSkin.IMGARRAY[j].html;
+                ibiSkin.IMGARRAY[j].html = null;
+            }
+            cstr = writeobjout(ibiSkin.IMGARRAY);
+            htmlLines += ('ibiSkin.IMGARRAY=' + cstr + ';\r\n');
+            for (j = 0; j < numElem; j++) {
+                ibiSkin.IMGARRAY[j].html = saveElems[j];
+            }
+        }
+    }
+    if (!noScript) {
+        htmlLines += ttcall;
+        htmlLines += '<\/body>\r\n<\/html>';
+    }
+
+    if (nF) {
+        nF.Write(htmlLines);
+        nF.Close();
+    } else {
+        var blob = new Blob([htmlLines],
+            { type: "text/plain;charset=" + document.characterSet });
+
+        if (navigator.msSaveBlob) {
+            navigator.msSaveBlob(blob, filename);
+        } else {
+            var downloadLink = document.createElement("a");
+            if (downloadLink.download !== 'undefined') {
+                var url = URL.createObjectURL(blob);
+                downloadLink.setAttribute("href", url);
+                downloadLink.setAttribute("download", filename);
+                downloadLink.style.visibility = "hidden";
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }
+        }
+    }
+
+    if (b_hasActiveX && dosendemail) {
+        window.ibiActiveX.DoEmailMe(filename);
+    }
+
+    if (openBrowser) {
+        var url = 'file:///' + filename.replace(/\\\\/g, '/');
+        var nw = d.open(url, '_blank', '');
     }
 }

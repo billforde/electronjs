@@ -7,6 +7,10 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180710 1155 wjf 204537 AHTML:Exclude from chart / Undo Filter not working properly
+* 180628 1121 wjf 202452 Vis : Running "Missing" value filtered chart throws error
+* 180614 1130 wjf 203644 Issue loading Scatter plot in Visualization mode
+* 180612 1104 wjf 203644 Issue loading Scatter plot in Visualization mode
 * 180416 1050 wjf 202085 Hiding the filter prompt title, hides the prompt drop-down i
 * 180329 1145 wjf 201527 Document Canvas: Type any text inside "Edit box" throws "Web
 * 180326 1420 wjf 200478 Filter prompt showing additional unselected values, which wa
@@ -413,7 +417,7 @@
 //[p135287] FIx issue with border around pivot not being sized correctly why toggling between layouts.
 // 
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arcompound"]="$Revision: 20180416.1050 $";
+ActiveJSRevision["arcompound"]="$Revision: 20180710.1155 $";
 
 (function() {
 
@@ -759,6 +763,11 @@ ActiveJSRevision["arcompound"]="$Revision: 20180416.1050 $";
             }
 
             var fcomp = this;
+            var recordLimit = arConstants.RECLIMIT;
+            if(this.limitDataProvider) {
+                recordLimit = 1;
+            }
+
             var cb = function(db) {
                 fcomp.dataProvider=db;
                 fcomp.processDataProviderCallBack();
@@ -794,10 +803,10 @@ ActiveJSRevision["arcompound"]="$Revision: 20180416.1050 $";
                             if (!this.children.length)
                                 top_level_filter.filter_chain_values = null;
                         } else {
-                            this.dataProvider = this.mytable.getUniqValues(this.col, this.dataProvider, null, arConstants.RECLIMIT, this.showFiltered, null, this.aggType, bycol,undefined,async,cb);
+                            this.dataProvider = this.mytable.getUniqValues(this.col, this.dataProvider, null, recordLimit, this.showFiltered, null, this.aggType, bycol,undefined,async,cb);
                         }
                     } else {
-                        this.dataProvider = this.mytable.getUniqValues(this.col, this.dataProvider, null, arConstants.RECLIMIT, this.showFiltered, null, this.aggType, bycol,undefined,async,cb);
+                        this.dataProvider = this.mytable.getUniqValues(this.col, this.dataProvider, null, recordLimit, this.showFiltered, null, this.aggType, bycol,undefined,async,cb);
                     }
                 }
             }
@@ -835,6 +844,12 @@ ActiveJSRevision["arcompound"]="$Revision: 20180416.1050 $";
     function GetMultiFilterValue(comp,val,fromZero) {
         var indx = -1;
         var i,j;
+        if(comp.limitDataProvider) {
+            if(typeof val == "object")
+                return val;
+            else
+            return val.split(arSet.FILTER_SEPARATOR_OPTIONAL);
+        } else
         if(comp.dataProvider && comp.dataProvider.length>4) {
             indx = inarray(comp.dataProvider[1], val, true);
             if (indx < 0)
@@ -948,7 +963,7 @@ ActiveJSRevision["arcompound"]="$Revision: 20180416.1050 $";
                     }
                 }
             }
-            if(vals == MISSING_STR)
+            if((vals == MISSING_STR)|| (vals == "_FOC_MISSING" ))
                 this.values[i] = missingVal;
             else
             switch (this.filter_datatype) {

@@ -7,6 +7,8 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180802 1151 wjf 204361 Visualization runtime Show Data displays incorrect value
+* 180628 1402 wjf 204361 Visualization run time Show Data display incorrect value
 * 171220 1311 wjf 198693 Vis: Drilldown on map doesn't work correctly at run time, w
 * 171106 1450 wjf 195749 Vis Esri map run time 'show data' shows layer twice
 * 171106 1423 wjf 195281 Vis : Run time tool bar menu - Show data displaying  sort v
@@ -100,7 +102,7 @@
 //[p135287] FIx issue with border around pivot not being sized correctly why toggling between layouts.
 // 
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arpivot"]="$Revision: 20171220.1311 $";
+ActiveJSRevision["arpivot"]="$Revision: 20180802.1151 $";
 
 (function() {
 
@@ -1162,6 +1164,8 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
     //mytable.a_cntl.cacheMode = false;
     //mytable.haveFilters = false;
     
+	var sv_capt = mytable.a_capt;
+	mytable.a_capt = capto;
     if(columnBucket.length>0) {
         HorzTree = mytable.getPivTree(columnBucket);
         nx = HorzTree.length;
@@ -1175,6 +1179,7 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
         else
             ny = 1;
     }
+	mytable.a_capt = sv_capt;
     mytable.a_cntl.cacheMode = sv1;
     mytable.haveFilters = sv2;
 
@@ -1334,6 +1339,9 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
             PAr[x+1][xpos][DATYP]=1;
             PAr[x+1][xpos][DARAW]=str;
             PAr[x+1][xpos][8] = '';
+            PAr[x+1][xpos][DAREC] = {'value':str,'type':'column'};
+            PAr[x+1][xpos][DARECCOL] = columnBucket[j];
+            PAr[x+1][xpos][DARECSTR] = str;
             if(number_of_measures>1)
                 PAr[x+1][xpos][8]=' colspan="'+number_of_measures+'" ';
             if(show)
@@ -1388,15 +1396,20 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
             PAr[i+row][counter][DACLS]='class="IBIS'+tnc+'_'+VertTree[i][j][DACLS]+'" '+mytable.getColumnStyle(capt[j+columnBucket.length].orgCol,i,i+1,mytable.a_cont[0],'x',capt[j+columnBucket.length].orgCol);
             PAr[i+row][counter][DATYP]=1;
             PAr[i+row][counter][DARAW]=str;
-            if(show)
+			if(show) {
                 PAr[i+row][counter][DASTR]=str;
-            else
+               	PAr[i+row][counter][DAREC] = {'value':str,'type':'row'};
+			    PAr[i+row][counter][DARECCOL] = rowBucket[j];
+               	PAr[i + row][counter][DARECSTR] = str;
+
+            } else
                 PAr[i+row][counter][DASTR]="&nbsp;";
         }
         counter++;
     }
     
     var pgt = '';
+	var fval;
     if(measureBucket.length) {
         captObj = capt[y_cols.length];
         if(captObj.noprint) {
@@ -1450,10 +1463,17 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
                 href = mytable.getHrefNode(mytable.o_look.styles,ucol,i);
             if(href !=null) {
                 href = mytable.setHrefValues(href,cont[i]);
-                val = href + FocusFormat(ii,captObj.format,cntl.cdn,cntl.cursym) + "<\/a>";
+                fval = ii;
+                if(fval != missingVal)
+                    fval = ibiStd.ibiNumberToFormat(fval,captObj.format);
+                val = href + FocusFormat(fval,captObj.format,cntl.cdn,cntl.cursym) + "<\/a>";
                 PAr[y+yy][xpos+rowBucket.length][DASTR] = val;
                 PAr[y+yy][xpos+rowBucket.length][DATYP] = 1;
             }
+            fval = ii;
+            if(fval != missingVal)
+                fval = ibiStd.ibiNumberToFormat(fval,captObj.format);
+            PAr[y+yy][xpos+rowBucket.length][DARECSTR] = FocusFormat(fval,captObj.format,cntl.cdn,cntl.cursym);
 
             var tpos = number_of_columns-(number_of_measures-j);
             if(columnBucket.length>0) {
@@ -1463,7 +1483,10 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
                     PAr[y+yy][tpos][DARAW]= ii;
                     //PAr[y+yy][tpos][DACLS]='class="IBIS'+tnc+'_'+s[DACLS]+'" '+mytable.getColumnStyle(capt[nrcols+j].orgCol,i,y+1,cont[i],'x',capt[nrcols+j].orgCol);
                     PAr[y+yy][tpos][DACLS]='class="IBIS'+tnc+'_'+s[DACLS]+'" '+mytable.getReportStyle("STRING",ST_GRANDTOTAL,capt[j+y_cols.length].orgCol)+';text-align:right;align:right;"';
-                    PAr[y+yy][tpos][DASTR]=FocusFormat(ii,captObj.format,cntl.cdn,cntl.cursym);
+                    fval = ii;
+                    if(fval != missingVal)
+                        fval = ibiStd.ibiNumberToFormat(fval,captObj.format);
+					PAr[y+yy][tpos][DASTR]=FocusFormat(fval,captObj.format,cntl.cdn,cntl.cursym);
                     PAr[y+yy][tpos][DACNT]=1;
                 } else {
                     PAr[y+yy][tpos][DACNT]++;
@@ -1474,7 +1497,10 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
                         if(ii>PAr[y+yy][tpos][DARAW])PAr[y+yy][number_of_columns-1][DARAW] = ii;
                     } else
                         PAr[y+yy][tpos][DARAW]+=ii;
-                    PAr[y+yy][tpos][DASTR]=FocusFormat(PAr[y+(columnBucket.length*2)+1][tpos][DARAW],captObj.format,cntl.cdn,cntl.cursym);
+                    fval = PAr[y+(columnBucket.length*2)+1][tpos][DARAW];
+                    if(fval != missingVal)
+                        fval = ibiStd.ibiNumberToFormat(fval,captObj.format);
+					PAr[y+yy][tpos][DASTR]=FocusFormat(fval,captObj.format,cntl.cdn,cntl.cursym);
                 }
             }
             
@@ -1486,7 +1512,10 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
                         PAr[number_of_rows-1][xpos+rowBucket.length][DACNT]=1;
                         PAr[number_of_rows-1][xpos+rowBucket.length][DARAW]=ii;
                         PAr[number_of_rows-1][xpos+rowBucket.length][DACLS]='class="IBIS'+tnc+'_'+s[DACLS]+'" '+mytable.getReportStyle("STRING",ST_GRANDTOTAL,capt[j+y_cols.length].orgCol)+';text-align:right;align:right;"';
-                        PAr[number_of_rows-1][xpos+rowBucket.length][DASTR]=FocusFormat(ii,captObj.format,cntl.cdn,cntl.cursym);
+                        fval = ii;
+                        if(fval != missingVal)
+                            fval = ibiStd.ibiNumberToFormat(fval,captObj.format);
+						PAr[number_of_rows-1][xpos+rowBucket.length][DASTR]=FocusFormat(fval,captObj.format,cntl.cdn,cntl.cursym);
                     } else {
                         PAr[number_of_rows-1][xpos+rowBucket.length][DACNT]++;
                         if(btypeArray[0]=='MIN') {
@@ -1496,7 +1525,10 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
                             if(ii>PAr[number_of_rows-1][xpos+rowBucket.length][DARAW])PAr[number_of_rows-1][xpos+rowBucket.length][DARAW] = ii;
                         } else
                             PAr[number_of_rows-1][xpos+rowBucket.length][DARAW]+=ii;
-                        PAr[number_of_rows-1][xpos+rowBucket.length][DASTR]=FocusFormat(PAr[number_of_rows-1][xpos+rowBucket.length][DARAW],captObj.format,cntl.cdn,cntl.cursym);
+						fval = PAr[number_of_rows-1][xpos+rowBucket.length][DARAW];
+						if(fval != missingVal)
+							fval = ibiStd.ibiNumberToFormat(fval,captObj.format);
+						PAr[number_of_rows-1][xpos+rowBucket.length][DASTR]=FocusFormat(fval,captObj.format,cntl.cdn,cntl.cursym);
                     }
                 }
                 if(columnBucket.length>0) {
@@ -1514,7 +1546,10 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
                         } else
                             PAr[number_of_rows-1][tpos][DARAW] += ii;
                     }
-                    PAr[number_of_rows-1][tpos][DASTR]=FocusFormat(PAr[number_of_rows-1][tpos][DARAW],captObj.format,cntl.cdn,cntl.cursym);
+                    fval = PAr[number_of_rows-1][tpos][DARAW];
+                    if(fval != missingVal)
+                        fval = ibiStd.ibiNumberToFormat(fval,captObj.format);
+					PAr[number_of_rows-1][tpos][DASTR]=FocusFormat(fval,captObj.format,cntl.cdn,cntl.cursym);
                 }
             }
         }
@@ -1531,17 +1566,26 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
             for(i=0; i<nyy; i++)
                 if(PAr[i+yy][nx-1]!=null) {
                     PAr[i+yy][nx-1][DARAW]=PAr[i+yy][nx-1][DARAW]/PAr[i+yy][nx-1][DACNT];
-                    PAr[i+yy][nx-1][DASTR]=FocusFormat(PAr[i+yy][nx-1][DARAW],captObj.format,cntl.cdn,cntl.cursym);
+                    fval = PAr[i+yy][nx-1][DARAW];
+                    if(fval != missingVal)
+                        fval = ibiStd.ibiNumberToFormat(fval,captObj.format);
+					PAr[i+yy][nx-1][DASTR]=FocusFormat(fval,captObj.format,cntl.cdn,cntl.cursym);
                 }
             if(rowBucket.length>0)
             for(i=0; i<nxx; i++)
                 if(PAr[ny-1][i+rowBucket.length]!=null) {
                     PAr[ny-1][i+rowBucket.length][DARAW]=PAr[ny-1][i+rowBucket.length][DARAW]/PAr[ny-1][i+rowBucket.length][DACNT];
-                    PAr[ny-1][i+rowBucket.length][DASTR]=FocusFormat(PAr[ny-1][i+rowBucket.length][DARAW],captObj.format,cntl.cdn,cntl.cursym);
+                    fval = PAr[ny-1][i+rowBucket.length][DARAW];
+                    if(fval != missingVal)
+                        fval = ibiStd.ibiNumberToFormat(fval,captObj.format);
+					PAr[ny-1][i+rowBucket.length][DASTR]=FocusFormat(fval,captObj.format,cntl.cdn,cntl.cursym);
                 }
             if((columnBucket.length>0)&&(rowBucket.length>0)) {
                 PAr[ny-1][nx-1][DARAW]=PAr[ny-1][nx-1][DARAW]/cont.length;
-                PAr[ny-1][nx-1][DASTR]=FocusFormat(PAr[ny-1][nx-1][DARAW],captObj.format,cntl.cdn,cntl.cursym);
+                fval = PAr[ny-1][nx-1][DARAW];
+                if(fval != missingVal)
+                    fval = ibiStd.ibiNumberToFormat(fval,captObj.format);
+				PAr[ny-1][nx-1][DASTR]=FocusFormat(fval,captObj.format,cntl.cdn,cntl.cursym);
             }
         }
     }
@@ -1593,6 +1637,7 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
 
     var record;
     var recordColumn;
+    var str2;
 
     for(i=0; i<nor; i++) {
         s_[s_.length] = '<tr>';
@@ -1629,8 +1674,19 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
                 str=ibs[s[DASTR]];
                 if(typeof(s[DATYP])!='undefined')
                     if(s[DATYP]==1) str=s[DASTR];
-                record = s[DAREC];
-                recordColumn = s[DARECCOL];
+                if(typeof s[DAREC] != "undefined") {
+                    if(typeof s[DAREC] == "object") {
+                        record = 0;
+                        recordColumn = s[DARECCOL];
+                        str2 = s[DARECSTR];
+                        str = str2;
+                    } else {
+                        recordColumn = s[DARECCOL];
+                        record = s[DAREC];
+                        str2 = s[DARECSTR];
+                        str = str2;
+                    }
+                }
             } else str=s;
             /*
             if (i == 1) {
@@ -1646,7 +1702,8 @@ function drawPivotGrid(a,did,capto,cont,look,cntl,p_num,heading,win,ibs,buckets,
                 if(classStr.indexOf("font-weight:bold;")>0)
                     spanStr = ' style="font-weight:bold;"';
 
-            spanStr += ' onmouseover="ibiPivot.delayShowMenu(event,\''+mytable.id+'\','+record+','+recordColumn+',\''+str+'\')" onmouseout="ibiPivot.clearDelayShowMenu(\''+mytable.id+'\')" ';
+            if(record!=-1)
+                spanStr += ' onmouseover="ibiPivot.delayShowMenu(event,\''+mytable.id+'\','+record+','+recordColumn+',\''+str2+'\')" onmouseout="ibiPivot.clearDelayShowMenu(\''+mytable.id+'\')" ';
             if((s!=null)&&(typeof(s)=='object') && (s.type == "header")) {
                 if(s.col<capt.length)
                     s_[s_.length]=drawPivotGridColumnHeading(mytable, s.col, s.text,capt[s.col].orgCol, s.colspan);
@@ -2069,7 +2126,7 @@ function build_chartagg(mytable,id,win,icon,pn,ctype,subTable){
 
         menuArray[menuArray.length] = htmlMenu;
         if(dataType == "DATA") {
-            var dstooltip = ibiChart.BuildDrillToolTip(mytable,mytable.a_cntl.buckets,mytable.t_capt, mytable.t_cntl, mytable.t_cont,  column);
+            var dstooltip = ibiChart.BuildDrillToolTip(mytable,mytable.a_cntl.buckets,mytable.a_capt, mytable.a_cntl, mytable.a_cont,  column);
             if(dstooltip != '') {
                 menuArray[menuArray.length] = '<hr>';
                 for (j = 0; j < dstooltip.length; j++)

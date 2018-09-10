@@ -7,6 +7,8 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180709 1248 wjf 191009 Bucketize Pyramid Chart
+* 180627 1120 wjf 204326 Additional labels are displaying for Funnel and Pyramid char
 * 180510 1228 wjf 203095 AHTML-Mobile: Chart Default should be Bar instead of VBar
 * 180326 1242 wjf 199946 Conversion from "Treemap to Tagcloud" with two BY fields di
 * 180321 1055 wjf 199943 Conversion from Any chart type to Tagcloud with two BY fiel
@@ -75,7 +77,7 @@
 //[p134795] fix log/revision message
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["artdgclist"]="$Revision: 20180510.1228 $";
+ActiveJSRevision["artdgclist"]="$Revision: 20180709.1248 $";
 
 
 var TDGDefaultLabelColor = "#333333";
@@ -332,8 +334,8 @@ tdginfo.category = [
                         
     {category:ibiMsgStr['crtother'], //Other category
      chartList:[
-            {base:'funnel',internalType:'funnel',name:'funnel', label:ibiMsgStr['Funnel'], chartProps: 'otherProps',chartPropsExtra:'funnelProps',sampleData:dppie,showInTool:true,sampleImg:null,notForBucket:true},
-            {base:'funnel',internalType:'funnel',name:'pyramid', label:ibiMsgStr['Pyramid'], chartProps: 'otherProps',chartPropsExtra:'pyramidProps',sampleData:dppie,showInTool:true,sampleImg:null,notForBucket:true},
+            {base:'funnel',internalType:'funnel',name:'funnel', label:ibiMsgStr['Funnel'], chartProps: 'otherProps',chartPropsExtra:'funnelProps',sampleData:dppie,showInTool:true,sampleImg:null},
+            {base:'funnel',internalType:'funnel',name:'pyramid', label:ibiMsgStr['Pyramid'], chartProps: 'otherProps',chartPropsExtra:'pyramidProps',sampleData:dppie,showInTool:true,sampleImg:null},
             {base:'funnel',internalType:'funnel',name:'pyramid1', label:ibiMsgStr['Pyramid 1'], chartProps: 'otherProps',chartPropsExtra:'pyramidProps',sampleData:dppie,showInTool:false,sampleImg:null,notForBucket:true},
             {base:'heatmap',internalType:'heatmap',name:'heatmap', label:ibiMsgStr['Heatmap'], chartProps: 'otherProps',chartPropsExtra:'heatmapProps',sampleData:dpheatmap,showInTool:true,sampleImg:null},
             {base:'waterfall',internalType:'waterfall',name:'hwaterfl', label:ibiMsgStr['Waterfall'], chartProps: 'otherProps',chartPropsExtra:'waterfallProps',sampleData:dpwaterfall,showInTool:false,sampleImg:null,notForBucket:true},
@@ -728,6 +730,17 @@ tdginfo.chartIconsProps = {
         visible: false
     },
     pieProperties: {
+        label: {
+            visible: false
+        },
+        totalLabel: {
+            visible: false
+        }
+    },
+    funnelProperties: {
+        groupLabel: {
+            visible: false
+        },
         label: {
             visible: false
         },

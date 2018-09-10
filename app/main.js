@@ -3,9 +3,9 @@ if (require('electron-squirrel-startup')) return;}
 catch (e){
 
 }
-const {app, BrowserWindow, dialog} = require('electron')
-const path = require('path')
-const url = require('url')
+const {app, BrowserWindow, dialog, ipcMain} = require('electron');
+const path = require('path');
+const url = require('url');
 
 global.sharedObject = {prop1: process.argv};
 
@@ -115,7 +115,7 @@ function createWindow () {
     }));
 
     //show debug screen
-    mainWin.webContents.openDevTools();
+    //mainWin.webContents.openDevTools();
 
     //load the index.html of the app.
     mainWin.loadURL(url.format({
@@ -129,6 +129,45 @@ function createWindow () {
         splash.destroy();
     mainWin.show();
 });
+}
+var saveEvent = null;
+
+ipcMain.on('asynchronous-message', function(event, arg) {
+    saveEvent = event;
+});
+
+//to make singleton instance
+const isSecondInstance = app.makeSingleInstance(function (commandLine, workingDirectory)  {
+        // Someone tried to run a second instance, we should focus our window.
+        if (mainWin) {
+            if (mainWin.isMinimized()) mainWin.restore();
+            mainWin.show();
+            mainWin.focus();
+            var origArgs = commandLine;
+            var args = [];
+            for (var i=0; i<origArgs.length; i++)
+                if (origArgs[i].substr(0,2)!= "--" && //ignore option
+                    origArgs[i]!= "./app" ) //ignore root app directory
+                    args[args.length] = origArgs[i];
+
+            console.log(args);
+
+            //if argument exist on command line && ...
+            if (args.length > 1 && args[1] != '.') { //if this not a hidden file
+                var filename = args[1];
+                var lp = filename.split('"');
+                if (lp.length > 1)
+                    filename = lp[1];
+                saveEvent.sender.send('open-file', filename);
+            }
+            //saveEvent.sender.send('open-file', 'ping');
+            //ipcMain.sendSync('open-file', 'ping');
+        }
+    });
+
+//if the main window exist, the application exit.
+if (isSecondInstance) {
+    app.quit();
 }
 
 app.on('ready', createWindow)/**

@@ -7,6 +7,13 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180808 1154 wjf 205281 Visualization: Dragging a second computed field to the verti
+* 180807 1723 wjf 205386 AHTML:  Add ibx support for use by new tools.
+* 180725 0721 bjd 203653 AHTML: hide display ACROSS groups with null values
+* 180702 1343 wjf 197863 Visualization: "No Data to Graph" message is displayed when
+* 180628 1505 iys 204291 AHTML HFREEZE - Drillmenu does not display when clicked on
+* 180614 1130 wjf 203644 Issue loading Scatter plot in Visualization mode
+* 180605 1117 wjf 179138 Traffic Lights are not working in active chart
 * 180508 1044 iys 168850 NFR:AHTML FREEZING HEADINGS IN ACTIVE REPORT OUTPUT
 * 180503 1540 bjd 202855 AHTML: COLUMN=field(*) formatting does not format computed f
 * 180419 1022 wjf 199221 Vis Esri Postal Code to City drill down and vise versa at r
@@ -734,7 +741,7 @@
 //[p139177] dont set default font and size if not Report style node.
 // 
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arcontrol"]="$Revision: 20180508.1044 $";
+ActiveJSRevision["arcontrol"]="$Revision: 20180808.1154 $";
 
 
 
@@ -771,6 +778,10 @@ function RefreshUrl(tnum,w)
 function setCurCell(tablenumber,cellid) {
     curCell.tablenumber=tablenumber;
     curCell.cellid=cellid;
+
+    if(MyTable[tablenumber].isHFreezeEnabled && cellid.indexOf('TCOL') === -1) {
+        curCell.cellid = cellid.replace(/I/, 'Im');
+    }
 }
 
 function ServerUpdatedata(msg,t_num)
@@ -3347,8 +3358,10 @@ function TTable(a_capt, a_cont, o_look, a_cntl, a_styles, subtab,tstrings,acdLin
     };
     if(typeof(a_cntl.table_name)!='undefined')
         this.table_name = a_cntl.table_name;
-    else
+    else {
         this.table_name = "$ibi$table%"+this.id;
+        this.a_cntl.table_name = this.table_name;
+    }
     this.pnode = pnode;
     this.grcCols = [];
     this.connectedReports=[];
@@ -3697,6 +3710,9 @@ function TTable(a_capt, a_cont, o_look, a_cntl, a_styles, subtab,tstrings,acdLin
             'aggType':a_capt[i].aggType?a_capt[i].aggType:null,
             'exp_hide' : a_capt[i].exphide
         };
+        if (a_capt[i].isAcross) {
+            this.a_capt[i].isAcross = true;
+        }
 		if(this.fexParts) {
 			var found = false;
 			var aggfields, bys;
@@ -4562,6 +4578,10 @@ function mresetDashboard(id) {
     for (i = 0; i < MyTable.length; i++) {
 		if(MyTable[i].deleted)
 			continue;
+        if(MyTable[i].showReportRendered) {
+            MyTable[i].menuReporthandle.deleteJsonReport();
+            delete MyTable[i].menuReporthandle;
+        }
 		var saveAutoFit = MyTable[i].a_cntl.autoFit;
         MyTable[i].o_paging.c = 0;
         MyTable[i].filterChange = true;
@@ -5542,7 +5562,10 @@ function IGetChartValues(x_col,y_col,sumres,res,groupbyArray,get_all,isnotfirst,
             if (bytot && this.a_capt[y_col[i]].aggType) {
                 fldname = this.a_capt[y_col[i]].aggType + '.' + fldname;
             }
-            bycols += fldname+' ';
+            if(this.a_capt[y_col[i]].isCompute)
+                bycols += 'COMPUTE '+fldname+'; ';
+			else
+                bycols += fldname+' ';
             if(this.a_capt[y_col[i]].noprint) 
                 bycols += 'NOPRINT ';
         }
@@ -6377,14 +6400,20 @@ function ICallFilt(isroot) {
                 var cn = 0;
                 for(j =0; j < val.length;j++) {
                     if(comp.dataProvider.length>0) {
-                        var isIn = inarray(comp.dataProvider[3],val[j],true,comp.clen);
-                        if(isIn>-1) {
-                            na[cn] = comp.dataProvider[6][isIn];
-                            nv[cn] = comp.dataProvider[3][isIn];
-                            cn++;
+						if(comp.limitDataProvider) {
+							na[cn] = val[j];
+							nv[cn] = val[j].join(arSet.FILTER_SEPARATOR);
+							cn++;
+                        } else {
+                            var isIn = inarray(comp.dataProvider[3],val[j],true,comp.clen);
+                            if(isIn>-1) {
+                                na[cn] = comp.dataProvider[6][isIn];
+                                nv[cn] = comp.dataProvider[3][isIn];
+                                cn++;
+                            }
                         }
                     }
-                }
+				}
                 val ={};
                 val.forRemoteWhereValues = na;
                 val.forLocalMultiValues = nv;
@@ -7788,6 +7817,8 @@ function IgetStyleNode(snode,col,row,stnode,parent,values,acrossColumn,printColN
                     case 5: if(val1>=val2) usethis = true; break;
                     case 6: if(val1<=val2) usethis = true; break;
                 }
+				if(usethis)
+					stnode.condition = true;
             }
              styleHasCond = true;
         }

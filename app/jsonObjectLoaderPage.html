@@ -21,29 +21,21 @@
     <script type='text/javascript' language='JavaScript'>
 
         <!--
-        //console.log(parent);
-        //console.log('here');
-        //alert('You are in IframeContent');
-        var holdfileObj = null; //place holder for the json object string
-        //load the active report into the iframe of the tab item
+
+        var holdfileObj = null;
+
         function createAR(){
-            //alert('It is loading the active report');
 
-            //if (typeof parent.window.aaa == "undefined") return;
-            //cd if (window.frameElement.name == "dummy") return;
-            //retrieve the json string from the parent global object using the frame name as a property name.
-            //var holdfileString = parent.window.aaa[window.frameElement.name];
+            //get the handle to the active report APIs
+            var arObj = new activeReport();
 
-            var arObj = new activeReport(); //handle to APIs
-            //convert from the string to js object
-           // eval("var holdfileObj="+holdfileString);
-            //Passing the body element as a container for the active report
-            //arObj.addJsonReport(holdfileObj, document.getElementsByTagName('body')[0]);
+            //render the Json object into the active report
             arObj.addJsonReport(holdfileObj);
         }
         //loading the Active Report using dataObj (json) as the input
         function loadActiveReport(dataObj) {
             holdfileObj = dataObj;
+            //check to see the active report APIs is ready, if it is not then wait for the loader to call createAR.
             if (ibiARLoader.jsloaded)
                 createAR();
             else ibiARLoader.onload = createAR;

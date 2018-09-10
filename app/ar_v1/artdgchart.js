@@ -7,6 +7,7 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180605 0925 bjd 191502 In-Document Analytics (Active Document), Charts not display
 * 180320 1505 bjd 200596 The operation of [Automatically Shade Frame Edge] does not b
 * 180320 1421 bjd 200403 Axis labels now appear for certain active charts
 * 171204 0930 wjf 193487 Inconsistent  Graph Rendering in Active Dashboard
@@ -406,7 +407,7 @@
 //[p143860] Set overflow to hidden so that we dont cause unwanted scroll bars.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["artdgchart"]="$Revision: 20180320.1505 $";
+ActiveJSRevision["artdgchart"]="$Revision: 20180605.0925 $";
 
 (function() {
 
@@ -1866,6 +1867,7 @@ ActiveJSRevision["artdgchart"]="$Revision: 20180320.1505 $";
                             (ps[i].indexOf("setShadowDisplay") != -1) ||
                             (ps[i].indexOf("setGridStep") != -1) ||
                             (ps[i].indexOf("setFrameAuto") != -1) ||
+                            (ps[i].indexOf("setFootnoteString") != -1) ||
                             (ps[i].indexOf("setFont") != -1)) {
                             if(ps[i].indexOf('$')!=-1) {
                                 t = ps[i].split('$');

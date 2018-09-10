@@ -7,6 +7,11 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180809 1628 wjf 205386 AHTML:  Add ibx support for use by new tools.
+* 180809 1603 wjf 205386 AHTML:  Add ibx support for use by new tools.
+* 180807 1719 wjf 205386 AHTML:  Add ibx support for use by new tools.
+* 180806 1515 wjf 204943 AHTML: add new format ADF to replace APDF
+* 180614 1130 wjf 203644 Issue loading Scatter plot in Visualization mode
 * 180531 1033 wjf 203539 AHTML: JSON output server crash with large images
 * 180424 1424 wjf 200246 AHML: Unify JSON output
 * 180227 1508 wjf 200246 AHML: Unify JSON output
@@ -272,7 +277,7 @@
 //[p140894] Missing mobile menu file.  If launched from api dont enable fullscreen mode.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arapi"]="$Revision: 20180531.1033 $";
+ActiveJSRevision["arapi"]="$Revision: 20180809.1628 $";
 var ApiEnableGlobal=true;
 var Events=[];
 Events['onclick']={'type':'onclick','callback':null,'tables':[]};
@@ -286,7 +291,173 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
     if (typeof window.apiCont !== 'undefined') {
         return;
     }
+    var emptyChartObject = {
+        "info":{
+            "revision":"1.0",
+            "release":"R729999D",
+            "gen_num":"300286"
+        }
+        ,"activeOptions":{
+            "records":5,
+            "columns":0,
+            "iscompound":false,
+            "iscache":false,
+            "isextjs":false
+        },
 
+        "reports":[
+            {
+                "tablecss":{},
+                "columns":[],
+                "gridlook":{
+                    "structure" : [0, 2, 4],
+                    "params" : [2, 0, 1],
+                    "colors" : {
+                        "even"    : "white",
+                        "odd"     : "white",
+                        "hovered" : "#fffccc",
+                        "marked"  : "#33ffcc"
+                    },
+                    "freeze" : [0, 0],
+                    "freeze_column": 0 ,
+                    "scroll":{
+                        "horizontal" : false,
+                        "size": 0
+                    },
+                    "paging" : {
+                        "by" : 57,
+                        "tt" : "%rcs of %trcs records, Page %inds of %pgs<span id='smsg%tn'></span>",
+                        "pf" : "<span style='font: 8pt blue Arial; border: none; cursor: pointer; text-decoration: none;'>&#9668;&#9668;<\/span>",
+                        "pp" : "<span style='font: 8pt blue Arial; border: none; cursor: pointer; text-decoration: none;'>|&#9668;&nbsp;<\/span>",
+                        "pn" : "<span style='font: 8pt blue Arial; border: none; cursor: pointer; text-decoration: none;'>&nbsp;&#9658;|<\/span>",
+                        "pl" : "<span style='font: 8pt blue Arial; border: none; cursor: pointer; text-decoration: none;'>&#9658;&#9658;<\/span>",
+                        "sh" : true
+                    },
+                    "filter" : {
+                        "type": 8
+                    },
+                    "css" : {
+                        "body"     : ["tabBody1Col0","tabBody1Col1"],
+                        "pagnCell" : "tabPaging1",
+                        "pagnText" : "tabPagingText1",
+                        "pagnPict" : "tabPagingArrowCell1",
+                        "filtCell" : "tabFilter1",
+                        "filtPatt" : "tabFilterPattern1",
+                        "filtSelc" : "tabFilterSelect1"
+                    }
+                },
+                "data":[],
+                "settings":{
+                    "MENUTYPE":"POPUP",
+                    "MP_COL_COUNT":2,
+                    "MP_LINE_COUNT":57,
+                    "CALC_POSITION":1,
+                    "filter_form_table":"filter_form_table",
+                    "chartAggregate":false,
+                    "menuops": {
+                        "pagination": true,
+                        "freeze": true,
+                        "hide": true,
+                        "search": true,
+                        "filter": true,
+                        "calc": true,
+                        "chart": true,
+                        "visualize": true,
+                        "exporttable": true,
+                        "msappexport": true,
+                        "sortcol": true,
+                        "rollup": true,
+                        "pivot": true,
+                        "comments": true,
+                        "window": true,
+                        "restore": true,
+                        "sendemail": true,
+                        "savechange": true,
+                        "print": true,
+                        "accordion": true,
+                        "pivottool": true,
+                        "gridtool": true,
+                        "charttool": true,
+                        "fsappmode": false,
+                        "menunoprint": false
+                    },
+                    "table_number": 0,
+                    "verbs":[
+                        {"type":"SUM"}  ],
+                    "showGlobalFilter": true,
+                    "showMenuBar": true,
+                    "ibinotvalid": true,
+                    "defaultView": 4,
+                    "reportView": 10,
+                    "ibiChart": "BAR",
+                    "fullfex":null,
+                    "iconset": "default",
+                    "tdgScript": "",
+                    "graphProps":[
+                        {
+                            "json": ["chartType: 'bar'\n"]
+                        }
+                    ],
+                    "jschartScript": "",
+                    "jsonProps": "",
+                    "jsTooltip": null,
+                    "GraphEngine": 5,
+                    "style":[
+                        ".IBIS0_0 {  font-size: 10pt;  font-family: DEFAULT-FIXED;  color: #FEFFFF;  text-align: left;}",
+                        ".IBIS0_1 {  font-size: 10pt;  font-family: DEFAULT-FIXED;  color: #FEFFFF;  text-align: right;}"
+                    ],
+                    "menubordercolor" : "#F0F0F0",
+                    "statusalign":0,
+                    "cdn" : 0,
+                    "isGraphRequest":true,
+                    "graphLook":"BAR",
+                    "graphType":202,
+                    "graphMerge":2,
+                    "graphMulti":0,
+                    "graphLegend":0,
+                    "graphAxis":1,
+                    "graph3D":1,
+                    "autoFit":1,
+                    "hasBuckets":true,
+                    "buckets":{
+                        "PAGE":[],
+                        "SLIDER":[],
+                        "ROW":[],
+                        "COLUMN":[],
+                        "DETAIL":[],
+                        "X-AXIS":[],
+                        "Y-AXIS":[],
+                        "COLOR":[],
+                        "SIZE":[],
+                        "SHAPE":[],
+                        "TOOLTIP":[],
+                        "LOCATION":[],
+                        "GEOMETRY":[],
+                        "MEASURE":[],
+                        "LATITUDE":[],
+                        "LONGITUDE":[],
+                        "NULL":[],
+                        "MIN":[],
+                        "LOWER":[],
+                        "MEDIAN":[],
+                        "UPPER":[],
+                        "MAX":[],
+                        "FACET":[]
+                    },
+                    "cursym":"$",
+                    "nodata" : ".",
+                    "status" : 0,
+                    "htmlCss" : 1,
+                    "ByDisplay":false,
+                    "WindowDisplay":"cascade",
+                    "Accordion":false,
+                    "table_div":{"position":"none","top":0,"left":0,"width":769,"height":404},
+                    "NumRecords":5,
+                    "a_cols" : []
+                }
+            }]
+        ,"datastrings":[]
+    };
     window.apiCont = {
         GRID:1,
         GRIDCOLUMN:2,
@@ -315,7 +486,8 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
         CALC_COUNT :'COU',
         CALC_CONTDISTINCT:'DIS',
         handleList:[],
-        filterHandles:[]
+		filterHandles:[],
+        emptyChartObject: emptyChartObject
     };
 })();
 
@@ -327,6 +499,8 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
 
     window.ibiApiReportObj = {
         getColumns:APIgetColumns,
+        createBucketChart: APIcreateBucketChart,
+		getColumnByName: APIgetColumnByName,
         getColumnValues:APIgetColumnValues,
         delFilters:APIdelFilters,
         addFilter:APIaddFilter,
@@ -355,6 +529,7 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
         disableGlobal:APIdisableGlobal,
         enableGlobal:APIenableGlobal,
         addToReport:APIaddToReport,
+        newJsonReport: APInewJsonReport,
         addJsonReport:APIaddJsonReport,
 		saveJsonReport: APIsaveJsonReport,
         addFilterObject:APIaddFilterObject,
@@ -373,11 +548,84 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
         updateJsonReport:APIupdateJsonReport,
 		deleteJsonReport:APIdeleteJsonReport,
 		getFilter:APIgetFilter,
+        newJsonChartObject:APInewJsonChartObject,
 		getInfo: APIgetInfo,
 		findFilterById: APIfindFilter,
+        mergeJsonObject: APImergeJsonObject,
+		listOfBuckets: (tdginfo?tdginfo.knownBuckets:null),
 		originalJson: null
     };
     
+
+	var emptyJsonTemplate = {
+
+	};
+
+	function APInewJsonReport() {
+		return ibiStd.copyObject(emptyJsonTemplate);
+	}
+
+    function APInewJsonChartObject() {
+        return ibiStd.copyObject(apiCont.emptyChartObject);
+    }
+
+	function APIcreateBucketChart(table,chartType,buckets,chartObj) {
+		var obj;
+		var col;
+		var i,j;
+		var mytable = MyTable[table];
+		var index;
+
+		if((typeof chartObj == "undefined") || chartObj == null)
+			obj = APInewJsonChartObject();
+		else
+			obj = chartObj;
+		//point to the table that has the data
+		obj.reports[0].settings.dataReport = MyTable[table].table_name;
+        obj.reports[0].settings.ibiChart = chartType;
+        obj.reports[0].settings.graphLook = chartType;
+        //obj.images
+        var info = ibiChart.getInfo(chartType);
+        if(info)
+            obj.reports[0].settings.graphProps[0].json[0]  = "chartType: '"+info.base+"'\n";
+		//Add the columns from the buckets.
+        var verbs = [];
+        var bys = [];
+		for(i in buckets) {
+		    if(buckets[i].length) {
+		        for(j = 0; j < buckets[i].length; j++) {
+		            col = buckets[i][j];
+		            if(!col.isBy)
+		                continue;
+		            index = mytable.getColumnByName(col.qualname);
+		            if(typeof obj.reports[0].settings.buckets[i] == "undefined")
+                        obj.reports[0].settings.buckets[i] = [];
+		            obj.reports[0].settings.buckets[i][j] = obj.reports[0].columns.length;
+		            obj.reports[0].columns[obj.reports[0].columns.length] = ibiStd.copyObject(mytable.a_capt[index]);
+                    obj.reports[0].columns[obj.reports[0].columns.length-1].isby = true;
+		            obj.reports[0].settings.a_cols[obj.reports[0].settings.a_cols.length] = ibiStd.copyObject(mytable.a_cntl.a_cols[index]);
+                }
+            }
+		}
+        for(i in buckets) {
+            if(buckets[i].length) {
+                for(j = 0; j < buckets[i].length; j++) {
+                    col = buckets[i][j];
+                    if(col.isBy)
+                        continue;
+                    index = mytable.getColumnByName(col.qualname);
+                    if(typeof obj.reports[0].settings.buckets[i] == "undefined")
+                        obj.reports[0].settings.buckets[i] = [];
+                    obj.reports[0].settings.buckets[i][j] = obj.reports[0].columns.length;
+                    obj.reports[0].columns[obj.reports[0].columns.length] = ibiStd.copyObject(mytable.a_capt[index]);
+                    obj.reports[0].columns[obj.reports[0].columns.length-1].isby = false;
+                    obj.reports[0].settings.a_cols[obj.reports[0].settings.a_cols.length] = ibiStd.copyObject(mytable.a_cntl.a_cols[index]);
+                }
+            }
+        }
+		return(obj);
+	}
+
 	function APIgetInfo() {
 		var obj = {};
 		var container = document.getElementById("orgdivinner0");
@@ -409,12 +657,39 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
         var cols=[];
         for(var i=0; i < MyTable[t_num].a_capt.length; i++) {
             cols[i] = {'name':MyTable[t_num].a_cntl.a_cols[i].name,
+                'alias':MyTable[t_num].a_cntl.a_cols[i].alias,
+                'field':MyTable[t_num].a_cntl.a_cols[i].field,
+                'qualname':MyTable[t_num].a_cntl.a_cols[i].qualname,
+                'format':MyTable[t_num].a_capt[i].format,
                 'isby':MyTable[t_num].a_capt[i].isby?true:false,
                 'isnoprint':MyTable[t_num].a_capt[i].noprint?true:false,
-                'type':MyTable[t_num].a_capt[i].type
+				'type':MyTable[t_num].a_capt[i].type,
+                'colnum': i
                 };
         }
         return cols;
+    }
+
+    function APIgetColumnByName(t_num,field) {
+        var col=null;
+        for(var i=0; i < MyTable[t_num].a_capt.length; i++) {
+        	if(
+        		(MyTable[t_num].a_cntl.a_cols[i].name == field) ||
+                (MyTable[t_num].a_cntl.a_cols[i].alias == field) ||
+                (MyTable[t_num].a_cntl.a_cols[i].field == field) ||
+                (MyTable[t_num].a_cntl.a_cols[i].qualname == field))
+            return {'name':MyTable[t_num].a_cntl.a_cols[i].name,
+                'alias':MyTable[t_num].a_cntl.a_cols[i].alias,
+                'field':MyTable[t_num].a_cntl.a_cols[i].field,
+                'qualname':MyTable[t_num].a_cntl.a_cols[i].qualname,
+                'format':MyTable[t_num].a_capt[i].format,
+                'isby':MyTable[t_num].a_capt[i].isby?true:false,
+                'isnoprint':MyTable[t_num].a_capt[i].noprint?true:false,
+                'type':MyTable[t_num].a_capt[i].type,
+				'colnum': i
+            };
+        }
+        return null;
     }
 
     function APIgetColumnValues(t_num,col) {
@@ -642,6 +917,11 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
         return tn;
     }
     
+	function APImergeJsonObject(arrayOfObjects) {
+		var newObject = arrayOfObjects[0];
+		return newObject;
+	}
+
 	function APIupdateJsonReport(iJsonObj)
     {
         var i;
@@ -770,10 +1050,12 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
                         if(typeof w== "object") {
                             for( i =0; i < w.length; i++ )
                                 if(typeof w[i] == "string")
-                                    w[i] = w[i].split(arSet.FILTER_SEPARATOR_OPTIONAL).join(arSet.FILTER_SEPARATOR);
+								    if(!this.obj.limitDataProvider)
+                                        w[i] = w[i].split(arSet.FILTER_SEPARATOR_OPTIONAL).join(arSet.FILTER_SEPARATOR);
                         } else
                             if(typeof w == "string")
-                                w = w.split(arSet.FILTER_SEPARATOR_OPTIONAL).join(arSet.FILTER_SEPARATOR);
+                                if(!this.obj.limitDataProvider)
+                                    w = w.split(arSet.FILTER_SEPARATOR_OPTIONAL).join(arSet.FILTER_SEPARATOR);
                     }
 
                     if(w!=null && this.obj.values!=null && typeof(w)=="object" && typeof(this.obj.values)=="object") {
@@ -856,10 +1138,12 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
                         if(typeof w== "object") {
                             for( i =0; i < w.length; i++ )
                                 if(typeof w[i] == "string")
-                                    w[i] = w[i].split(arSet.FILTER_SEPARATOR_OPTIONAL).join(arSet.FILTER_SEPARATOR);
+                                    if(!this.obj.limitDataProvider)
+                                        w[i] = w[i].split(arSet.FILTER_SEPARATOR_OPTIONAL).join(arSet.FILTER_SEPARATOR);
                         } else
                             if(typeof w == "string")
-                                w = w.split(arSet.FILTER_SEPARATOR_OPTIONAL).join(arSet.FILTER_SEPARATOR);
+                                if(!this.obj.limitDataProvider)
+                                    w = w.split(arSet.FILTER_SEPARATOR_OPTIONAL).join(arSet.FILTER_SEPARATOR);
                     }
                     if(w!=null && this.obj.defaultValues!=null && typeof(w)=="object" && typeof(this.obj.defaultValues)=="object") {
                         if(w.length == this.obj.defaultValues.length) {
@@ -1886,7 +2170,7 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
 
         newObj.ibiMsgStr = JsonObj.strings;
         ARstrings = JsonObj.datastrings;
-        if(JsonObj.icons) {
+        if(JsonObj.icons && (typeof ibiSkin.sumicon == "undefined")) {
             var ic;
             for(ic in ibiSkin.icons) {
                 var html = "";
@@ -2270,7 +2554,12 @@ Events['onColumnHide']  ={'type':'onColumnHide','callback':null,'tables':[]};
 function getAReportObj(useDiv)
 {
     //this.raw_tables = MyTable;
+	this.copyObject = ibiStd.copyObject;
+	this.newJsonReport = window.ibiApiReportObj.newJsonReport;
     this.getColumns = window.ibiApiReportObj.getColumns;
+	this.listOfBuckets = window.ibiApiReportObj.listOfBuckets;
+	this.createBucketChart = window.ibiApiReportObj.createBucketChart;
+	this.getColumnByName = window.ibiApiReportObj.getColumnByName;
     this.getColumnValues = window.ibiApiReportObj.getColumnValues;
     this.numOfTables = MyTable.length;
     this.getNumOfReports = window.ibiApiReportObj.getNumOfReports;
@@ -2318,6 +2607,8 @@ function getAReportObj(useDiv)
 	this.findFilterById = window.ibiApiReportObj.findFilterById;
     this.saveJsonReport = window.ibiApiReportObj.saveJsonReport;
     this.getInfo = window.ibiApiReportObj.getInfo;
+    this.mergeJsonObject = window.ibiApiReportObj.mergeJsonObject;
+    this.newJsonChartObject = window.ibiApiReportObj.newJsonChartObject;
     this.originalJson = null;
     this.numOfTable = 0;
     this.reportString = null;

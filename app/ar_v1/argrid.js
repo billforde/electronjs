@@ -7,6 +7,13 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180802 1022 wjf 202630 AHTML formt in AppStudio canvas Column WRAP not working
+* 180801 1857 wjf 202630 AHTML formt in AppStudio canvas Column WRAP not working
+* 180801 1224 wjf 202630 AHTML formt in AppStudio canvas Column WRAP not working
+* 180730 1311 wjf 202630 AHTML formt in AppStudio canvas Column WRAP not working
+* 180727 1446 bjd 203653 AHTML: hide display ACROSS groups with null values
+* 180725 1042 bjd 203653 AHTML: hide display ACROSS groups with null values
+* 180725 0721 bjd 203653 AHTML: hide display ACROSS groups with null values
 * 180313 1325 iys 201237 Mobile:Adaptive Dashboard:Scrolling up/down with a large rep
 * 180312 1326 iys 200991 Mobile:Adaptive Dashboard:Doc with textbox and image click i
 * 180125 1507 iys 168850 NFR:AHTML FREEZING HEADINGS IN ACTIVE REPORT OUTPUT
@@ -140,7 +147,7 @@
 //[p134795] Fix issue in api, when reloading component with new json.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["argrid"]="$Revision: 20180313.1325 $";
+ActiveJSRevision["argrid"]="$Revision: 20180802.1022 $";
 (function() {
     var mytable = null;
     var isHead=1;
@@ -512,6 +519,38 @@ function IGo(mytable_in) {
     //    dobj.style.width=dobj_t.offsetWidth+'px';
 }
 
+
+/**
+ * Hide all across columns that contain only null values
+ */
+function _hideNullAcross(tbl) {
+    var col, numCols, row, numRows, allNull;
+
+    if (!tbl.a_cont.length) {
+        return;
+    }
+
+    for (col = 0, numCols = tbl.a_capt.length; col < numCols; ++col) {
+        if (tbl.a_capt[col].isAcross) {
+            allNull = true;
+            for (row = 0, numRows = tbl.a_cont.length; row < numRows; ++row) {
+                if (tbl.a_cont[row][col][DARAW] != arConstants.MISSING_OR_NODATA) {
+                    allNull = false;
+                    break;
+                }
+            }
+            if (allNull) {
+                tbl.a_capt[col].bHideNull = true;
+                tbl.a_capt[col].b_hide = true;
+            } else if (tbl.a_capt[col].bHideNull) {
+                tbl.a_capt[col].bHideNull = false;
+                tbl.a_capt[col].b_hide = false;
+            }
+        }
+    }
+}
+
+
 function IShow (fromRemoteFilter,mytable_in) {
     var tmytable=null;
     var id;
@@ -537,10 +576,25 @@ function IShow (fromRemoteFilter,mytable_in) {
         if((mytable.haveFilters) && ttcmytable.a_filter_body) {
             ttcmytable.a_f_body = ttcmytable.a_filter_body;
             ttcmytable.a_cont = ttcmytable.a_filter_cont;
+            if (mytable.a_cntl.hna) {
+                _hideNullAcross(mytable);
+            }
         } else {
             mytable.haveFilters = false;
             ttcmytable.a_f_body = ttcmytable.a_all_body;
             ttcmytable.a_cont = ttcmytable.a_all_cont;
+            if (mytable.a_cntl.hna) {
+                if (mytable.a_cntl.cacheMode) {
+                    _hideNullAcross(mytable);
+                } else {
+                    for (var col = 0, numCols = mytable.a_capt.length; col < numCols; ++col) {
+                        if (mytable.a_capt[col].bHideNull) {
+                            mytable.a_capt[col].bHideNull = false;
+                            mytable.a_capt[col].b_hide = false;
+                        }
+                    }
+                }
+            }
         }
         //if(typeof(mytable.n_clicks)=="undefined") mytable.n_clicks = 0;
         if(mytable.haveFilters)
@@ -595,8 +649,9 @@ function IShow (fromRemoteFilter,mytable_in) {
     if((!mytable.isRollUp)&&(mytable.a_cntl.WindowDisplay!='tab')) mytable.maintable.wmenu.innerHTML = blankdot;
 //     var tstr = mytable.build().replace("/\'/g","\\'");
     var tbla = d.getElementById('MAINTABLE_wbody'+mytable.id);
+    // was 99999 but 1 seems to work better.
     if (tbla) { 
-        tbla.style.width = (mytable.useMdiv) ? "*" : "99999px";
+        tbla.style.width = (mytable.useMdiv) ? "*" : "1px";
     }
 
     if(mytable.isHFreezeEnabled && !mytable.isRollUp) {
@@ -1631,6 +1686,13 @@ function IBuildHead(istype,first_col,last_col,slevel,noHTML) {
                                        ? ' style="white-space:nowrap;" '
                                        : divStyle.replace(/"$/, ' white-space:nowrap;"');
 
+						} else
+						if(curHeadColCell.wrap.trim().toLowerCase()!=""){
+
+                                divStyle = (divStyle == '')
+                                    ? ' style="width:'+curHeadColCell.wrap+'px;" '
+                                    : divStyle.replace(/"$/, ' width:'+curHeadColCell.wrap+'px;"');
+
                         }
                         s_ += 'id="'+idstr+'" COLSPAN='+cs+bgcolor+align+tdPaddingStyle+'><div ' + divStyle + '>' 
                               + curHeadColCell.name + '<\/div><\/td>';
@@ -1727,7 +1789,8 @@ function IBuildCaptTB(first,last) {
                 }
             }
             if(mytable.a_capt[i].name.align!='') mstr += " align='"+mytable.a_capt[i].name.align+"' ";
-            switch (mytable.a_capt[i].name.wrap) {
+			if(typeof mytable.a_capt[i].name.wrap != "undefined")
+			switch (mytable.a_capt[i].name.wrap) {
                 case " NOWRAP": case " ":
                     mstr += 'style="white-space:nowrap;';
                     break;

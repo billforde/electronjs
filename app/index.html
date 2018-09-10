@@ -57,7 +57,7 @@
     $(document).ready(function () {
 
         $("#google-drive-menu").menu();
-        $(document).tooltip();
+        //$(document).tooltip();
         $('#ribbon').ribbon();
 
         $('#enable-btn').click(function() {
@@ -117,9 +117,9 @@
     function showSaveDialog(name) {
       var dialog = require('electron').remote.dialog;
       //dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'promptToCreate']});
-        dialog.showOpenDialog({properties: ['promptToCreate','createDirectory','openFile'],buttonLabel:"Save"},function(filename){
+        dialog.showSaveDialog({buttonLabel:"Save"},function(filename){
             var empty=1;
-            saveCurrentTab(filename[0]);
+            saveCurrentTab(filename);
         });
     }
 
@@ -127,10 +127,10 @@
 <!--div style="height: 202px; "-->
     <div id="ribbon">
         <span class="ribbon-window-title">In-Document Analytics Viewer</span>
-        <div class="ribbon-tab" id="file-tab">
-            <span class="ribbon-title">File</span>
+        <div class="ribbon-tab" id="home-tab">
+            <span class="ribbon-title">Home</span>
             <div class="ribbon-section">
-                <span class="section-title">Files</span>
+                <!--span class="section-title">File</span-->
                 <div title="Open a file from the file system" class="ribbon-button ribbon-button-large" id="open-file-button">
                     <img class="ribbon-icon ribbon-normal" src="assets/005-open-file.png" />
                 </div>
@@ -143,6 +143,16 @@
                 <div title="Email" class="ribbon-button ribbon-button-large" id="email-button">
                     <img class="ribbon-icon ribbon-normal" src="assets/004-envelope.png" width="32"/>
                 </div>
+                <div title="Merge Reports" class="ribbon-button ribbon-button-large" id="merge-button">
+                    <img class="ribbon-icon ribbon-normal" src="assets/033-merge-5.png" width="32"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="ribbon-tab" id="share-tab">
+            <span class="ribbon-title">Google</span>
+            <div class="ribbon-section">
+                <!--span class="section-title">Share</span-->
                 <div title="Gmail" class="ribbon-button ribbon-button-large" id="gmail-button">
                     <img class="ribbon-icon ribbon-normal" src="assets/002-gmail-1.png" width="32"/>
                 </div>
@@ -150,7 +160,7 @@
                     <ul id="google-drive-menu">
                         <li>
                             <!--div-->
-                                <img src="assets/011-drive.png" width="32"/>
+                            <img src="assets/011-drive.png" width="32"/>
                             <!--/div-->
                             <ul style="width:130px;text-align:left;">
                                 <li><div onclick="signinToGoogle('upload');">Save to Google Drive</div></li>
@@ -159,31 +169,40 @@
                         </li>
                     </ul>
                 </div>
-
             </div>
+        </div>
 
-
-            <!--div class="ribbon-section">
-                <span class="section-title">Share</span>
-                <div class="ribbon-button ribbon-button-large" id="share-button">
-                    <span class="button-title">Share</span>
-                    <will open a dialog windown so u can pick where u want to share to...ex: fb, linkin>
+        <!--
+        <div class="ribbon-tab" id="filter-tab">
+            <span class="ribbon-title">Filter</span>
+            <div class="ribbon-section">
+                <span class="section-title">Filter</span>
+                 <div title="Filter" class="ribbon-button ribbon-button-large" id="filter-button">
+                    < class="button-title">Filter</span>
                     <img class="ribbon-icon ribbon-normal" src="Office-Ribbon/icons/normal/new-page.png" />
                     <img class="ribbon-icon ribbon-hot" src="Office-Ribbon/icons/hot/new-page.png" />
                     <img class="ribbon-icon ribbon-disabled" src="Office-Ribbon/icons/disabled/new-page.png" />
                 </div>
-                <div class="ribbon-button ribbon-button-large" id="add-filter-btn">
-                    <span class="button-title">Add<br/>Filter</span>
-                    <span class="button-help">This button will open a filter dialog.</span>
-                    < Filter across reports>
+            </div>
+        </div>
+
+        <!--div class="ribbon-tab" id="export-tab">
+            <span class="section-title">Export</span>
+            <div class="ribbon-section">
+                <span class="section-title">Export>
+                <div title="export" class="ribbon-button ribbon-button-large" id="export-button">
+                <span class="button-title">Import/Export</span>
+                <span class="button-help">This button will open a filter dialog.</span>
+                    <Filter across reports>
                     <img class="ribbon-icon ribbon-normal" src="Office-Ribbon/icons/normal/open-page.png" />
                     <img class="ribbon-icon ribbon-hot" src="Office-Ribbon/icons/hot/open-page.png" />
                     <img class="ribbon-icon ribbon-disabled" src="Office-Ribbon/icons/disabled/open-page.png" />
-                </div>
             </div>
+          </div-->
 
 
-            <div-- class="ribbon-section">
+
+            <!--div-- class="ribbon-section">
                 <span class="section-title">Actions</span>
                 <div class="ribbon-button ribbon-button-small" id="run-btn">
                     <span class="button-title">Run</span>
@@ -208,7 +227,6 @@
                 </div>
             </div-->
 
-        </div>
     </div>
 <!--/div-->
 <!--div>
@@ -272,6 +290,17 @@
         TOKEN_PATH = TOKEN_DIR + 'googleService.json';
         app = require('electron').remote.app; //require the library called 'electron'
 
+        //for -- if the app is already opened, then prevent multiple instances from the app
+        var ipcRenderer = require('electron').ipcRenderer;
+        ipcRenderer.send('asynchronous-message', 'ping');
+        ipcRenderer.on('open-file',function(event, arg){
+            var myNextTabId = addTabs(arg);
+            loadDocIntoTab(arg, myNextTabId);
+        });
+
+        //this code is for nwjs -- event handling that is only happens in nwjs
+        //comment out for the time being.
+        /**************
         app.on('open', function(filename){
             var parm = filename.split(' ');
             var lastparm = parm[parm.length-1];  //filename
@@ -283,6 +312,7 @@
             console.log("main 1: before loadDocIntoTab tabItemCount is:" + tabItemCount);
             loadDocIntoTab(lastparm, myNextTabId);
         });
+        ******************/
 
         var remote = require('electron').remote;
         var origArgs = remote.getGlobal('sharedObject').prop1;
@@ -296,7 +326,7 @@
         console.log(args);
 
         //if argument exist on command line && ...
-        if (args.length > 1 && args[1] != '.') {
+        if (args.length > 1 && args[1] != '.') { //if this not a hidden file
             $(document).ready(function () {
                 console.log("main 2: before loadDocIntoTab tabItemCount is:" + tabItemCount);
                // var filename = process.argv[0];
@@ -315,16 +345,81 @@
 
     function loadDocIntoTab(filename, tabId, data)
     {
-        var fs =  require('fs'); //load the node js file system library
-
-        //read the content of hold.htm or hold.txt and close it...
-        //holdfileString is the string converted from hold.txt or from hold.htm?
-
+        var tabItem = document.getElementById(tabId);
+        tabItem.innerHTML = "";
+        var htmltxt;
+        var javascriptCmd;
+        var isHtmlPage = false;
         var holdfileString;
-        if (filename == null)
-            holdfileString = JSON.stringify(data);//response.data from downloadAndOpenGoogleFile
-        else
-            holdfileString = fs.readFileSync(filename).toString();
+        currentTabActive = tabId;
+
+        //create a webview as the container
+        var aWebview = document.createElement('webview');
+        aWebview.setAttribute('id',"w_" + tabId);
+        aWebview.setAttribute('partition','trusted');
+        aWebview.setAttribute('allownw',true);
+        aWebview.setAttribute('nwdisable',false);
+        aWebview.setAttribute('name',filename);
+        //save the line below
+        aWebview.setAttribute('style','display:flex;height:100%;width:100%;');
+        tabItem.appendChild(aWebview);
+
+        var fs =  require('fs'); //load the node js file system library
+        var filetype;
+        if (filename != null){
+            filetype = filename.split(".");
+            filetype = filetype[filetype.length-1].toLowerCase();
+        } else {
+            filetype = "adf";
+        }
+
+        switch(filetype) {
+            case "adf":
+            case "idf":
+                if (filename == null) //this is the case when we do download from google drive
+                    holdfileString = JSON.stringify(data);//response.data from downloadAndOpenGoogleFile
+                else //here we have a local file with adf extension
+                    //read the content of the file and turn it into a string
+                    holdfileString = fs.readFileSync(filename).toString();
+
+                //remember that holdfileString is the string version of the json object ==> json string
+                //and now we create a javascript call that contains the json string
+                javascriptCmd = "loadActiveReport("+holdfileString+")";
+
+                window.setTimeout(function() { //call later to make sure that the webview is appended to the document
+                    aWebview.addEventListener("did-finish-load", function(){
+                        //in here, we already loaded the jsonObjectLoaderPage
+                        //aWebview.openDevTools();
+                        //we now execute the javascript command using the command that we created previously
+                        aWebview.executeJavaScript(javascriptCmd);
+                    });
+
+                    var path = require('path'); //open the path library and assign it to the variale called path
+                    var url = require('url');
+
+                    //set the url format on the browser url bar as: file://.../jsonObjectLoaderPage.html
+                    aWebview.src = url.format({
+                        //_dirname is the current directory
+                        pathname: path.join(__dirname, 'jsonObjectLoaderPage.html'),
+                        protocol: 'file:',
+                        slashes: true
+                    });
+
+                },10);
+                break;
+            case "pdf":
+                var path = require('path'); //open the path library and assign it to the variale called path
+                var url = require('url');
+
+                //set the url format on the browser url bar as: file://.../jsonObjectLoaderPage.html
+                aWebview.src = url.format({
+                    //_dirname is the current directory
+                    pathname: filename,
+                    protocol: 'file:',
+                    slashes: true
+                });
+                break;
+        }
 
         //at the time being, don't call the Json parser
         //Converted to Json object but error bc ==>Actually, Json parser generates mixed quotes
@@ -332,25 +427,25 @@
 
         //var arObj = new activeReport();
         //var reportContainer =  document.getElementById('reportContainer');
-        var tabItem = document.getElementById(tabId);
-        tabItem.innerHTML = "";
-        var htmltxt;
-        var isHtmlPage = false;
 
+
+        /*************
         if (holdfileString.substr(0,9)== '<!DOCTYPE') { //if we have an html page ==> create the iframe
             htmltxt = new Buffer(holdfileString).toString('base64'); //64 encoded
             htmltxt = "data:text/html;base64," + htmltxt;
             isHtmlPage = true;
         } else { //if Json object(hold.txt) ==> put it into the report One div
-
             //var iFrameContent = fs.readFileSync('iFrameContent.html').toString();
             //htmltxt must be a fully formed html doc for webview
 
-            //holdfileString is the string version of the json object
-            htmltxt = "loadActiveReport("+holdfileString+")";
+            //remember that holdfileString is the string version of the json object ==> json string
+            //and now we create a javascript call that contains the json string
+            //javascriptCmd = "loadActiveReport("+holdfileString+")";
 
-        }
+        //}
+**************/
 
+        /********
         //create a webview as the container
         var reportFrame = document.createElement('webview');
         reportFrame.setAttribute('id',"w_" + tabId);
@@ -361,43 +456,14 @@
         //save the line below
         reportFrame.setAttribute('style','display:flex;height:100%;width:100%;');
         tabItem.appendChild(reportFrame);
+        *********/
 
         //empty the iframe to initialize
         //mine type: stream is text, processed as html, the encoding is expected as base64
         //reportFrame.src = "data:text/html;base64," + new Buffer("<html></html>").toString('base64');
 
-        window.setTimeout(function() { //call later after the above code is processed.
-
-            //create a property for each tabItem and store the json obj (holdfileString) to that property.
-            //note: aaa is the global obj that will be referenced by iFrameContent. which is used to render
-            //the active report.
-            //aaa[filename] = holdfileString;
-
-            //load the html content into the reportFrame ==>  already encoded to base64
-            if (isHtmlPage) {
-                reportFrame.addEventListener("did-finish-load", function(){
-                    //reportFrame.openDevTools();
-                });
-                reportFrame.src = htmltxt;
-            } else {
-                reportFrame.addEventListener("did-finish-load", function(){
-                    //after loading the iframe content page
-                    //reportFrame.openDevTools();
-                    reportFrame.executeJavaScript(htmltxt);
-                });
-
-                var path = require('path');
-                var url = require('url');
-                reportFrame.src = url.format({
-                    pathname: path.join(__dirname, 'iFrameContent.html'),
-                    protocol: 'file:',
-                    slashes: true
-                });
-            }
-        },10);
-
         //firstTime = false;
-        currentTabActive = tabId;
+        //currentTabActive = tabId;
     }//loadDocIntoTab()
 
     /***************************************************/
@@ -468,7 +534,7 @@
         shortname = shortname[shortname.length-1];
         //anch.innerHTML = "report " + tabItemCount + "&nbsp;&nbsp;<span onclick='closeTabs("+tabItemCount+")' style='cursor:pointer;color: red'>X</span>";
 
-        anch.innerHTML = '<input onclick="toggleCheckbox(event,this)" style="background-color:blue" type="checkbox"/>' + shortname + "&nbsp;&nbsp;<span onclick='closeTabs("+tabItemCount+")' style='cursor:pointer;color: red'>X</span>";
+        anch.innerHTML = '<input onclick="toggleCheckbox(event,this)" checked style="background-color:blue" type="checkbox"/>' + shortname + "&nbsp;&nbsp;<span onclick='closeTabs("+tabItemCount+")' style='cursor:pointer;color: red'>X</span>";
         anch.title = filename; //for hover over it
         listItem.appendChild(anch);
         tabList.appendChild(listItem);
@@ -756,7 +822,7 @@
                 return;
             }
             var myNextTabId = addTabs(filename);
-            loadDocIntoTab(null, myNextTabId, response.data);
+            loadDocIntoTab(null, myNextTabId, response.data); //null is not a local file
         });
     }
 

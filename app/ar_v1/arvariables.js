@@ -7,6 +7,7 @@
 * _History_:
 *  Date  Time Who Proj       Project Title
 * ====== ==== === ====== ===========================================
+* 180817 1524 bjd 199245 Date Period is sorting incorrectly with an Active Chart wit
 * 180504 1543 bjd 202889 Invoking "XFOCUS" Reporting server console throws error.
 * 180503 1032 bjd 202855 AHTML: COLUMN=field(*) formatting does not format computed f
 * 180425 0844 bjd 202656 AHTML:Filter marker selection is different in Edge browser
@@ -188,7 +189,7 @@
 //[p140572][>branch8001] Add activereport.js that will automatically include all the necessary active report js files.  Also added activereport.css that contains the styling for active.
 //
 if(typeof(ActiveJSRevision)=="undefined") var ActiveJSRevision=new Object();
-ActiveJSRevision["arvariables"]="$Revision: 20180504.1543 $";
+ActiveJSRevision["arvariables"]="$Revision: 20180817.1524 $";
 
 if(typeof(T_look)=="undefined") {
 var w = window;
@@ -1132,10 +1133,14 @@ function initvars()
         if(ibiStd.id2jdLookup[key])
             return ibiStd.id2jdLookup[key];
         var d = iDate+'';
-        if(d.indexOf('e')!=-1)  //Number too big, so it becomes exponent
+        if (iDate.match(/[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)/)) {
+            //if(d.indexOf('e')!=-1)  //Number too big, so it becomes exponent
             d = (iDate/1000000) + '';
+        }
+        d = d.replace(/,/g, ' ').replace(/  +/g, ' ');
         var sp = d.split(' ');
         var sp2 = d.split('/');
+        var parts = sp2.length;
         var mm;
         var yy;
         var dd;
@@ -1148,7 +1153,6 @@ function initvars()
         dp = format.indexOf('D');
         var mmp = (format.indexOf('m') != -1);
         var tp = format.indexOf('t');
-        var parts = d.split("/").length;
        if(yp!=-1) {
           yi = 0;
           if((mp!=-1)&&(mp<yp))
