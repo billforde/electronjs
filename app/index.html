@@ -105,7 +105,7 @@
         var dialog = require('electron').remote.dialog;
         dialog.showOpenDialog({
             filters: [
-                {name: 'idfViewer files',  extensions: ["adf", "idf", "pdf"]}
+                {name: 'idfViewer files',  extensions: ["adf", "idf", "pdf", "html", "htm"]}
             ],
             properties: ['openFile', 'multiSelections']}, function(filename){
             for (var i=0; i<filename.length; i++){
@@ -414,6 +414,19 @@
                 },10);
                 break;
             case "pdf":
+                var path = require('path'); //open the path library and assign it to the variale called path
+                var url = require('url');
+
+                //set the url format on the browser url bar as: file://.../jsonObjectLoaderPage.html
+                aWebview.src = url.format({
+                    //_dirname is the current directory
+                    pathname: filename,
+                    protocol: 'file:',
+                    slashes: true
+                });
+                break;
+            case "html":
+            case "htm":
                 var path = require('path'); //open the path library and assign it to the variale called path
                 var url = require('url');
 
