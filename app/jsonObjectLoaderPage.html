@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Active Report</title>
+</head>
+<body>
+    <link rel="stylesheet" href="Charts/leaflet.css"/>
+    <link rel="stylesheet" href="Charts/leaflet.draw.css"/>
+    <style type="text/css">
+        @media print and (orientation:portrait){
+            body { -webkit-print-color-adjust: exact;zoom: 85%;}
+            }
+        @media print and (orientation:landscape){
+            body { -webkit-print-color-adjust: exact;zoom: 110%;}
+        }
+    </style>
+    <script src="jquery/jquery_min.js"></script>
+    <script src="jquery/jquery_ui_ar_min.js"></script>
+    <script src='Charts/tdgchart-min.js'></script>
+    <script src='ar_v1/activereport.js'></script>
+    <script type='text/javascript' language='JavaScript'>
+
+        <!--
+
+        var holdfileObj = null;
+
+        function createAR(){
+
+            //get the handle to the active report APIs
+            var arObj = new activeReport();
+
+            //render the Json object into the active report
+            arObj.addJsonReport(holdfileObj);
+        }
+        //loading the Active Report using dataObj (json) as the input
+        function loadActiveReport(dataObj) {
+            holdfileObj = dataObj;
+            //check to see the active report APIs is ready, if it is not then wait for the loader to call createAR.
+            if (ibiARLoader.jsloaded)
+                createAR();
+            else ibiARLoader.onload = createAR;
+        }
+        //-->
+    </script>
+    <div id="loadingARMsg" style="width:100%;height:100%; position:absolute; background-color:#beebff";><img src="custom images\LoadingGIF.gif" style="position:relative; left:45%; top:45%"></div>
+</body>
+</html>

@@ -1,12 +1,8 @@
 {
-  "name": "idfViewer",
-  "productName": "idfViewer",
-  "version": "1.0.0",
-  "description": "try electron",
-  "main": "main.js",
   "dependencies": {
     "electron": "^1.8.4",
     "electron-regedit": "^1.0.6",
+    "emailjs": "^2.1.0",
     "googleapis": "^28.1.0"
   },
   "devDependencies": {
@@ -15,10 +11,23 @@
     "electron-installer-windows": "^1.1.0",
     "electron-packager": "^12.0.1"
   },
+  "build": {
+    "appId": "idfViewer",
+    "fileAssociations": {
+      "ext": [
+        "adf",
+        "idf"
+      ]
+    },
+    "win": {
+      "icon": "app/assets/favicon2.png"
+    }
+  },
   "scripts": {
-    "start": "electron .",
-    "build": "electron-packager .  --overwrite --icon=assets/favicon.ico  --out=release-builds",
-    "setup": "electron-installer-windows --src release-builds/idfViewer-win32-x64/ --dest c:/electron_dist/installers/"
+    "postinstall": "install-app-deps",
+    "start": "electron ./app --enable-logging",
+    "dev": "NODE_ENV='development' npm run start",
+    "dist": "build --x64"
   },
   "repository": {
     "type": "git",
