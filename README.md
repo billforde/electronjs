@@ -1,17 +1,24 @@
 # In-Document Analytics Viewer
 
+## Release Info
+
+### Version 1.0.0
+
+6/12/2018
+In order to use this app, run the setup program like you would do when installing Acrobat Reader. In addition to the functionality of the icons (description of the tooltip) in the ribbon, this app is able to:
+-	Have new icons.
+-	Associate the file extensions (adf/idf) during install. It means that if you double click a file with extension “adf’ or “idf”, that file will be opened with the app without prompting you to open it with any application.
+-	The google drive icon usage requires you to have a google account as gmail.
+These are the features that I will implement in the near future:
+	Email icon currently doesn’t work, since mailto does not allow attachments, because of security issues.  This will  need more research.  The work around solution maybe to share the link from Google or directly talk to the email server.
+	Find out how to make the app reuse the same opened application window.
+	Drag a xxx.adf file into the app.
+
 
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-### Prerequisites
-
-What things you need to install the software and how to install them
-
-```
-Give examples
-```
 
 ### Installing
 
@@ -31,25 +38,6 @@ until finished
 
 End with an example of getting some data out of the system or using it for a little demo
 
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
 
 ## Deployment
 
