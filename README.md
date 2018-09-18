@@ -4,7 +4,7 @@
 
 ### Version 1.0.0
 
-6/12/2018
+####6/12/2018
 In order to use this app, run the setup program like you would do when installing Acrobat Reader. In addition to the functionality of the icons (description of the tooltip) in the ribbon, this app is able to:
 -	Have new icons.
 -	Associate the file extensions (adf/idf) during install. It means that if you double click a file with extension “adf’ or “idf”, that file will be opened with the app without prompting you to open it with any application.
