@@ -7,7 +7,7 @@
 #### 9/18/2018
 The new updates are:
 •	The version of 1.0.1 is just created.
-•	Can now load a valid HTML active report onto the tab container.
+•	Can now load HTML files into the tab container.
 •	A README file is just created, with all the progresses mentioned in the release notes.
 
 ### Version 1.0.0
@@ -20,43 +20,42 @@ Updates are:
 	When loading a file into the tabs container, it is not checked by default.
 
 #### 8/28/2018
-Before the demo, the 3 following problems have been fixed, they are requested by Maria Volant:
-1.	When saving changes, I am being prompted to create file. We should not be prompted to save the file. If the filename used exists, then I would expect a prompt about the existing file
-2.	When I am opening a .adf file from my local drive, if the IDA Viewer is already open, I wouldn’t expect a new instance to open up, as this could result in too many open windows:
-3.	When I open and then close an adf file, the file tooltip that comes up as I reach for the X button remains open:
+Before the demo, the 3 following problems have been fixed:
+1.	When saving changes, the user is being prompted to create file. They should not be prompted to save the file. If the filename being used already exists, then they would expect a prompt about overwriting the existing file.
+2.	When the user opens an .adf file from their local drive, if the IDA Viewer is already opened, they wouldn’t expect a new instance to open up, as this could result in too many opened windows.
+3.	When the user opens and then close an adf file, the file tooltip comes up and remains opened even after closing the window.
 
 #### 8/2/2018
-I already return the codes to add support HOLD FORMAT ADF to the reporting server.
+The code has been returned to add support HOLD FORMAT ADF to the reporting server.
 
-We also need to add the followed line for adding to the mime.wfs
+Adding the followed line to the mime.wfs so that the client support the new file type.
 <ADDTYPE>                 .adf          application/vnd.ibi-id.analytics  binary  yes       N/A       yes           .adf                     binary
 
 
 #### 7/16/2018
-I improve the gmail feature which now get the from name and address from the credential information from google when you sign in.
-The e-mail still prompt you for the from, and I plan to implement a configuration screen so that you can only enter the from address once.
-
-I will be working on merging selected reports. A checkbox has been added to each tab to select the report. William will be working on the api for adding support for merging multiple reports.
+Use the GMAIL APIs to get the FROM name and address when emailing reports thru gmail.
 
 #### 6/26/2018
--	The google drive icon usage requires you to have a google account as gmail.
--	Email and Gmail icons now work (from today’s executable).
+Add support for Google sign in.
+Add support to Email and Gmail.
 
 #### 6/19/2018
-The email icon is currently implemented only to work in ibi because it only uses the ibi smtp server. This will be a configurable option in the future.
-My next plan is to implement the Gmail and if possible Exchange.
+Add support to email thru SMTP.
 
 #### 6/12/2018
-In order to use this app, run the setup program like you would do when installing Acrobat Reader. In addition to the functionality of the icons (description of the tooltip) in the ribbon, this app is able to:
--	Have new icons.
--	Associate the file extensions (adf/idf) during install. It means that if you double click a file with extension “adf’ or “idf”, that file will be opened with the app without prompting you to open it with any application.
--	The google drive icon usage requires you to have a google account as gmail.
-These are the features that I will implement in the near future:
-	Email icon currently doesn’t work, since mailto does not allow attachments, because of security issues.  This will  need more research.  The work around solution maybe to share the link from Google or directly talk to the email server.
-	Find out how to make the app reuse the same opened application window.
-	Drag a xxx.adf file into the app.
+Initial return of the setup program for installing the viewer.
 
+For setup and installation:
+-	Custom icon for identifying the new extensions.
+-	Associate the file extensions (adf/idf) during install. Files with extension “adf’ or “idf”  will be opened with the viewer without prompting.
 
+Add support for Google Drive to allow saving and loading ADF files:
+-	The user is required to have a Gmail account.
+
+## To Do
+Add support to merge multiple reports.
+Add support to drag a *adf file into the app.
+Add support to configurate email option.
 
 ## Getting Started
 
