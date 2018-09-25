@@ -281,6 +281,8 @@
         //with the last parameter passed from the file system.
 
         fs = require('fs');
+        app = require('electron').remote.app; //require the library called 'electron'
+        var path = require('path'); //open the path library and assign it to the variale called path
         readline = require('readline');
         google = require('googleapis').google;
         googleAuth = require('google-auth-library');
@@ -290,9 +292,10 @@
             'https://www.googleapis.com/auth/gmail.compose',
             'https://www.googleapis.com/auth/gmail.send',
             'https://www.googleapis.com/auth/userinfo.profile'];
-        TOKEN_DIR = './credentials/'
-        TOKEN_PATH = TOKEN_DIR + 'googleService.json';
-        app = require('electron').remote.app; //require the library called 'electron'
+
+        //we put the user sign-in to Google json file in the userData directory
+        TOKEN_DIR = path.join(app.getPath('userData'),'credentials');
+        TOKEN_PATH = path.join(TOKEN_DIR , 'signinToGoogle.json');
 
         //for -- if the app is already opened, then prevent multiple instances from the app
         var ipcRenderer = require('electron').ipcRenderer;
@@ -615,7 +618,7 @@
     }
 
     /*******************************************************************************************/
-    /* Get user profile from Google and glpbally store it into googleInfo  */
+    /* Get user profile from Google and globally store it into googleInfo  */
     /*******************************************************************************************/
     var googleInfo = {};
 
