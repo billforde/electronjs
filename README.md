@@ -4,6 +4,9 @@
 
 ### Version 1.0.1
 
+#### 9/25/2018
+Store the sign-in to Google json file in the userData directory.
+
 #### 9/18/2018
 The new updates are:
 •	The version of 1.0.1 is just created.
