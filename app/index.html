@@ -83,13 +83,15 @@
             if (this.isEnabled()) {
                 //alert($(this).attr('id') + ' clicked');
                 if ($(this).attr('id')=='open-file-button')
-                    showOpenFileDialog("#loadFileDialog");
+                    showOpenFileDialog();
                 if ($(this).attr('id')=='print-button')
                     printReport();
                 if ($(this).attr('id')=='save-button')
-                    showSaveDialog("#saveDialog");
+                    showSaveDialog();
                 if ($(this).attr('id')=='email-button')
-                    showEmailDialog("emailDialog");
+                    showEmailDialog();
+                if ($(this).attr('id')=='merge-button')
+                    showMergeDialog();
                 if ($(this).attr('id')=='gmail-button')
                     signinToGoogle("gmail");
             }
@@ -108,9 +110,11 @@
                 {name: 'idfViewer files',  extensions: ["adf", "idf", "pdf", "htm", "html"]}
             ],
             properties: ['openFile', 'multiSelections']}, function(filename){
-            for (var i=0; i<filename.length; i++){
-                var myNextTabId = addTabs(filename[i]);
-                loadDocIntoTab(filename[i], myNextTabId);
+            if (filename != undefined) {
+                for (var i = 0; i < filename.length; i++) {
+                    var myNextTabId = addTabs(filename[i]);
+                    loadDocIntoTab(filename[i], myNextTabId);
+                }
             }
         });
         //var chooser = document.querySelector(name);
@@ -119,8 +123,9 @@
     }
     //show the system file dialog and let you enter the file name or browse the file system for saving
     function showSaveDialog(name) {
-      var dialog = require('electron').remote.dialog;
-      //dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'promptToCreate']});
+        if (checkIfThereIsTabs() === false) return;
+        var dialog = require('electron').remote.dialog;
+        //dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'promptToCreate']});
         dialog.showSaveDialog({buttonLabel:"Save"},function(filename){
             var empty=1;
             saveCurrentTab(filename);
@@ -269,7 +274,9 @@
     var TOKEN_DIR;
     var TOKEN_PATH;
     var arguments;
-
+    var config_file;
+    var config_obj = {};
+    var fs = require('fs');
     main();
 
     function main()
@@ -280,7 +287,7 @@
         //open event will trigger this funtion to loadDocIntoTab
         //with the last parameter passed from the file system.
 
-        fs = require('fs');
+        //var fs = require('fs');
         app = require('electron').remote.app; //require the library called 'electron'
         var path = require('path'); //open the path library and assign it to the variale called path
         readline = require('readline');
@@ -296,6 +303,9 @@
         //we put the user sign-in to Google json file in the userData directory
         TOKEN_DIR = path.join(app.getPath('userData'),'credentials');
         TOKEN_PATH = path.join(TOKEN_DIR , 'signinToGoogle.json');
+
+        config_file = path.join(app.getPath('userData'),'config.json');
+        loadConfig();
 
         //for -- if the app is already opened, then prevent multiple instances from the app
         var ipcRenderer = require('electron').ipcRenderer;
@@ -347,6 +357,32 @@
         }
     }
     /**********************************************************************************/
+    /* Read the config file into the config object */
+    /**********************************************************************************/
+
+    function loadConfig(){
+        //var fs = require('fs');
+        try {
+            var tempStr = fs.readFileSync(config_file).toString();
+            config_obj = JSON.parse(tempStr);
+        } catch (e) {
+            saveConfig();
+        }
+    }
+
+    function saveConfig() {
+        //var fs = require('fs');
+
+        fs.writeFileSync(config_file, JSON.stringify(config_obj));
+    }
+    /**********************************************************/
+    /** showMergeDialog */
+    /**********************************************************/
+    function showMergeDialog()
+    {
+        alert('Not implemented yet');
+    }
+    /**********************************************************************************/
     /* Load the active report using html page or json object passed from the cmd line */
     /**********************************************************************************/
 
@@ -372,7 +408,7 @@
         aWebview.setAttribute('style','display:flex;height:100%;width:100%;');
         tabItem.appendChild(aWebview);
 
-        var fs =  require('fs'); //load the node js file system library
+        //var fs =  require('fs'); //load the node js file system library
         var filetype;
         if (filename != null){
             filetype = filename.split(".");
@@ -465,7 +501,7 @@
     /*Print ==> print preview to send a doc to the printer */
     /***************************************************/
     function printReport(){
-
+        if (checkIfThereIsTabs() === false) return;
         var mywebview =  document.getElementById("w_"+currentTabActive);
         mywebview.setAttribute('style','display:flex;height:3000px;width:3000px;');
 
@@ -491,7 +527,7 @@
         var executetxt = "$AR.saveJsonReport()";
         mywebview.executeJavaScript(executetxt,false,
                  function(jsonObject){
-                     var fs =  require('fs'); //load the node js file system library
+                     //var fs =  require('fs'); //load the node js file system library
 
                      //if the filename don't end with .adf, then append the 'adf' extension to it
                      var extension = filename.split('.');
@@ -595,7 +631,7 @@
 
         // Load client secrets from a local file.
         var fullFilename = app.getAppPath()+'\\'+'client_secret.json';
-
+        //var fs =  require('fs'); //load the node js file system library
         if (fs.existsSync(fullFilename))
             console.log('Checking for: '+ fullFilename);
 
@@ -768,7 +804,7 @@
                     var file = files[i];
                     console.log('%s (%s)', file.name, file.id);
                 }***/
-                displayDownloadDialog(auth, files);
+                showDownloadDialog(auth, files);
             }
         }
         );
@@ -776,7 +812,7 @@
     /******************************************************/
     /* Show a list of files from Google Drive for download */
     /******************************************************/
-    function displayDownloadDialog(auth, files){
+    function showDownloadDialog(auth, files){
 
         var element = document.createElement('ol');
         var dl = document.getElementById('download-list');
@@ -825,6 +861,7 @@
     //display an upload dialog (jquery dialog)
     /******************************************/
     function showUploadDialog(auth){
+        if (checkIfThereIsTabs() === false) return;
         $( function() {
             $( "#dialog-message" ).dialog({
                 modal: true,
@@ -843,22 +880,53 @@
             });
         } );
     }
-
+    /*****************************************************/
+    /* Check if tab Container is empty */
+    /*****************************************************/
+    function checkIfThereIsTabs () {
+    //return false if there is no tab, else the index of the tab.
+        var currentTabActive = $("#tabsContainer").tabs("option", "active");
+        if (currentTabActive === false) {
+            alert("No document loaded!");
+            return false;
+        } else {
+            return true;
+        }
+}
     /**********************************************/
     //Show an email dialog (jquery dialog)
     /**********************************************/
     function showEmailDialog(auth){
+
+        if (checkIfThereIsTabs() === false) return;
+        if (typeof config_obj.smtp == "undefined"){
+            config_obj.smtp = {
+                "from": "",
+                "to": "",
+                "cc": "",
+                "subject": ""
+            };
+        }
         $( function() {
+            var emailFrom = document.querySelector("#emailFrom");
+            //When the app is initially loaded, we load the info from config file ==>
+            //assign the previous value to the field of the dialog that is about to be displayed
+            emailFrom.value = config_obj.smtp.from;
             $( "#dialog-email" ).dialog({
                 modal: true,
                 buttons: {
                     Send: function() {
-                        var emailFrom = document.querySelector("#emailFrom");
+                        //var emailFrom = document.querySelector("#emailFrom");
                         var emailTo = document.querySelector("#emailTo");
                         var ccTo = document.querySelector("#ccTo");
                         var emailSubject = document.querySelector("#emailSubject");
                         if (emailFrom.value != "" && emailTo.value != "") {
                             $(this).dialog("close");
+                            config_obj.smtp.from = emailFrom.value;
+                            config_obj.smtp.to = emailTo.value;
+                            config_obj.smtp.cc = ccTo.value;
+                            config_obj.smtp.subject = emailSubject.value;
+                            saveConfig();
                             emailFile(emailFrom.value, emailTo.value, ccTo.value, emailSubject.value);
                         }
                     },
@@ -919,7 +987,7 @@
             console.log(err || message);
             if (err)
                 alert(err);
-            else alert("mail sent successfully!")
+            else alert("mail sent successfully!");
 
             // If we don't need the file anymore we could manually call the removeCallback
             // But thanpt is not necessary if we didn't pass the keep option because the library
@@ -932,6 +1000,7 @@
     //Show a Gmail dialog (jquery dialog)
     /**********************************************/
     function showGmailDialog(auth, filename){
+        if (checkIfThereIsTabs() === false) return;
         $( function() {
             $( "#dialog-gmail" ).dialog({
                 modal: true,
@@ -956,7 +1025,7 @@
     /**************************************************************************************/
     function createBody(to, ccTo, subject, message, filename){
 
-        var fs = require('fs');
+        //var fs = require('fs');
         var dataBase64 = fs.readFileSync(filename);
         dataBase64 = dataBase64.toString('base64');
 

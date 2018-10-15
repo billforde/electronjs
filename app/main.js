@@ -107,7 +107,7 @@ function createWindow () {
 
     splash = new BrowserWindow({width: 810, height: 610, transparent: true, frame: false, alwaysOnTop: true});
 
-    //load the splash sreen
+    //load the splash screen
     splash.loadURL(url.format({
         pathname: path.join(__dirname, 'splash.html'),
         protocol: 'file:',
@@ -128,8 +128,9 @@ function createWindow () {
     mainWin.once('ready-to-show', function() {
         splash.destroy();
     mainWin.show();
-});
-}
+    });
+} //end createWindow()
+
 var saveEvent = null;
 
 ipcMain.on('asynchronous-message', function(event, arg) {
@@ -179,6 +180,6 @@ app.on('window-all-closed', function() {
     // On macOS it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') { //if it is not macOS
-    app.quit()
-}
+        app.quit()
+    }
 })
