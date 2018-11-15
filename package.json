@@ -11,7 +11,7 @@
     "electron-packager": "^12.1.2"
   },
   "build": {
-    "appId": "idfViewer",
+    "appId": "idaViewer",
     "fileAssociations": {
       "ext": [
         "adf",
@@ -36,6 +36,6 @@
     "adf",
     "idf"
   ],
-  "author": "Patricia L",
+  "author": "Patricia Lam",
   "license": "ISC"
 }

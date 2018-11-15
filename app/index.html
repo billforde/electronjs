@@ -94,6 +94,8 @@
                     showMergeDialog();
                 if ($(this).attr('id')=='gmail-button')
                     signinToGoogle("gmail");
+                if ($(this).attr('id')=='signoff-button')
+                    signOffGoogle();
             }
         });
         $('#tabsContainer').tabs();
@@ -107,7 +109,7 @@
         var dialog = require('electron').remote.dialog;
         dialog.showOpenDialog({
             filters: [
-                {name: 'idfViewer files',  extensions: ["adf", "idf", "pdf", "htm", "html"]}
+                {name: 'idaViewer files',  extensions: ["adf", "idf", "pdf", "htm", "html"]}
             ],
             properties: ['openFile', 'multiSelections']}, function(filename){
             if (filename != undefined) {
@@ -177,6 +179,9 @@
                             </ul>
                         </li>
                     </ul>
+                </div>
+                <div title="Sign Off" class="ribbon-button ribbon-button-large" id="signoff-button">
+                    <img class="ribbon-icon ribbon-normal" src="assets/034-logout.png" width="32"/>
                 </div>
             </div>
         </div>
@@ -620,6 +625,22 @@
             frame: true
         });
     }
+
+    /****************************************************************************************/
+    /* Sign Off Google Drive ==> delete the credential file (app/credentials/googleService.json) */
+    /********************************************************************/
+
+    function signOffGoogle() {
+
+        if (fs.existsSync(TOKEN_PATH)){
+            fs.unlinkSync(TOKEN_PATH);
+            alert('You have been sign off.');
+        }else{
+            alert('You are not logged in to Google!');
+        }
+
+    }
+
     /****************************************************************************************/
     /* Save to Google Drive ==> Set up the credentials, save the authentication to a token,  */
     /* which allow users to have the write access to their google drive. If we are doing an upload */
@@ -631,9 +652,9 @@
 
         // Load client secrets from a local file.
         var fullFilename = app.getAppPath()+'\\'+'client_secret.json';
+
         //var fs =  require('fs'); //load the node js file system library
-        if (fs.existsSync(fullFilename))
-            console.log('Checking for: '+ fullFilename);
+        console.log('Checking for: '+ fullFilename);
 
         fs.readFile(fullFilename, function processClientSecrets(err, content) {
             if (err) {
@@ -650,6 +671,7 @@
                 authorize(JSON.parse(content), listFilesFromGoogle);
             else if (dowhat == 'gmail')
                 authorize(JSON.parse(content), showGmailDialog);
+
         });
     }
 
@@ -969,7 +991,7 @@
 
     // send the message and get a callback with an error or details of the message that was sent
         server.send({
-            text:    "i hope this works",
+            text:    "See attachment.",
             //from:    "myself<patricia_lam@ibi.com>",
             //to:      "someone <patricia_lam@ibi.com>",
             from: emailFrom,
@@ -980,7 +1002,7 @@
             //subject: "testing emailjs",
             attachment:
                     [
-                        {data:"<html>i <i>hope</i> this works!</html>", alternative:true},
+                        {data:"See attachment.", alternative:true},
                         {path:filename, type:"application/adf", name:"report.adf"}
                     ]
         }, function(err, message) {

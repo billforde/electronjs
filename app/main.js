@@ -60,7 +60,7 @@ function handleSquirrelEvent() {
             const {ProgId, ShellOption, Regedit} = require('electron-regedit')
 
             new ProgId({
-                description: 'idfViewer',
+                description: 'idaViewer',
                 icon: 'assets/favicon.ico',
                 squirrel: true,
                 extensions: ['adf','idf'],

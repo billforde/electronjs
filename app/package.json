@@ -1,6 +1,6 @@
 {
-  "name": "idfViewer",
-  "productName": "idfViewer",
+  "name": "idaViewer",
+  "productName": "idaViewer",
   "version": "1.0.1",
   "description": "Application built with electron-builder",
   "main": "main.js",
